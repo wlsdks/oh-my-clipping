@@ -74,7 +74,11 @@ playwright/.local-browsers/
 META-INF/
 .superpowers/
 .worktrees/
-frontend/tsconfig.tsbuildinfo
+frontend/*.tsbuildinfo
+frontend/vite.config.d.ts
+frontend/vite.config.js
+.claude/scheduled_tasks.lock
+.claude/*.lock
 
 # generated frontend bundle served by Spring Boot
 src/main/resources/static/index.html
