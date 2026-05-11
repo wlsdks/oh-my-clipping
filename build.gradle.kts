@@ -9,7 +9,7 @@ plugins {
     // 대체 enforcement: 아래 checkPostgresSpecificSql gradle task + AGENTS.md §1.3 코드 리뷰 체크.
 }
 
-group = "com.clipping.mcpserver"
+group = "com.ohmyclipping"
 version = "2.0.0"
 description = "oh-my-clipping — an open-source news clipping agent. RSS collection, AI summarisation, and Slack delivery, with an admin UI and an MCP server interface."
 

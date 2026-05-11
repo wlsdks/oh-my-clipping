@@ -1,0 +1,33 @@
+package com.ohmyclipping.entity
+
+import jakarta.persistence.*
+import java.io.Serializable
+import java.time.Instant
+
+/**
+ * 사용자-소스 소유 관계 복합키.
+ */
+data class UserOwnedSourceId(
+    val userId: String = "",
+    val sourceId: String = ""
+) : Serializable
+
+/**
+ * 사용자가 소유한 RSS 소스 매핑 엔티티.
+ * clipping_user_owned_sources 테이블에 매핑된다.
+ */
+@Entity
+@Table(name = "clipping_user_owned_sources")
+@IdClass(UserOwnedSourceId::class)
+class UserOwnedSourceEntity(
+    @Id
+    @Column(name = "user_id", length = 36)
+    val userId: String = "",
+
+    @Id
+    @Column(name = "source_id", length = 36)
+    val sourceId: String = "",
+
+    @Column(name = "created_at", nullable = false)
+    val createdAt: Instant = Instant.now()
+)

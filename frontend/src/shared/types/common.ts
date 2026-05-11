@@ -1,7 +1,7 @@
 /**
  * 낙관적 잠금 충돌(409 STALE_EDIT) 시 서버가 반환하는 편집 상태 스냅샷.
  *
- * 백엔드 `com.clipping.mcpserver.error.StaleEditInfo`와 1:1로 매핑된다.
+ * 백엔드 `com.ohmyclipping.error.StaleEditInfo`와 1:1로 매핑된다.
  * 응답 본문에 `code: "STALE_EDIT"`로 들어오며, 프론트는 이 정보로
  * "누가 먼저 저장했는지"와 변경 필드 요약을 사용자에게 보여준다.
  */

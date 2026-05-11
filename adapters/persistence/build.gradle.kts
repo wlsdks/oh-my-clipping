@@ -5,7 +5,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "com.clipping.mcpserver"
+group = "com.ohmyclipping"
 version = "2.0.0"
 
 java {
@@ -62,15 +62,15 @@ tasks.register("checkPersistenceBoundaries") {
 
     doLast {
         val forbiddenImports = listOf(
-            Regex("""import\s+com\.clipping\.mcpserver\.admin\.""") to "admin adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.user\.""") to "user adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.config\.""") to "app config import",
-            Regex("""import\s+com\.clipping\.mcpserver\.adapter\.""") to "external adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.rss\.""") to "RSS adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.ai\.""") to "AI adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.mcp\.""") to "MCP adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.observability\.""") to "observability import",
-            Regex("""import\s+com\.clipping\.mcpserver\.security\.""") to "security import",
+            Regex("""import\s+com\.ohmyclipping\.admin\.""") to "admin adapter import",
+            Regex("""import\s+com\.ohmyclipping\.user\.""") to "user adapter import",
+            Regex("""import\s+com\.ohmyclipping\.config\.""") to "app config import",
+            Regex("""import\s+com\.ohmyclipping\.adapter\.""") to "external adapter import",
+            Regex("""import\s+com\.ohmyclipping\.rss\.""") to "RSS adapter import",
+            Regex("""import\s+com\.ohmyclipping\.ai\.""") to "AI adapter import",
+            Regex("""import\s+com\.ohmyclipping\.mcp\.""") to "MCP adapter import",
+            Regex("""import\s+com\.ohmyclipping\.observability\.""") to "observability import",
+            Regex("""import\s+com\.ohmyclipping\.security\.""") to "security import",
         )
 
         val violations = mutableListOf<String>()
@@ -78,15 +78,15 @@ tasks.register("checkPersistenceBoundaries") {
             .filter { it.isFile && it.extension == "kt" }
             .forEach { file ->
                 val relativePath = file.relativeTo(sourceRoot).path
-                if (!relativePath.startsWith("com/clipping/mcpserver/entity/") &&
-                    !relativePath.startsWith("com/clipping/mcpserver/repository/") &&
-                    !relativePath.startsWith("com/clipping/mcpserver/store/")
+                if (!relativePath.startsWith("com/ohmyclipping/entity/") &&
+                    !relativePath.startsWith("com/ohmyclipping/repository/") &&
+                    !relativePath.startsWith("com/ohmyclipping/store/")
                 ) {
                     violations += "$relativePath — persistence module may contain only entity/repository/store packages"
                 }
 
                 val source = file.readText()
-                Regex("""import\s+com\.clipping\.mcpserver\.service\.(?!dto\.|analytics\.dto\.|pipeline\.)""")
+                Regex("""import\s+com\.ohmyclipping\.service\.(?!dto\.|analytics\.dto\.|pipeline\.)""")
                     .findAll(source)
                     .forEach { match ->
                         val line = source.substring(0, match.range.first).count { it == '\n' } + 1

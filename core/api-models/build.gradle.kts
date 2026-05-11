@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "2.3.0"
 }
 
-group = "com.clipping.mcpserver"
+group = "com.ohmyclipping"
 version = "2.0.0"
 
 java {
@@ -35,13 +35,13 @@ tasks.register("checkApiModelBoundaries") {
         val forbiddenImports = listOf(
             Regex("""import\s+org\.springframework\.""") to "Spring import",
             Regex("""import\s+jakarta\.persistence\.""") to "JPA import",
-            Regex("""import\s+com\.clipping\.mcpserver\.model\.""") to "app model import",
-            Regex("""import\s+com\.clipping\.mcpserver\.entity\.""") to "entity import",
-            Regex("""import\s+com\.clipping\.mcpserver\.repository\.""") to "repository import",
-            Regex("""import\s+com\.clipping\.mcpserver\.store\.""") to "store import",
-            Regex("""import\s+com\.clipping\.mcpserver\.config\.""") to "app config import",
-            Regex("""import\s+com\.clipping\.mcpserver\.admin\.""") to "admin adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.user\.""") to "user adapter import",
+            Regex("""import\s+com\.ohmyclipping\.model\.""") to "app model import",
+            Regex("""import\s+com\.ohmyclipping\.entity\.""") to "entity import",
+            Regex("""import\s+com\.ohmyclipping\.repository\.""") to "repository import",
+            Regex("""import\s+com\.ohmyclipping\.store\.""") to "store import",
+            Regex("""import\s+com\.ohmyclipping\.config\.""") to "app config import",
+            Regex("""import\s+com\.ohmyclipping\.admin\.""") to "admin adapter import",
+            Regex("""import\s+com\.ohmyclipping\.user\.""") to "user adapter import",
         )
 
         val violations = mutableListOf<String>()

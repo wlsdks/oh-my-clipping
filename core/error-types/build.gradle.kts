@@ -3,7 +3,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "com.clipping.mcpserver"
+group = "com.ohmyclipping"
 version = "2.0.0"
 
 java {
@@ -45,16 +45,16 @@ tasks.register("checkErrorTypeBoundaries") {
     doLast {
         val forbiddenImports = listOf(
             Regex("""import\s+jakarta\.persistence\.""") to "JPA import",
-            Regex("""import\s+com\.clipping\.mcpserver\.model\.""") to "app model import",
-            Regex("""import\s+com\.clipping\.mcpserver\.entity\.""") to "entity import",
-            Regex("""import\s+com\.clipping\.mcpserver\.repository\.""") to "repository import",
-            Regex("""import\s+com\.clipping\.mcpserver\.store\.""") to "store import",
-            Regex("""import\s+com\.clipping\.mcpserver\.service\.""") to "service import",
-            Regex("""import\s+com\.clipping\.mcpserver\.admin\.""") to "admin adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.user\.""") to "user adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.adapter\.""") to "external adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.rss\.""") to "RSS adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.ai\.""") to "AI adapter import",
+            Regex("""import\s+com\.ohmyclipping\.model\.""") to "app model import",
+            Regex("""import\s+com\.ohmyclipping\.entity\.""") to "entity import",
+            Regex("""import\s+com\.ohmyclipping\.repository\.""") to "repository import",
+            Regex("""import\s+com\.ohmyclipping\.store\.""") to "store import",
+            Regex("""import\s+com\.ohmyclipping\.service\.""") to "service import",
+            Regex("""import\s+com\.ohmyclipping\.admin\.""") to "admin adapter import",
+            Regex("""import\s+com\.ohmyclipping\.user\.""") to "user adapter import",
+            Regex("""import\s+com\.ohmyclipping\.adapter\.""") to "external adapter import",
+            Regex("""import\s+com\.ohmyclipping\.rss\.""") to "RSS adapter import",
+            Regex("""import\s+com\.ohmyclipping\.ai\.""") to "AI adapter import",
         )
 
         val violations = mutableListOf<String>()
