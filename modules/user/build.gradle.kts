@@ -24,13 +24,19 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":clipping-app-ports"))
-    implementation(project(":clipping-domain"))
-    implementation(project(":clipping-engine"))
-    implementation(project(":clipping-error-types"))
-    implementation(project(":clipping-store-spi"))
+    implementation(project(":core:api-models"))
+    implementation(project(":core:application-models"))
+    implementation(project(":ports:workflow"))
+    implementation(project(":core:domain"))
+    implementation(project(":modules:digest-policy"))
+    implementation(project(":core:error-types"))
+    implementation(project(":adapters:notification"))
+    implementation(project(":modules:source"))
+    implementation(project(":ports:persistence"))
 
     implementation("org.springframework:spring-context")
+    implementation("org.springframework:spring-tx")
+    implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     implementation("org.slf4j:slf4j-api")
 
@@ -53,9 +59,9 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.register("checkNotificationBoundaries") {
+tasks.register("checkUserApplicationBoundaries") {
     group = "verification"
-    description = "Ensure notification application module does not depend on root app implementation packages."
+    description = "Ensure user application module does not depend on root app implementation packages."
     val sourceRoot = layout.projectDirectory.dir("src/main/kotlin").asFile
     inputs.dir(sourceRoot)
     outputs.upToDateWhen { false }
@@ -73,7 +79,8 @@ tasks.register("checkNotificationBoundaries") {
             Regex("""import\s+com\.clipping\.mcpserver\.repository\.""") to "repository import",
             Regex("""import\s+com\.clipping\.mcpserver\.rss\.""") to "RSS adapter import",
             Regex("""import\s+com\.clipping\.mcpserver\.security\.""") to "security import",
-            Regex("""import\s+com\.clipping\.mcpserver\.service\.(?!notification\.|port\.)""") to "root service import",
+            Regex("""import\s+com\.clipping\.mcpserver\.service\.(?!dto\.|port\.|notification\.|source\.|event\.)""") to "root service import",
+            Regex("""import\s+com\.clipping\.mcpserver\.support\.""") to "root support import",
             Regex("""import\s+com\.clipping\.mcpserver\.user\.""") to "user adapter import",
         )
 
@@ -85,7 +92,7 @@ tasks.register("checkNotificationBoundaries") {
                 forbiddenImports.forEach { (pattern, label) ->
                     pattern.findAll(source).forEach { match ->
                         val line = source.substring(0, match.range.first).count { it == '\n' } + 1
-                        violations += "${file.relativeTo(sourceRoot).path}:$line — forbidden notification dependency ($label)"
+                        violations += "${file.relativeTo(sourceRoot).path}:$line — forbidden user application dependency ($label)"
                     }
                 }
             }
@@ -93,15 +100,15 @@ tasks.register("checkNotificationBoundaries") {
         if (violations.isNotEmpty()) {
             violations.forEach { logger.error(it) }
             throw GradleException(
-                "${violations.size} notification boundary violation(s) detected. " +
-                    "Keep notification application code behind ports and shared SPIs.",
+                "${violations.size} user application boundary violation(s) detected. " +
+                    "Keep user application code behind ports and shared SPIs.",
             )
         }
 
-        logger.lifecycle("checkNotificationBoundaries: OK (notification module has no root app implementation imports)")
+        logger.lifecycle("checkUserApplicationBoundaries: OK (user application module has no root app implementation imports)")
     }
 }
 
 tasks.named("check") {
-    dependsOn("checkNotificationBoundaries")
+    dependsOn("checkUserApplicationBoundaries")
 }

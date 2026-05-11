@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":clipping-api-models"))
+    implementation(project(":core:api-models"))
 }
 
 kotlin {

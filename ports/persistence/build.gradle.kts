@@ -16,9 +16,9 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":clipping-domain"))
-    implementation(project(":clipping-api-models"))
-    implementation(project(":clipping-pipeline-models"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:api-models"))
+    implementation(project(":core:pipeline-models"))
 }
 
 kotlin {

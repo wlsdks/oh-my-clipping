@@ -24,14 +24,16 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":clipping-api-models"))
-    implementation(project(":clipping-app-ports"))
-    implementation(project(":clipping-domain"))
-    implementation(project(":clipping-engine"))
-    implementation(project(":clipping-error-types"))
-    implementation(project(":clipping-store-spi"))
+    implementation(project(":core:api-models"))
+    implementation(project(":ports:workflow"))
+    implementation(project(":core:domain"))
+    implementation(project(":modules:digest-policy"))
+    implementation(project(":core:error-types"))
+    implementation(project(":ports:persistence"))
 
     implementation("org.springframework:spring-context")
+    implementation("org.springframework:spring-tx")
+    implementation("com.rometools:rome:2.1.0")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
@@ -53,9 +55,9 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-tasks.register("checkDigestApplicationBoundaries") {
+tasks.register("checkCollectionBoundaries") {
     group = "verification"
-    description = "Ensure digest application module does not depend on root app implementation packages."
+    description = "Ensure collection application module does not depend on root app implementation packages."
     val sourceRoot = layout.projectDirectory.dir("src/main/kotlin").asFile
     inputs.dir(sourceRoot)
     outputs.upToDateWhen { false }
@@ -73,8 +75,7 @@ tasks.register("checkDigestApplicationBoundaries") {
             Regex("""import\s+com\.clipping\.mcpserver\.repository\.""") to "repository import",
             Regex("""import\s+com\.clipping\.mcpserver\.rss\.""") to "RSS adapter import",
             Regex("""import\s+com\.clipping\.mcpserver\.security\.""") to "security import",
-            Regex("""import\s+com\.clipping\.mcpserver\.service\.(?!digest\.|dto\.|port\.)""") to "root service import",
-            Regex("""import\s+com\.clipping\.mcpserver\.support\.""") to "root support import",
+            Regex("""import\s+com\.clipping\.mcpserver\.service\.(?!collection\.|dto\.|port\.)""") to "root service import",
             Regex("""import\s+com\.clipping\.mcpserver\.user\.""") to "user adapter import",
         )
 
@@ -86,7 +87,7 @@ tasks.register("checkDigestApplicationBoundaries") {
                 forbiddenImports.forEach { (pattern, label) ->
                     pattern.findAll(source).forEach { match ->
                         val line = source.substring(0, match.range.first).count { it == '\n' } + 1
-                        violations += "${file.relativeTo(sourceRoot).path}:$line — forbidden digest application dependency ($label)"
+                        violations += "${file.relativeTo(sourceRoot).path}:$line — forbidden collection dependency ($label)"
                     }
                 }
             }
@@ -94,15 +95,15 @@ tasks.register("checkDigestApplicationBoundaries") {
         if (violations.isNotEmpty()) {
             violations.forEach { logger.error(it) }
             throw GradleException(
-                "${violations.size} digest application boundary violation(s) detected. " +
-                    "Keep digest application code behind ports, engine, and shared SPIs.",
+                "${violations.size} collection boundary violation(s) detected. " +
+                    "Keep collection application code behind ports and shared SPIs.",
             )
         }
 
-        logger.lifecycle("checkDigestApplicationBoundaries: OK (digest application module has no root app implementation imports)")
+        logger.lifecycle("checkCollectionBoundaries: OK (collection module has no root app implementation imports)")
     }
 }
 
 tasks.named("check") {
-    dependsOn("checkDigestApplicationBoundaries")
+    dependsOn("checkCollectionBoundaries")
 }

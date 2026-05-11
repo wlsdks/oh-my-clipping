@@ -1,16 +1,19 @@
-rootProject.name = "clipping-mcp-server"
-include("clipping-app-ports")
-include("clipping-api-models")
-include("clipping-application-models")
-include("clipping-domain")
-include("clipping-collection")
-include("clipping-user-application")
-include("clipping-analytics-application")
-include("clipping-digest-application")
-include("clipping-engine")
-include("clipping-error-types")
-include("clipping-notification")
-include("clipping-persistence")
-include("clipping-pipeline-models")
-include("clipping-source")
-include("clipping-store-spi")
+rootProject.name = "oh-my-clipping"
+
+include(
+    ":core:domain",
+    ":core:error-types",
+    ":core:api-models",
+    ":core:pipeline-models",
+    ":core:application-models",
+    ":ports:workflow",
+    ":ports:persistence",
+    ":adapters:persistence",
+    ":adapters:notification",
+    ":modules:digest-policy",
+    ":modules:collection",
+    ":modules:source",
+    ":modules:digest",
+    ":modules:user",
+    ":modules:analytics",
+)

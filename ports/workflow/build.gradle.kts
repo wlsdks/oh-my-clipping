@@ -16,10 +16,8 @@ repositories {
 }
 
 dependencies {
-    implementation(project(":clipping-api-models"))
-    implementation(project(":clipping-domain"))
-
-    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
+    implementation(project(":core:api-models"))
+    implementation(project(":core:application-models"))
 }
 
 kotlin {
@@ -31,9 +29,9 @@ kotlin {
     }
 }
 
-tasks.register("checkApplicationModelBoundaries") {
+tasks.register("checkAppPortBoundaries") {
     group = "verification"
-    description = "Ensure application DTO models stay free of Spring/JPA/store/root implementation dependencies."
+    description = "Ensure app port module stays free of Spring/JPA/store/app model dependencies."
     val sourceRoot = layout.projectDirectory.dir("src/main/kotlin").asFile
     inputs.dir(sourceRoot)
     outputs.upToDateWhen { false }
@@ -42,16 +40,13 @@ tasks.register("checkApplicationModelBoundaries") {
         val forbiddenImports = listOf(
             Regex("""import\s+org\.springframework\.""") to "Spring import",
             Regex("""import\s+jakarta\.persistence\.""") to "JPA import",
+            Regex("""import\s+com\.clipping\.mcpserver\.model\.""") to "app model import",
             Regex("""import\s+com\.clipping\.mcpserver\.entity\.""") to "entity import",
             Regex("""import\s+com\.clipping\.mcpserver\.repository\.""") to "repository import",
             Regex("""import\s+com\.clipping\.mcpserver\.store\.""") to "store import",
             Regex("""import\s+com\.clipping\.mcpserver\.config\.""") to "app config import",
             Regex("""import\s+com\.clipping\.mcpserver\.admin\.""") to "admin adapter import",
             Regex("""import\s+com\.clipping\.mcpserver\.user\.""") to "user adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.adapter\.""") to "external adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.ai\.""") to "AI adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.rss\.""") to "RSS adapter import",
-            Regex("""import\s+com\.clipping\.mcpserver\.service\.(?!dto\.)""") to "application service import",
         )
 
         val violations = mutableListOf<String>()
@@ -62,7 +57,7 @@ tasks.register("checkApplicationModelBoundaries") {
                 forbiddenImports.forEach { (pattern, label) ->
                     pattern.findAll(source).forEach { match ->
                         val line = source.substring(0, match.range.first).count { it == '\n' } + 1
-                        violations += "${file.relativeTo(sourceRoot).path}:$line — forbidden application model dependency ($label)"
+                        violations += "${file.relativeTo(sourceRoot).path}:$line — forbidden app port dependency ($label)"
                     }
                 }
             }
@@ -70,15 +65,15 @@ tasks.register("checkApplicationModelBoundaries") {
         if (violations.isNotEmpty()) {
             violations.forEach { logger.error(it) }
             throw GradleException(
-                "${violations.size} application model boundary violation(s) detected. " +
-                    "Keep application DTOs free of framework, store, and service implementation dependencies.",
+                "${violations.size} app port boundary violation(s) detected. " +
+                    "Keep app ports free of Spring/JPA/store/app model dependencies.",
             )
         }
 
-        logger.lifecycle("checkApplicationModelBoundaries: OK (application DTOs have no forbidden implementation imports)")
+        logger.lifecycle("checkAppPortBoundaries: OK (app ports have no forbidden app/framework imports)")
     }
 }
 
 tasks.named("check") {
-    dependsOn("checkApplicationModelBoundaries")
+    dependsOn("checkAppPortBoundaries")
 }

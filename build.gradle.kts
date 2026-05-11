@@ -31,21 +31,21 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":clipping-app-ports"))
-    implementation(project(":clipping-api-models"))
-    implementation(project(":clipping-application-models"))
-    implementation(project(":clipping-analytics-application"))
-    implementation(project(":clipping-collection"))
-    implementation(project(":clipping-digest-application"))
-    implementation(project(":clipping-domain"))
-    implementation(project(":clipping-engine"))
-    implementation(project(":clipping-error-types"))
-    implementation(project(":clipping-notification"))
-    implementation(project(":clipping-persistence"))
-    implementation(project(":clipping-pipeline-models"))
-    implementation(project(":clipping-source"))
-    implementation(project(":clipping-store-spi"))
-    implementation(project(":clipping-user-application"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:error-types"))
+    implementation(project(":core:api-models"))
+    implementation(project(":core:pipeline-models"))
+    implementation(project(":core:application-models"))
+    implementation(project(":ports:workflow"))
+    implementation(project(":ports:persistence"))
+    implementation(project(":adapters:persistence"))
+    implementation(project(":adapters:notification"))
+    implementation(project(":modules:digest-policy"))
+    implementation(project(":modules:collection"))
+    implementation(project(":modules:source"))
+    implementation(project(":modules:digest"))
+    implementation(project(":modules:user"))
+    implementation(project(":modules:analytics"))
 
     // Spring Boot
     implementation("org.springframework.boot:spring-boot-starter")
@@ -227,17 +227,17 @@ tasks.register("checkPostgresSpecificSql") {
     description = "Kotlin 소스에서 H2 가 지원하지 않는 PostgreSQL 전용 SQL 패턴을 스캔한다."
     val sourceRoots = listOf(
         layout.projectDirectory.dir("src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-api-models/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-app-ports/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-collection/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-domain/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-engine/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-error-types/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-notification/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-persistence/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-pipeline-models/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-source/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-store-spi/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/api-models/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/domain/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/error-types/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/pipeline-models/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("ports/workflow/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("ports/persistence/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("adapters/notification/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("adapters/persistence/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("modules/collection/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("modules/digest-policy/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("modules/source/src/main/kotlin").asFile,
     )
     inputs.files(sourceRoots)
     outputs.upToDateWhen { false } // 항상 실행 (매우 가벼움)
@@ -314,14 +314,14 @@ tasks.register("checkBroadExceptionBaseline") {
     description = "Kotlin 소스의 catch (Exception) 사용량이 baseline보다 늘지 않았는지 검사한다."
     val sourceRoots = listOf(
         layout.projectDirectory.dir("src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-api-models/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-app-ports/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-domain/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-engine/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-error-types/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-persistence/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-pipeline-models/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("clipping-store-spi/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/api-models/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/domain/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/error-types/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("core/pipeline-models/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("ports/workflow/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("ports/persistence/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("adapters/persistence/src/main/kotlin").asFile,
+        layout.projectDirectory.dir("modules/digest-policy/src/main/kotlin").asFile,
     )
     val baselineFile = layout.projectDirectory.file("config/quality/broad-exception-baseline.txt").asFile
     inputs.files(sourceRoots)
@@ -391,19 +391,20 @@ tasks.named("check") {
     dependsOn(
         "checkPostgresSpecificSql",
         "checkBroadExceptionBaseline",
-        ":clipping-analytics-application:checkAnalyticsApplicationBoundaries",
-        ":clipping-api-models:checkApiModelBoundaries",
-        ":clipping-app-ports:checkAppPortBoundaries",
-        ":clipping-application-models:checkApplicationModelBoundaries",
-        ":clipping-collection:checkCollectionBoundaries",
-        ":clipping-digest-application:checkDigestApplicationBoundaries",
-        ":clipping-engine:checkEngineBoundaries",
-        ":clipping-error-types:checkErrorTypeBoundaries",
-        ":clipping-notification:checkNotificationBoundaries",
-        ":clipping-persistence:checkPersistenceBoundaries",
-        ":clipping-pipeline-models:checkPipelineModelBoundaries",
-        ":clipping-source:checkSourceBoundaries",
-        ":clipping-store-spi:checkStoreSpiBoundaries",
-        ":clipping-user-application:checkUserApplicationBoundaries",
+        ":core:api-models:checkApiModelBoundaries",
+        ":core:application-models:checkApplicationModelBoundaries",
+        ":core:domain:checkDomainBoundaries",
+        ":core:error-types:checkErrorTypeBoundaries",
+        ":core:pipeline-models:checkPipelineModelBoundaries",
+        ":ports:workflow:checkAppPortBoundaries",
+        ":ports:persistence:checkStoreSpiBoundaries",
+        ":adapters:persistence:checkPersistenceBoundaries",
+        ":adapters:notification:checkNotificationBoundaries",
+        ":modules:digest-policy:checkEngineBoundaries",
+        ":modules:collection:checkCollectionBoundaries",
+        ":modules:source:checkSourceBoundaries",
+        ":modules:digest:checkDigestApplicationBoundaries",
+        ":modules:user:checkUserApplicationBoundaries",
+        ":modules:analytics:checkAnalyticsApplicationBoundaries",
     )
 }

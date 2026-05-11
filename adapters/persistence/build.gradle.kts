@@ -25,11 +25,11 @@ dependencyManagement {
 }
 
 dependencies {
-    implementation(project(":clipping-api-models"))
-    implementation(project(":clipping-domain"))
-    implementation(project(":clipping-error-types"))
-    implementation(project(":clipping-pipeline-models"))
-    implementation(project(":clipping-store-spi"))
+    implementation(project(":core:api-models"))
+    implementation(project(":core:domain"))
+    implementation(project(":core:error-types"))
+    implementation(project(":core:pipeline-models"))
+    implementation(project(":ports:persistence"))
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
