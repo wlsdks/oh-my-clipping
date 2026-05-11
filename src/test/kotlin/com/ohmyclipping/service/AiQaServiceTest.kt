@@ -1,7 +1,7 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.model.BatchSummary
-import com.ohmyclipping.service.dto.AiQaRequest
+import com.ohmyclipping.service.dto.admin.AiQaRequest
 import com.ohmyclipping.store.BatchSummaryStore
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty

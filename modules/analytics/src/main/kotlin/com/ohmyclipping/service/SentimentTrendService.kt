@@ -1,9 +1,9 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.KeywordTrendPeriod
-import com.ohmyclipping.service.dto.SentimentDailyCount
-import com.ohmyclipping.service.dto.SentimentSummary
-import com.ohmyclipping.service.dto.SentimentTrendResponse
+import com.ohmyclipping.service.dto.analytics.KeywordTrendPeriod
+import com.ohmyclipping.service.dto.analytics.SentimentDailyCount
+import com.ohmyclipping.service.dto.analytics.SentimentSummary
+import com.ohmyclipping.service.dto.analytics.SentimentTrendResponse
 import com.ohmyclipping.store.BatchSummaryStore
 import org.springframework.stereotype.Service
 import java.time.LocalDate

@@ -2,7 +2,7 @@ package com.ohmyclipping.ai
 
 import com.ohmyclipping.observability.ClippingMetrics
 import com.ohmyclipping.observability.SchedulerRunTracker
-import com.ohmyclipping.service.dto.CompetitorTimelineItem
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull

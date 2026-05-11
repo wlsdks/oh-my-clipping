@@ -1,8 +1,8 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.ReportSettingsService
-import com.ohmyclipping.service.dto.ReportSettingsResponse
-import com.ohmyclipping.service.dto.ReportSettingsUpdateRequest
+import com.ohmyclipping.service.dto.user.ReportSettingsResponse
+import com.ohmyclipping.service.dto.user.ReportSettingsUpdateRequest
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PutMapping

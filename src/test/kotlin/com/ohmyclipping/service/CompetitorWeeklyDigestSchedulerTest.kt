@@ -9,8 +9,8 @@ import com.ohmyclipping.model.AccountRole
 import com.ohmyclipping.model.AdminUser
 import com.ohmyclipping.observability.ClippingMetrics
 import com.ohmyclipping.service.port.SlackDeliveryResult
-import com.ohmyclipping.service.dto.CompetitorTimelineItem
-import com.ohmyclipping.service.dto.SovResponse
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem
+import com.ohmyclipping.service.dto.analytics.SovResponse
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.ReportDeliveryLogStore
 import com.fasterxml.jackson.databind.ObjectMapper

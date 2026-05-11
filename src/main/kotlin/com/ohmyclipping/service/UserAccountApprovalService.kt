@@ -3,8 +3,8 @@ package com.ohmyclipping.service
 import com.ohmyclipping.service.port.OpsRequestNotificationEvent
 
 import com.ohmyclipping.service.notification.OperationsNotificationService
-import com.ohmyclipping.service.dto.BulkActionFailure
-import com.ohmyclipping.service.dto.BulkActionResponse
+import com.ohmyclipping.service.dto.admin.BulkActionFailure
+import com.ohmyclipping.service.dto.admin.BulkActionResponse
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.error.ensureValid

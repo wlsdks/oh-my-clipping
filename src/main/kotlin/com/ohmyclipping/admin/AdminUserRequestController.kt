@@ -5,10 +5,10 @@ import com.ohmyclipping.admin.dto.BulkApproveClippingRequestRequest
 import com.ohmyclipping.admin.dto.BulkReviewRequest
 import com.ohmyclipping.admin.dto.ReviewUserClippingRequest
 import com.ohmyclipping.admin.dto.UserClippingRequestResponse
-import com.ohmyclipping.service.dto.ApproveClippingRequestCommand
-import com.ohmyclipping.service.dto.BulkActionFailure
-import com.ohmyclipping.service.dto.BulkActionResponse
-import com.ohmyclipping.service.dto.UserRequestStatsResponse
+import com.ohmyclipping.service.dto.admin.ApproveClippingRequestCommand
+import com.ohmyclipping.service.dto.admin.BulkActionFailure
+import com.ohmyclipping.service.dto.admin.BulkActionResponse
+import com.ohmyclipping.service.dto.user.UserRequestStatsResponse
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.model.SourceLegalBasis
 import com.ohmyclipping.model.UserClippingRequestStatus

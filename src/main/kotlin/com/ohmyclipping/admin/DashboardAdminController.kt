@@ -4,7 +4,7 @@ import com.ohmyclipping.admin.dto.ActiveSubscriptionsSummaryDto
 import com.ohmyclipping.admin.dto.ForecastDto
 import com.ohmyclipping.admin.dto.UserEngagementTrendDto
 import com.ohmyclipping.service.DashboardService
-import com.ohmyclipping.service.dto.OpsSummary
+import com.ohmyclipping.service.dto.analytics.OpsSummary
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

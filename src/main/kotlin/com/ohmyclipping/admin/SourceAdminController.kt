@@ -9,10 +9,10 @@ import com.ohmyclipping.admin.dto.DiscoverSourceRequest
 import com.ohmyclipping.admin.dto.DiscoverSourceResponse
 import com.ohmyclipping.admin.dto.DiscoveredFeedDto
 import com.ohmyclipping.admin.dto.KnownMatchDto
-import com.ohmyclipping.service.dto.BulkSourceActionResponse
-import com.ohmyclipping.service.dto.CrawlHistoryResponse
-import com.ohmyclipping.service.dto.SourceAiCostsResponse
-import com.ohmyclipping.service.dto.SourceAnalyticsResponse
+import com.ohmyclipping.service.dto.analytics.BulkSourceActionResponse
+import com.ohmyclipping.service.dto.analytics.CrawlHistoryResponse
+import com.ohmyclipping.service.dto.analytics.SourceAiCostsResponse
+import com.ohmyclipping.service.dto.analytics.SourceAnalyticsResponse
 import com.ohmyclipping.admin.dto.SourceArticleCountsResponse
 import com.ohmyclipping.admin.dto.SourcePageResponse
 import com.ohmyclipping.admin.dto.SourceResponse

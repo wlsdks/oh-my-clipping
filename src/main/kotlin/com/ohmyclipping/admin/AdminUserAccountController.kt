@@ -11,7 +11,7 @@ import com.ohmyclipping.model.AccountApprovalStatus
 import com.ohmyclipping.model.AdminUser
 import com.ohmyclipping.service.UserAccountApprovalService
 import com.ohmyclipping.service.UserEventService
-import com.ohmyclipping.service.dto.BulkActionResponse
+import com.ohmyclipping.service.dto.admin.BulkActionResponse
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

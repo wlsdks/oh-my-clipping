@@ -1,7 +1,7 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.analytics.SourceQualityQueryHelper
-import com.ohmyclipping.service.dto.ContentLeversSummary
+import com.ohmyclipping.service.dto.admin.ContentLeversSummary
 import org.springframework.stereotype.Service
 import java.time.Instant
 

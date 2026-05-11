@@ -1,7 +1,7 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.model.UserClippingRequestStatus
-import com.ohmyclipping.service.dto.UserMonthlyStat
+import com.ohmyclipping.service.dto.user.UserMonthlyStat
 import com.ohmyclipping.store.CategoryStore
 import com.ohmyclipping.store.DeliveryLogStore
 import com.ohmyclipping.store.StatsStore

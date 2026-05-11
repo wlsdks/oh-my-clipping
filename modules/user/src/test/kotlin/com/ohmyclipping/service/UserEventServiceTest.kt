@@ -2,7 +2,7 @@ package com.ohmyclipping.service
 
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.model.UserEvent
-import com.ohmyclipping.service.dto.UserEventRequest
+import com.ohmyclipping.service.dto.user.UserEventRequest
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.UserEventStore
 import com.fasterxml.jackson.databind.ObjectMapper

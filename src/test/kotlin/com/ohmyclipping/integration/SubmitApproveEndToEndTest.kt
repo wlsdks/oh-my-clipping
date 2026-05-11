@@ -4,8 +4,8 @@ import com.ohmyclipping.model.AccountRole
 import com.ohmyclipping.model.AdminUser
 import com.ohmyclipping.service.OrganizationService
 import com.ohmyclipping.service.UserClippingRequestService
-import com.ohmyclipping.service.dto.EntryDto
-import com.ohmyclipping.service.dto.SubmitWithEntriesRequest
+import com.ohmyclipping.service.dto.user.EntryDto
+import com.ohmyclipping.service.dto.user.SubmitWithEntriesRequest
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.CategoryRuleStore
 import com.ohmyclipping.store.RssSourceStore

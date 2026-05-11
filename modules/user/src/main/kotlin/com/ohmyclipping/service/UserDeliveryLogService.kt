@@ -2,8 +2,8 @@ package com.ohmyclipping.service
 
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.model.AccountRole
-import com.ohmyclipping.service.dto.UserDeliveryLogItemView
-import com.ohmyclipping.service.dto.UserDeliveryLogListView
+import com.ohmyclipping.service.dto.user.UserDeliveryLogItemView
+import com.ohmyclipping.service.dto.user.UserDeliveryLogListView
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.DeliveryLogStore
 import com.ohmyclipping.store.UserClippingRequestStore

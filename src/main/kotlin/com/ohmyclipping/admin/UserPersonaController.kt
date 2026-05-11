@@ -4,7 +4,7 @@ import com.ohmyclipping.admin.dto.CreatePersonaRequest
 import com.ohmyclipping.admin.dto.PersonaResponse
 import com.ohmyclipping.admin.dto.UpdatePersonaRequest
 import com.ohmyclipping.service.UserOwnedPersonaService
-import com.ohmyclipping.service.dto.UserOwnedPersonaView
+import com.ohmyclipping.service.dto.user.UserOwnedPersonaView
 import org.springframework.security.core.Authentication
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*

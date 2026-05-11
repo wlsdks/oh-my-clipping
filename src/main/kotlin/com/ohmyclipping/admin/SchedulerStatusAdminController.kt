@@ -1,7 +1,7 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.SchedulerStatusService
-import com.ohmyclipping.service.dto.SchedulerStatusResponse
+import com.ohmyclipping.service.dto.admin.SchedulerStatusResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

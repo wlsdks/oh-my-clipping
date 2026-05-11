@@ -1,7 +1,7 @@
 package com.ohmyclipping.user
 
 import com.ohmyclipping.service.BriefingService
-import com.ohmyclipping.service.dto.BriefingListResponse
+import com.ohmyclipping.service.dto.user.BriefingListResponse
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

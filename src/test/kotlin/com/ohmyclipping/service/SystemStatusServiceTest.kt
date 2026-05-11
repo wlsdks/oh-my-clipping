@@ -3,10 +3,10 @@ package com.ohmyclipping.service
 import com.ohmyclipping.observability.SchedulerRunTracker
 import com.ohmyclipping.observability.SlackHealthStatus
 import com.ohmyclipping.resilience.InMemoryCircuitBreaker
-import com.ohmyclipping.service.dto.AiStatus
-import com.ohmyclipping.service.dto.DatabaseStatus
-import com.ohmyclipping.service.dto.JobQueueStatus
-import com.ohmyclipping.service.dto.SlackStatus
+import com.ohmyclipping.service.dto.admin.AiStatus
+import com.ohmyclipping.service.dto.admin.DatabaseStatus
+import com.ohmyclipping.service.dto.admin.JobQueueStatus
+import com.ohmyclipping.service.dto.admin.SlackStatus
 import com.ohmyclipping.store.AsyncJobStore
 import com.zaxxer.hikari.HikariDataSource
 import com.zaxxer.hikari.HikariPoolMXBean

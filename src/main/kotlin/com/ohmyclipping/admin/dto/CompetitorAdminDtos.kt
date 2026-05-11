@@ -1,6 +1,6 @@
 package com.ohmyclipping.admin.dto
 
-import com.ohmyclipping.service.dto.RssFeedInput
+import com.ohmyclipping.service.dto.analytics.RssFeedInput
 
 /**
  * 경쟁사 생성 요청 DTO.

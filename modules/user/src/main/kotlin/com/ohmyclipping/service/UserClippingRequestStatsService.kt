@@ -1,9 +1,9 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.model.UserClippingRequest
-import com.ohmyclipping.service.dto.RejectionReasonItem
-import com.ohmyclipping.service.dto.TopicRankItem
-import com.ohmyclipping.service.dto.UserRequestStatsResponse
+import com.ohmyclipping.service.dto.user.RejectionReasonItem
+import com.ohmyclipping.service.dto.user.TopicRankItem
+import com.ohmyclipping.service.dto.user.UserRequestStatsResponse
 import com.ohmyclipping.store.UserClippingRequestStore
 import org.springframework.stereotype.Service
 import java.time.Clock

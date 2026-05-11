@@ -6,9 +6,9 @@ import com.ohmyclipping.admin.dto.RegisterWizardOwnershipRequest
 import com.ohmyclipping.admin.dto.UserClippingRequestResponse
 import com.ohmyclipping.admin.UserClippingRequestResponseMapper
 import com.ohmyclipping.service.UserClippingRequestService
-import com.ohmyclipping.service.dto.UserAdditionalRssSourcesSubmission
-import com.ohmyclipping.service.dto.UserClippingRequestSubmission
-import com.ohmyclipping.service.dto.UserRssSourceSubmission
+import com.ohmyclipping.service.dto.user.UserAdditionalRssSourcesSubmission
+import com.ohmyclipping.service.dto.user.UserClippingRequestSubmission
+import com.ohmyclipping.service.dto.user.UserRssSourceSubmission
 import com.ohmyclipping.user.dto.RenameRequestBody
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication

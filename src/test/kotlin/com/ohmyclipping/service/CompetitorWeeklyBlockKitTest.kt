@@ -3,10 +3,10 @@ package com.ohmyclipping.service
 import com.ohmyclipping.service.port.CompetitorHighlight
 import com.ohmyclipping.service.port.CompetitorWeeklyInsight
 import com.ohmyclipping.service.competitor.CompetitorWeeklyBlockKit
-import com.ohmyclipping.service.dto.CompetitorTimelineItem
-import com.ohmyclipping.service.dto.SovPeriod
-import com.ohmyclipping.service.dto.SovResponse
-import com.ohmyclipping.service.dto.SovShareItem
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem
+import com.ohmyclipping.service.dto.analytics.SovPeriod
+import com.ohmyclipping.service.dto.analytics.SovResponse
+import com.ohmyclipping.service.dto.analytics.SovShareItem
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe

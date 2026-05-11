@@ -8,8 +8,8 @@ import com.ohmyclipping.service.toLlmCompetitorTimelineItem
 import com.ohmyclipping.service.port.CompetitorWeeklyInsight
 import com.ohmyclipping.service.port.LlmSummarizationPort
 import com.ohmyclipping.service.port.SlackDeliveryPort
-import com.ohmyclipping.service.dto.CompetitorTimelineItem
-import com.ohmyclipping.service.dto.SovResponse
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem
+import com.ohmyclipping.service.dto.analytics.SovResponse
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.ReportDeliveryLogStore
 import com.fasterxml.jackson.databind.ObjectMapper

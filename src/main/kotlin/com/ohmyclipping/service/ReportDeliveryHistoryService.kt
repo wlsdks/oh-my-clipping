@@ -1,6 +1,6 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.ReportDeliveryHistoryItem
+import com.ohmyclipping.service.dto.user.ReportDeliveryHistoryItem
 import com.ohmyclipping.store.ReportDeliveryLogStore
 import org.springframework.stereotype.Service
 

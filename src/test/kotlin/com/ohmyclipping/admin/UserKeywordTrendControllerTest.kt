@@ -1,8 +1,8 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.KeywordTrendService
-import com.ohmyclipping.service.dto.KeywordTrendPeriod
-import com.ohmyclipping.service.dto.KeywordTrendResponse
+import com.ohmyclipping.service.dto.analytics.KeywordTrendPeriod
+import com.ohmyclipping.service.dto.analytics.KeywordTrendResponse
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk

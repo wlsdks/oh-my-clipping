@@ -1,7 +1,7 @@
 package com.ohmyclipping.service.competitor
 
-import com.ohmyclipping.service.dto.CompetitorSnapshotItem
-import com.ohmyclipping.service.dto.CompetitorSnapshotResponse
+import com.ohmyclipping.service.dto.analytics.CompetitorSnapshotItem
+import com.ohmyclipping.service.dto.analytics.CompetitorSnapshotResponse
 import com.ohmyclipping.store.CompetitorWatchlistStore
 import com.ohmyclipping.store.SummaryKeywordLookupStore
 import org.springframework.stereotype.Service

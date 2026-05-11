@@ -3,8 +3,8 @@ package com.ohmyclipping.admin
 import com.ohmyclipping.admin.dto.UpdateUserSubscriptionPreferenceRequest
 import com.ohmyclipping.admin.dto.UserSubscriptionPreferenceResponse
 import com.ohmyclipping.service.UserClippingRequestService
-import com.ohmyclipping.service.dto.UpdateUserSubscriptionPreferenceCommand
-import com.ohmyclipping.service.dto.UserSubscriptionPreferenceView
+import com.ohmyclipping.service.dto.user.UpdateUserSubscriptionPreferenceCommand
+import com.ohmyclipping.service.dto.user.UserSubscriptionPreferenceView
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable

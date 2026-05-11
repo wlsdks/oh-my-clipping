@@ -1,7 +1,7 @@
 package com.ohmyclipping.user
 
 import com.ohmyclipping.service.UserDeliveryLogService
-import com.ohmyclipping.service.dto.UserDeliveryLogListView
+import com.ohmyclipping.service.dto.user.UserDeliveryLogListView
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

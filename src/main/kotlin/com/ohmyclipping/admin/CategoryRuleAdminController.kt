@@ -9,7 +9,7 @@ import com.ohmyclipping.model.CategoryRule
 import com.ohmyclipping.service.AdminCategoryRuleService
 import com.ohmyclipping.service.AdminReviewQueueService
 import com.ohmyclipping.service.CategoryRuleStatsService
-import com.ohmyclipping.service.dto.RuleDryRunResult
+import com.ohmyclipping.service.dto.admin.RuleDryRunResult
 import com.ohmyclipping.support.IdempotencyKeyService
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping

@@ -1,11 +1,11 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.error.NotFoundException
-import com.ohmyclipping.service.dto.ArticleDetailView
-import com.ohmyclipping.service.dto.ArticleHistoryItemView
-import com.ohmyclipping.service.dto.ArticleHistoryPageView
-import com.ohmyclipping.service.dto.UndeliveredArticleView
-import com.ohmyclipping.service.dto.UndeliveredDigestView
+import com.ohmyclipping.service.dto.user.ArticleDetailView
+import com.ohmyclipping.service.dto.user.ArticleHistoryItemView
+import com.ohmyclipping.service.dto.user.ArticleHistoryPageView
+import com.ohmyclipping.service.dto.user.UndeliveredArticleView
+import com.ohmyclipping.service.dto.user.UndeliveredDigestView
 import com.ohmyclipping.content.ArticleContentExtractor
 import com.ohmyclipping.model.BatchSummary
 import com.ohmyclipping.model.BookmarkedArticle

@@ -3,7 +3,7 @@ package com.ohmyclipping.admin.mcp
 import com.ohmyclipping.error.RateLimitExceededException
 import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.service.AnalyticsContentLeversService
-import com.ohmyclipping.service.dto.ContentLeversSummary
+import com.ohmyclipping.service.dto.admin.ContentLeversSummary
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain

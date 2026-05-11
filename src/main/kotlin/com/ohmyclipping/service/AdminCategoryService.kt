@@ -11,7 +11,7 @@ import com.ohmyclipping.store.UserClippingRequestStore
 import com.ohmyclipping.store.RssSourceStore
 import com.ohmyclipping.store.AuditLogStore
 import com.ohmyclipping.store.SummaryDeliveryStore
-import com.ohmyclipping.service.dto.CategoryStatsBundle
+import com.ohmyclipping.service.dto.analytics.CategoryStatsBundle
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.error.ensureValid
 import com.ohmyclipping.support.InputSanitizer

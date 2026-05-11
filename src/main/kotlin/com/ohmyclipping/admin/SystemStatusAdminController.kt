@@ -1,7 +1,7 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.SystemStatusService
-import com.ohmyclipping.service.dto.SystemStatusResponse
+import com.ohmyclipping.service.dto.admin.SystemStatusResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController

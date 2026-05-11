@@ -1,8 +1,8 @@
 package com.ohmyclipping.user
 
 import com.ohmyclipping.service.UserEventService
-import com.ohmyclipping.service.dto.UserEventBatchRequest
-import com.ohmyclipping.service.dto.UserEventBatchResponse
+import com.ohmyclipping.service.dto.user.UserEventBatchRequest
+import com.ohmyclipping.service.dto.user.UserEventBatchResponse
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.PostMapping

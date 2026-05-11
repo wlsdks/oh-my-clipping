@@ -25,7 +25,6 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":core:api-models"))
-    implementation(project(":core:application-models"))
     implementation(project(":ports:workflow"))
     implementation(project(":core:domain"))
     implementation(project(":core:error-types"))

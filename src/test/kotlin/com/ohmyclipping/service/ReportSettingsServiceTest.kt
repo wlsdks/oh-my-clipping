@@ -1,6 +1,6 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.ReportSettingsUpdateRequest
+import com.ohmyclipping.service.dto.user.ReportSettingsUpdateRequest
 import com.ohmyclipping.store.ReportSettingsStore
 import io.kotest.matchers.shouldBe
 import io.mockk.every

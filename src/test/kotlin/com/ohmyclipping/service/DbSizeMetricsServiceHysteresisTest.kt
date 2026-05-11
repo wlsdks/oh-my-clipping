@@ -1,9 +1,9 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.observability.ClippingMetrics
-import com.ohmyclipping.service.dto.DailyGrowthSummary
-import com.ohmyclipping.service.dto.DbSizeSnapshot
-import com.ohmyclipping.service.dto.RetentionEligibleSummary
+import com.ohmyclipping.service.dto.admin.DailyGrowthSummary
+import com.ohmyclipping.service.dto.admin.DbSizeSnapshot
+import com.ohmyclipping.service.dto.admin.RetentionEligibleSummary
 import com.ohmyclipping.service.port.OpsLogNotifier
 import io.kotest.matchers.shouldBe
 import io.mockk.every

@@ -3,7 +3,7 @@ package com.ohmyclipping.service
 import com.ohmyclipping.model.BatchSummary
 import com.ohmyclipping.model.Category
 import com.ohmyclipping.model.CategoryRule
-import com.ohmyclipping.service.dto.RuleEvaluationResult
+import com.ohmyclipping.service.dto.admin.RuleEvaluationResult
 import com.ohmyclipping.store.RuntimeSettingStore
 import org.springframework.stereotype.Service
 

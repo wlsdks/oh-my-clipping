@@ -43,7 +43,7 @@ class LlmSummarizationPortBoundaryTest {
         source shouldNotContain "com.ohmyclipping.service.dto"
         source shouldNotContain "AiSummaryResponse"
         source shouldNotContain "AiDailySummaryResponse"
-        source shouldNotContain "import com.ohmyclipping.service.dto.CompetitorTimelineItem"
+        source shouldNotContain "import com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem"
     }
 
     @Test

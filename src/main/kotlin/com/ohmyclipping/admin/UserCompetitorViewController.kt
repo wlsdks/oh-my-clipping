@@ -2,10 +2,10 @@ package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.competitor.CompetitorSnapshotService
 import com.ohmyclipping.service.competitor.CompetitorWatchlistService
-import com.ohmyclipping.service.dto.ArticleDetailView
-import com.ohmyclipping.service.dto.CompetitorSnapshotResponse
-import com.ohmyclipping.service.dto.CompetitorTimelineResponse
-import com.ohmyclipping.service.dto.SovResponse
+import com.ohmyclipping.service.dto.user.ArticleDetailView
+import com.ohmyclipping.service.dto.analytics.CompetitorSnapshotResponse
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineResponse
+import com.ohmyclipping.service.dto.analytics.SovResponse
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.GetMapping

@@ -2,7 +2,7 @@ package com.ohmyclipping.admin
 
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.service.AnalyticsContentLeversService
-import com.ohmyclipping.service.dto.ContentLeversSummary
+import com.ohmyclipping.service.dto.admin.ContentLeversSummary
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam

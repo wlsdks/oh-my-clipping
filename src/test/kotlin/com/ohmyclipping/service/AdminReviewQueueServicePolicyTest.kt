@@ -38,7 +38,7 @@ class AdminReviewQueueServicePolicyTest {
     private val ruleEvaluator = mockk<ReviewPolicyRuleEvaluator> {
         // 기본: 룰 엔진은 항상 PassThrough — 기존 threshold 로직 검증 유지
         every { evaluate(any(), any(), any()) } returns
-            com.ohmyclipping.service.dto.RuleEvaluationResult.PassThrough
+            com.ohmyclipping.service.dto.admin.RuleEvaluationResult.PassThrough
     }
 
     private val service = AdminReviewQueueService(

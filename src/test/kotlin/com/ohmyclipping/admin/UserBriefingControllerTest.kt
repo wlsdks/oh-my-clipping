@@ -2,7 +2,7 @@ package com.ohmyclipping.admin
 
 import com.ohmyclipping.user.UserBriefingController
 import com.ohmyclipping.service.BriefingService
-import com.ohmyclipping.service.dto.BriefingListResponse
+import com.ohmyclipping.service.dto.user.BriefingListResponse
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk

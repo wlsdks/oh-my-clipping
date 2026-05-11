@@ -4,7 +4,7 @@ import com.ohmyclipping.admin.dto.BlockChannelRequest
 import com.ohmyclipping.admin.dto.BlockedChannelResponse
 import com.ohmyclipping.model.BlockedSlackChannel
 import com.ohmyclipping.service.AdminBlockedSlackChannelService
-import com.ohmyclipping.service.dto.SlackChannelListResponse
+import com.ohmyclipping.service.dto.admin.SlackChannelListResponse
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*

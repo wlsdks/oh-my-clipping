@@ -3,7 +3,7 @@ package com.ohmyclipping.service
 import com.ohmyclipping.error.ensureValid
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.model.Persona
-import com.ohmyclipping.service.dto.UserOwnedPersonaView
+import com.ohmyclipping.service.dto.user.UserOwnedPersonaView
 import com.ohmyclipping.store.PersonaStore
 import com.ohmyclipping.store.UserOwnedPersonaStore
 import org.springframework.stereotype.Service

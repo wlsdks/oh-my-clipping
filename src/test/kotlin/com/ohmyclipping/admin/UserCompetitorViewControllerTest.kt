@@ -2,10 +2,10 @@ package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.competitor.CompetitorSnapshotService
 import com.ohmyclipping.service.competitor.CompetitorWatchlistService
-import com.ohmyclipping.service.dto.CompetitorSnapshotResponse
-import com.ohmyclipping.service.dto.CompetitorTimelineResponse
-import com.ohmyclipping.service.dto.SovPeriod
-import com.ohmyclipping.service.dto.SovResponse
+import com.ohmyclipping.service.dto.analytics.CompetitorSnapshotResponse
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineResponse
+import com.ohmyclipping.service.dto.analytics.SovPeriod
+import com.ohmyclipping.service.dto.analytics.SovResponse
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk

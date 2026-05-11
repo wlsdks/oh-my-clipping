@@ -7,7 +7,7 @@ import com.ohmyclipping.model.UserClippingRequest
 import com.ohmyclipping.model.UserClippingRequestStatus
 import com.ohmyclipping.service.CategoryService
 import com.ohmyclipping.service.UserClippingRequestService
-import com.ohmyclipping.service.dto.ApproveClippingRequestCommand
+import com.ohmyclipping.service.dto.admin.ApproveClippingRequestCommand
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.mockk.Runs

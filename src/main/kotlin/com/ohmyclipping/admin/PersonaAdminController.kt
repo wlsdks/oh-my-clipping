@@ -6,8 +6,8 @@ import com.ohmyclipping.admin.dto.SetPersonaActiveRequest
 import com.ohmyclipping.admin.dto.UpdatePersonaRequest
 import com.ohmyclipping.model.Persona
 import com.ohmyclipping.service.AdminPersonaService
-import com.ohmyclipping.service.dto.PersonaVersionDetail
-import com.ohmyclipping.service.dto.PersonaVersionSummary
+import com.ohmyclipping.service.dto.admin.PersonaVersionDetail
+import com.ohmyclipping.service.dto.admin.PersonaVersionSummary
 import com.ohmyclipping.support.IdempotencyKeyService
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication

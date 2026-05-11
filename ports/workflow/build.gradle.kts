@@ -17,7 +17,6 @@ repositories {
 
 dependencies {
     implementation(project(":core:api-models"))
-    implementation(project(":core:application-models"))
 }
 
 kotlin {

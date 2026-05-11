@@ -12,7 +12,7 @@ import com.ohmyclipping.service.collection.toRssCollectedItem
 import com.ohmyclipping.service.competitor.CompetitorOrganizationSynchronizer
 import com.ohmyclipping.service.competitor.CompetitorWatchlistService
 import com.ohmyclipping.service.port.RssCollectionPort
-import com.ohmyclipping.service.dto.RssFeedInput
+import com.ohmyclipping.service.dto.analytics.RssFeedInput
 import com.ohmyclipping.store.BatchSummaryCompetitorStore
 import com.ohmyclipping.store.BatchSummaryStore
 import com.ohmyclipping.store.CompetitorRssFeedStore

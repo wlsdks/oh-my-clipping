@@ -1,6 +1,6 @@
 package com.ohmyclipping.admin
 
-import com.ohmyclipping.service.dto.BriefingListResponse
+import com.ohmyclipping.service.dto.user.BriefingListResponse
 import com.ohmyclipping.service.BriefingService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

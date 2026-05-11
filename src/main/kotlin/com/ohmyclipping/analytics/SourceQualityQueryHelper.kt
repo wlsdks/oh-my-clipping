@@ -1,6 +1,6 @@
 package com.ohmyclipping.analytics
 
-import com.ohmyclipping.service.dto.SourceQualityRow
+import com.ohmyclipping.service.dto.admin.SourceQualityRow
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Component

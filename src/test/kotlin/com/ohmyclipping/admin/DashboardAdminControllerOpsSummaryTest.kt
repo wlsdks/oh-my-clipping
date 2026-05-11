@@ -1,9 +1,9 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.DashboardService
-import com.ohmyclipping.service.dto.DeliveryOpsSummary
-import com.ohmyclipping.service.dto.OpsSummary
-import com.ohmyclipping.service.dto.PipelineOpsSummary
+import com.ohmyclipping.service.dto.analytics.DeliveryOpsSummary
+import com.ohmyclipping.service.dto.analytics.OpsSummary
+import com.ohmyclipping.service.dto.analytics.PipelineOpsSummary
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk

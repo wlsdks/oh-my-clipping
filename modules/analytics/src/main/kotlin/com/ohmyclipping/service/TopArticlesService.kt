@@ -1,8 +1,8 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.error.InvalidInputException
-import com.ohmyclipping.service.dto.TopArticleItem
-import com.ohmyclipping.service.dto.TopArticlesResponse
+import com.ohmyclipping.service.dto.analytics.TopArticleItem
+import com.ohmyclipping.service.dto.analytics.TopArticlesResponse
 import com.ohmyclipping.store.BatchSummaryStore
 import org.springframework.stereotype.Service
 import java.time.LocalDate

@@ -4,7 +4,7 @@ import com.ohmyclipping.model.BatchSummary
 import com.ohmyclipping.model.Category
 import com.ohmyclipping.model.CategoryRule
 import com.ohmyclipping.model.RuntimeSetting
-import com.ohmyclipping.service.dto.RuleEvaluationResult
+import com.ohmyclipping.service.dto.admin.RuleEvaluationResult
 import com.ohmyclipping.store.RuntimeSettingStore
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf

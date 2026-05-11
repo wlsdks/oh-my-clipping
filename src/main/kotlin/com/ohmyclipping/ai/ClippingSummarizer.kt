@@ -10,7 +10,7 @@ import com.ohmyclipping.service.port.CompetitorHighlight
 import com.ohmyclipping.service.port.CompetitorWeeklyInsight
 import com.ohmyclipping.service.port.ImportanceScreeningResult
 import com.ohmyclipping.service.port.LlmTokenUsage
-import com.ohmyclipping.service.dto.CompetitorTimelineItem
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.github.oshai.kotlinlogging.KotlinLogging

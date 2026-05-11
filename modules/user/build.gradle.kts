@@ -25,7 +25,6 @@ dependencyManagement {
 
 dependencies {
     implementation(project(":core:api-models"))
-    implementation(project(":core:application-models"))
     implementation(project(":ports:workflow"))
     implementation(project(":core:domain"))
     implementation(project(":modules:digest-policy"))
@@ -37,6 +36,7 @@ dependencies {
     implementation("org.springframework:spring-context")
     implementation("org.springframework:spring-tx")
     implementation("com.fasterxml.jackson.core:jackson-databind")
+    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
     implementation("org.slf4j:slf4j-api")
 

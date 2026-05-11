@@ -72,7 +72,7 @@ class LlmSummarizationAdapterTest {
 
     @Test
     fun `summarizeCompetitorWeekly maps timeline items to existing scheduler dto`() {
-        val captured = slot<Map<String, List<com.ohmyclipping.service.dto.CompetitorTimelineItem>>>()
+        val captured = slot<Map<String, List<com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem>>>()
         every {
             clippingSummarizer.summarizeCompetitorWeekly(capture(captured), "2026-W18")
         } returns CompetitorWeeklyInsight(

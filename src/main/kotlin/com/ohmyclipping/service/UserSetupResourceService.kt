@@ -2,8 +2,8 @@ package com.ohmyclipping.service
 
 import com.ohmyclipping.service.source.SourceVerificationClient
 import com.ohmyclipping.service.source.VerificationResult
-import com.ohmyclipping.service.dto.SlackChannelDto
-import com.ohmyclipping.service.dto.SlackChannelListResponse
+import com.ohmyclipping.service.dto.admin.SlackChannelDto
+import com.ohmyclipping.service.dto.admin.SlackChannelListResponse
 import com.ohmyclipping.model.AdminUser
 import com.ohmyclipping.model.Category
 import com.ohmyclipping.model.KnownNewsSource
@@ -11,7 +11,7 @@ import com.ohmyclipping.service.dto.clipping.PipelineRunResult
 import com.ohmyclipping.model.RssSource
 import com.ohmyclipping.security.UrlSafetyValidator
 import com.ohmyclipping.error.ensureValid
-import com.ohmyclipping.service.dto.UserSetupSourceUrlValidationView
+import com.ohmyclipping.service.dto.user.UserSetupSourceUrlValidationView
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.BlockedSlackChannelStore
 import com.ohmyclipping.store.CategoryStore

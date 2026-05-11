@@ -1,7 +1,7 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.DbSizeMetricsService
-import com.ohmyclipping.service.dto.DbSizeSnapshot
+import com.ohmyclipping.service.dto.admin.DbSizeSnapshot
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

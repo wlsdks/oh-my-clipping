@@ -1,6 +1,14 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.*
+import com.ohmyclipping.service.dto.analytics.ArticleRankItem
+import com.ohmyclipping.service.dto.analytics.ArticleRankingResponse
+import com.ohmyclipping.service.dto.analytics.CategoryStatItem
+import com.ohmyclipping.service.dto.analytics.CategoryStatsResponse
+import com.ohmyclipping.service.dto.analytics.ClickRateSummaryResponse
+import com.ohmyclipping.service.dto.analytics.DauPoint
+import com.ohmyclipping.service.dto.analytics.DauResponse
+import com.ohmyclipping.service.dto.analytics.WizardFunnelResponse
+import com.ohmyclipping.service.dto.analytics.WizardFunnelStep
 import com.ohmyclipping.store.ArticleEventRow
 import com.ohmyclipping.store.PersonaStore
 import com.ohmyclipping.store.WizardStepRow

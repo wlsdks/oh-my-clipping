@@ -13,7 +13,7 @@ import com.ohmyclipping.model.UserClippingRequest
 import com.ohmyclipping.model.UserClippingRequestStatus
 import com.ohmyclipping.model.UserDeliverySchedule
 import com.ohmyclipping.model.UserEvent
-import com.ohmyclipping.service.dto.PersonalDataExportLimits
+import com.ohmyclipping.service.dto.admin.PersonalDataExportLimits
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.AuditLogStore
 import com.ohmyclipping.store.BookmarkedArticleStore

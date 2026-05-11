@@ -1,7 +1,7 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.ReportDeliveryHistoryService
-import com.ohmyclipping.service.dto.ReportDeliveryHistoryItem
+import com.ohmyclipping.service.dto.user.ReportDeliveryHistoryItem
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam

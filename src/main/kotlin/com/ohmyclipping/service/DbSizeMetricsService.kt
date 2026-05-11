@@ -1,10 +1,10 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.observability.ClippingMetrics
-import com.ohmyclipping.service.dto.DailyGrowthSummary
-import com.ohmyclipping.service.dto.DbSizeSnapshot
-import com.ohmyclipping.service.dto.RetentionEligibleSummary
-import com.ohmyclipping.service.dto.TableSizeEntry
+import com.ohmyclipping.service.dto.admin.DailyGrowthSummary
+import com.ohmyclipping.service.dto.admin.DbSizeSnapshot
+import com.ohmyclipping.service.dto.admin.RetentionEligibleSummary
+import com.ohmyclipping.service.dto.admin.TableSizeEntry
 import com.ohmyclipping.service.port.OpsLogNotifier
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micrometer.core.instrument.Gauge

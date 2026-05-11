@@ -1,6 +1,6 @@
 package com.ohmyclipping.admin.dto
 
-import com.ohmyclipping.service.dto.BulkRevertItem
+import com.ohmyclipping.service.dto.admin.BulkRevertItem
 
 /**
  * 벌크 되돌리기 요청 DTO.

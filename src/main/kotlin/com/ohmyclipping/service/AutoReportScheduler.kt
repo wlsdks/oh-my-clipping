@@ -3,7 +3,7 @@ package com.ohmyclipping.service
 import com.ohmyclipping.observability.ClippingMetrics
 import io.github.oshai.kotlinlogging.KotlinLogging
 import com.ohmyclipping.service.competitor.CompetitorWatchlistService
-import com.ohmyclipping.service.dto.ReportSettingsResponse
+import com.ohmyclipping.service.dto.user.ReportSettingsResponse
 import com.ohmyclipping.service.port.SlackDeliveryPort
 import com.ohmyclipping.store.ReportDeliveryLogStore
 import org.springframework.scheduling.annotation.Scheduled

@@ -1,11 +1,11 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.ActiveSubscriptionsSummaryResult
-import com.ohmyclipping.service.dto.DeliveryOpsSummary
-import com.ohmyclipping.service.dto.EngagementTrendResult
-import com.ohmyclipping.service.dto.OpsSummary
-import com.ohmyclipping.service.dto.PipelineOpsSummary
-import com.ohmyclipping.service.dto.TodayForecastResult
+import com.ohmyclipping.service.dto.analytics.ActiveSubscriptionsSummaryResult
+import com.ohmyclipping.service.dto.analytics.DeliveryOpsSummary
+import com.ohmyclipping.service.dto.analytics.EngagementTrendResult
+import com.ohmyclipping.service.dto.analytics.OpsSummary
+import com.ohmyclipping.service.dto.analytics.PipelineOpsSummary
+import com.ohmyclipping.service.dto.analytics.TodayForecastResult
 import com.ohmyclipping.store.CategoryStore
 import com.ohmyclipping.store.DeliveryLogStore
 import com.ohmyclipping.store.PersonaStore

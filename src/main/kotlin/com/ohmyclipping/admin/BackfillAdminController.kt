@@ -1,8 +1,8 @@
 package com.ohmyclipping.admin
 
-import com.ohmyclipping.service.dto.BackfillApplyRequest
-import com.ohmyclipping.service.dto.BackfillApplyResponse
-import com.ohmyclipping.service.dto.BackfillPreviewResponse
+import com.ohmyclipping.service.dto.admin.BackfillApplyRequest
+import com.ohmyclipping.service.dto.admin.BackfillApplyResponse
+import com.ohmyclipping.service.dto.admin.BackfillPreviewResponse
 import com.ohmyclipping.service.BackfillService
 import jakarta.validation.Valid
 import org.springframework.security.core.Authentication

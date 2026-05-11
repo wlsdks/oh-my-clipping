@@ -1,8 +1,8 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.AiQaService
-import com.ohmyclipping.service.dto.AiQaRequest
-import com.ohmyclipping.service.dto.AiQaResponse
+import com.ohmyclipping.service.dto.admin.AiQaRequest
+import com.ohmyclipping.service.dto.admin.AiQaResponse
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping

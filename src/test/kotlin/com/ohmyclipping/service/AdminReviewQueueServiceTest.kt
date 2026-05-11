@@ -1,6 +1,6 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.BulkRevertItem
+import com.ohmyclipping.service.dto.admin.BulkRevertItem
 import com.ohmyclipping.service.query.ReviewPolicyQueryHelper
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.model.*
@@ -30,7 +30,7 @@ class AdminReviewQueueServiceTest {
     private val reviewPolicyQueryHelper = mockk<ReviewPolicyQueryHelper>()
     private val ruleEvaluator = mockk<ReviewPolicyRuleEvaluator> {
         every { evaluate(any(), any(), any()) } returns
-            com.ohmyclipping.service.dto.RuleEvaluationResult.PassThrough
+            com.ohmyclipping.service.dto.admin.RuleEvaluationResult.PassThrough
     }
 
     private val service = AdminReviewQueueService(

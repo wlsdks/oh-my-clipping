@@ -1,8 +1,8 @@
 package com.ohmyclipping.user
 
 import com.ohmyclipping.service.UserClippingRequestService
-import com.ohmyclipping.service.dto.SubmitWithEntriesRequest
-import com.ohmyclipping.service.dto.SubmitWithEntriesResponse
+import com.ohmyclipping.service.dto.user.SubmitWithEntriesRequest
+import com.ohmyclipping.service.dto.user.SubmitWithEntriesResponse
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

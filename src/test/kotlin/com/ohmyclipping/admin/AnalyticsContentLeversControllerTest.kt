@@ -1,8 +1,8 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.AnalyticsContentLeversService
-import com.ohmyclipping.service.dto.ContentLeversSummary
-import com.ohmyclipping.service.dto.SourceQualityRow
+import com.ohmyclipping.service.dto.admin.ContentLeversSummary
+import com.ohmyclipping.service.dto.admin.SourceQualityRow
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk

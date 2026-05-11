@@ -1,8 +1,8 @@
 package com.ohmyclipping.service.query
 
-import com.ohmyclipping.service.dto.ReviewPolicyStatus
-import com.ohmyclipping.service.dto.ScoreDistribution
-import com.ohmyclipping.service.dto.ScoreDistributionBucket
+import com.ohmyclipping.service.dto.admin.ReviewPolicyStatus
+import com.ohmyclipping.service.dto.analytics.ScoreDistribution
+import com.ohmyclipping.service.dto.analytics.ScoreDistributionBucket
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Component

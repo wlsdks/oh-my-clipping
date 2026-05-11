@@ -3,9 +3,9 @@ package com.ohmyclipping.service
 import com.ohmyclipping.model.BatchSummary
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.ensureValid
-import com.ohmyclipping.service.dto.AiQaRelatedArticle
-import com.ohmyclipping.service.dto.AiQaRequest
-import com.ohmyclipping.service.dto.AiQaResponse
+import com.ohmyclipping.service.dto.admin.AiQaRelatedArticle
+import com.ohmyclipping.service.dto.admin.AiQaRequest
+import com.ohmyclipping.service.dto.admin.AiQaResponse
 import com.ohmyclipping.store.BatchSummaryStore
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue

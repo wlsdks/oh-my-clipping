@@ -8,8 +8,8 @@ import com.ohmyclipping.service.pipeline.PipelineAnalyticsService
 import com.ohmyclipping.store.pipeline.PipelineAnalyticsStore
 
 import com.ohmyclipping.model.BudgetSetting
-import com.ohmyclipping.service.dto.CostReliabilityData
-import com.ohmyclipping.service.dto.DailyReliabilityData
+import com.ohmyclipping.service.dto.admin.CostReliabilityData
+import com.ohmyclipping.service.dto.admin.DailyReliabilityData
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every

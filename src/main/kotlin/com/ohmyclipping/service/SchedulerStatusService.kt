@@ -1,7 +1,7 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.observability.SchedulerRunTracker
-import com.ohmyclipping.service.dto.SchedulerStatusResponse
+import com.ohmyclipping.service.dto.admin.SchedulerStatusResponse
 import org.springframework.scheduling.support.CronExpression
 import org.springframework.stereotype.Service
 import java.time.Clock

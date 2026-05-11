@@ -2,8 +2,8 @@ package com.ohmyclipping.admin
 
 import com.ohmyclipping.admin.dto.ClassifyRequest
 import com.ohmyclipping.service.KeywordEntityService
-import com.ohmyclipping.service.dto.KeywordEntityItem
-import com.ohmyclipping.service.dto.KeywordEntityResponse
+import com.ohmyclipping.service.dto.analytics.KeywordEntityItem
+import com.ohmyclipping.service.dto.analytics.KeywordEntityResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

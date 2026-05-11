@@ -3,7 +3,7 @@ package com.ohmyclipping.admin.mcp
 import com.ohmyclipping.error.RateLimitExceededException
 import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.service.LlmCostService
-import com.ohmyclipping.service.dto.CostOverviewData
+import com.ohmyclipping.service.dto.admin.CostOverviewData
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.string.shouldNotContain
 import io.mockk.Runs

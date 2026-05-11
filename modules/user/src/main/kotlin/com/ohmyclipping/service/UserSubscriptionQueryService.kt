@@ -1,9 +1,9 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.error.InvalidInputException
-import com.ohmyclipping.service.dto.UserBriefingResult
-import com.ohmyclipping.service.dto.UserBriefingSectionResult
-import com.ohmyclipping.service.dto.UserSubscriptionQueryItem
+import com.ohmyclipping.service.dto.user.UserBriefingResult
+import com.ohmyclipping.service.dto.user.UserBriefingSectionResult
+import com.ohmyclipping.service.dto.user.UserSubscriptionQueryItem
 import com.ohmyclipping.service.port.ClippingQueryPort
 import com.ohmyclipping.store.CategoryRuleStore
 import com.ohmyclipping.store.CategoryStore

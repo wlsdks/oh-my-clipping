@@ -1,8 +1,8 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.ReviewPolicyStatus
-import com.ohmyclipping.service.dto.ScoreDistribution
-import com.ohmyclipping.service.dto.ScoreDistributionBucket
+import com.ohmyclipping.service.dto.admin.ReviewPolicyStatus
+import com.ohmyclipping.service.dto.analytics.ScoreDistribution
+import com.ohmyclipping.service.dto.analytics.ScoreDistributionBucket
 import com.ohmyclipping.service.query.ReviewPolicyQueryHelper
 import com.ohmyclipping.store.BatchSummaryStore
 import com.ohmyclipping.store.CategoryStore

@@ -8,7 +8,7 @@ import com.ohmyclipping.model.RetentionPolicy
 import com.ohmyclipping.error.ConflictException
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.error.ensureValid
-import com.ohmyclipping.service.dto.ClippingSetting
+import com.ohmyclipping.service.dto.admin.ClippingSetting
 import com.ohmyclipping.service.pipeline.DeterministicPipelineRunner
 import com.ohmyclipping.service.pipeline.RalphPipelineOrchestrator
 import com.ohmyclipping.service.pipeline.toDigestResult

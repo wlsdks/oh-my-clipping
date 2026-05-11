@@ -6,7 +6,7 @@ import com.ohmyclipping.admin.dto.CreateCategoryRequest
 import com.ohmyclipping.admin.dto.UpdateCategoryRequest
 import com.ohmyclipping.model.Category
 import com.ohmyclipping.service.AdminCategoryService
-import com.ohmyclipping.service.dto.CategoryStatsBundle
+import com.ohmyclipping.service.dto.analytics.CategoryStatsBundle
 import com.ohmyclipping.support.IdempotencyKeyService
 import com.ohmyclipping.support.PaginationUtils
 import org.springframework.http.HttpStatus

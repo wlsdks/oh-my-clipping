@@ -1,8 +1,8 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.error.ensureValid
-import com.ohmyclipping.service.dto.KeywordEntityItem
-import com.ohmyclipping.service.dto.KeywordEntityResponse
+import com.ohmyclipping.service.dto.analytics.KeywordEntityItem
+import com.ohmyclipping.service.dto.analytics.KeywordEntityResponse
 import com.ohmyclipping.store.BatchSummaryStore
 import com.ohmyclipping.store.KeywordEntityStore
 import org.springframework.stereotype.Service

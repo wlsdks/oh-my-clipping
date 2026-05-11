@@ -34,11 +34,11 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:error-types"))
     implementation(project(":core:api-models"))
-    implementation(project(":core:application-models"))
     implementation(project(":ports:workflow"))
     implementation(project(":ports:persistence"))
     implementation(project(":adapters:persistence"))
     implementation(project(":adapters:notification"))
+    implementation(project(":modules:admin"))
     implementation(project(":modules:digest-policy"))
     implementation(project(":modules:collection"))
     implementation(project(":modules:source"))
@@ -389,13 +389,13 @@ tasks.named("check") {
         "checkPostgresSpecificSql",
         "checkBroadExceptionBaseline",
         ":core:api-models:checkApiModelBoundaries",
-        ":core:application-models:checkApplicationModelBoundaries",
         ":core:domain:checkDomainBoundaries",
         ":core:error-types:checkErrorTypeBoundaries",
         ":ports:workflow:checkAppPortBoundaries",
         ":ports:persistence:checkStoreSpiBoundaries",
         ":adapters:persistence:checkPersistenceBoundaries",
         ":adapters:notification:checkNotificationBoundaries",
+        ":modules:admin:checkAdminModelBoundaries",
         ":modules:digest-policy:checkEngineBoundaries",
         ":modules:collection:checkCollectionBoundaries",
         ":modules:source:checkSourceBoundaries",

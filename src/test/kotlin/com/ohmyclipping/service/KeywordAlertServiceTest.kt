@@ -1,10 +1,10 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.service.notification.OperationsNotificationService
-import com.ohmyclipping.service.dto.KeywordDailyCount
-import com.ohmyclipping.service.dto.KeywordTrendItem
-import com.ohmyclipping.service.dto.KeywordTrendPeriod
-import com.ohmyclipping.service.dto.KeywordTrendResponse
+import com.ohmyclipping.service.dto.analytics.KeywordDailyCount
+import com.ohmyclipping.service.dto.analytics.KeywordTrendItem
+import com.ohmyclipping.service.dto.analytics.KeywordTrendPeriod
+import com.ohmyclipping.service.dto.analytics.KeywordTrendResponse
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk

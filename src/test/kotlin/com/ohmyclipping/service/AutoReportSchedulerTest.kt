@@ -6,7 +6,7 @@ import com.ohmyclipping.model.TrendSnapshotStatus
 import com.ohmyclipping.observability.ClippingMetrics
 import com.ohmyclipping.service.competitor.CompetitorWatchlistService
 import com.ohmyclipping.service.port.SlackDeliveryResult
-import com.ohmyclipping.service.dto.ReportSettingsResponse
+import com.ohmyclipping.service.dto.user.ReportSettingsResponse
 import com.ohmyclipping.store.ReportDeliveryLogStore
 import io.kotest.matchers.shouldBe
 import io.mockk.every

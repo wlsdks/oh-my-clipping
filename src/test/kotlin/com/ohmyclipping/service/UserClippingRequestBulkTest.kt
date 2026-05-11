@@ -6,7 +6,7 @@ import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.model.*
 import com.ohmyclipping.service.dto.clipping.*
 import com.ohmyclipping.security.UrlSafetyValidator
-import com.ohmyclipping.service.dto.ApproveClippingRequestCommand
+import com.ohmyclipping.service.dto.admin.ApproveClippingRequestCommand
 import com.ohmyclipping.service.source.CategorySourceBuilder
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.AuditLogStore

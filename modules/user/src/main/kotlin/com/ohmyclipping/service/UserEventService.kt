@@ -2,8 +2,8 @@ package com.ohmyclipping.service
 
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.model.UserEvent
-import com.ohmyclipping.service.dto.UserEventBatchResponse
-import com.ohmyclipping.service.dto.UserEventRequest
+import com.ohmyclipping.service.dto.user.UserEventBatchResponse
+import com.ohmyclipping.service.dto.user.UserEventRequest
 import com.ohmyclipping.store.ArticleEventRow
 import com.ohmyclipping.store.ArticleMetadataRow
 import com.ohmyclipping.store.AdminUserStore

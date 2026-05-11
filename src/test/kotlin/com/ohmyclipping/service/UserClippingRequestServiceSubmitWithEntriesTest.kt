@@ -1,9 +1,9 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.service.notification.OperationsNotificationService
-import com.ohmyclipping.service.dto.EntryDto
-import com.ohmyclipping.service.dto.EntryErrorReason
-import com.ohmyclipping.service.dto.SubmitWithEntriesRequest
+import com.ohmyclipping.service.dto.user.EntryDto
+import com.ohmyclipping.service.dto.user.EntryErrorReason
+import com.ohmyclipping.service.dto.user.SubmitWithEntriesRequest
 import com.ohmyclipping.service.source.CategorySourceBuilder
 import com.ohmyclipping.model.AccountApprovalStatus
 import com.ohmyclipping.model.AccountRole

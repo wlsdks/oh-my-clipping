@@ -8,11 +8,11 @@ import com.ohmyclipping.service.dto.clipping.*
 import com.ohmyclipping.security.UrlSafetyValidator
 import com.ohmyclipping.service.event.SubscriptionReviewNotificationEvent
 import com.ohmyclipping.service.event.SubscriptionReviewNotificationType
-import com.ohmyclipping.service.dto.ApproveClippingRequestCommand
-import com.ohmyclipping.service.dto.UpdateUserSubscriptionPreferenceCommand
-import com.ohmyclipping.service.dto.UserAdditionalRssSourcesSubmission
-import com.ohmyclipping.service.dto.UserClippingRequestSubmission
-import com.ohmyclipping.service.dto.UserRssSourceSubmission
+import com.ohmyclipping.service.dto.admin.ApproveClippingRequestCommand
+import com.ohmyclipping.service.dto.user.UpdateUserSubscriptionPreferenceCommand
+import com.ohmyclipping.service.dto.user.UserAdditionalRssSourcesSubmission
+import com.ohmyclipping.service.dto.user.UserClippingRequestSubmission
+import com.ohmyclipping.service.dto.user.UserRssSourceSubmission
 import com.ohmyclipping.service.source.CategorySourceBuilder
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.AuditLogStore

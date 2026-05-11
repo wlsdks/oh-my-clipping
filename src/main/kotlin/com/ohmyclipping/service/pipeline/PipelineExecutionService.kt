@@ -3,7 +3,7 @@ package com.ohmyclipping.service.pipeline
 import com.ohmyclipping.service.CategoryService
 import com.ohmyclipping.service.dto.pipeline.PipelineRunEntity
 import com.ohmyclipping.service.dto.pipeline.PipelineRunStatus
-import com.ohmyclipping.service.dto.PipelineStartCommand
+import com.ohmyclipping.service.dto.admin.PipelineStartCommand
 import com.ohmyclipping.service.event.PipelineRunRequestedEvent
 import com.ohmyclipping.store.CategoryStore
 import com.ohmyclipping.store.PipelineRunStore

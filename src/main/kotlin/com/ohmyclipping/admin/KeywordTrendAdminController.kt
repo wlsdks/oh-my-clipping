@@ -1,6 +1,6 @@
 package com.ohmyclipping.admin
 
-import com.ohmyclipping.service.dto.KeywordTrendResponse
+import com.ohmyclipping.service.dto.analytics.KeywordTrendResponse
 import com.ohmyclipping.service.KeywordTrendService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping

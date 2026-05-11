@@ -7,7 +7,7 @@ import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.model.UserClippingRequest
 import com.ohmyclipping.service.CategoryService
 import com.ohmyclipping.service.UserClippingRequestService
-import com.ohmyclipping.service.dto.ApproveClippingRequestCommand
+import com.ohmyclipping.service.dto.admin.ApproveClippingRequestCommand
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.beans.factory.annotation.Value

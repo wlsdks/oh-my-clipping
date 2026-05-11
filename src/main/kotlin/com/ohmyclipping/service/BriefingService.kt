@@ -1,7 +1,7 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.BriefingItem
-import com.ohmyclipping.service.dto.BriefingListResponse
+import com.ohmyclipping.service.dto.user.BriefingItem
+import com.ohmyclipping.service.dto.user.BriefingListResponse
 import com.ohmyclipping.store.CategoryStore
 import com.ohmyclipping.store.DailySummaryStore
 import org.springframework.stereotype.Service

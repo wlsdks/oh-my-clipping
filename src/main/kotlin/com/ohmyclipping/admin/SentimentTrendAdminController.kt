@@ -1,7 +1,7 @@
 package com.ohmyclipping.admin
 
 import com.ohmyclipping.service.SentimentTrendService
-import com.ohmyclipping.service.dto.SentimentTrendResponse
+import com.ohmyclipping.service.dto.analytics.SentimentTrendResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam

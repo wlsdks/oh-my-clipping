@@ -1,9 +1,9 @@
 package com.ohmyclipping.user
 
 import com.ohmyclipping.admin.dto.BookmarkToggleResponse
-import com.ohmyclipping.service.dto.ArticleDetailView
-import com.ohmyclipping.service.dto.ArticleHistoryPageView
-import com.ohmyclipping.service.dto.UndeliveredDigestView
+import com.ohmyclipping.service.dto.user.ArticleDetailView
+import com.ohmyclipping.service.dto.user.ArticleHistoryPageView
+import com.ohmyclipping.service.dto.user.UndeliveredDigestView
 import com.ohmyclipping.service.UserArticleHistoryService
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.Authentication

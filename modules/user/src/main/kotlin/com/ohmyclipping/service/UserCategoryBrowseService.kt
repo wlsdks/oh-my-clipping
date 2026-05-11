@@ -7,8 +7,8 @@ import com.ohmyclipping.model.AdminUser
 import com.ohmyclipping.model.Category
 import com.ohmyclipping.model.UserClippingRequest
 import com.ohmyclipping.model.UserClippingRequestStatus
-import com.ohmyclipping.service.dto.UserCategoryBrowseItem
-import com.ohmyclipping.service.dto.UserCategorySubscribeResult
+import com.ohmyclipping.service.dto.user.UserCategoryBrowseItem
+import com.ohmyclipping.service.dto.user.UserCategorySubscribeResult
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.CategoryStore
 import com.ohmyclipping.store.UserClippingRequestStore

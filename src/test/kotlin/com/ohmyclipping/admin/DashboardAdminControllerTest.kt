@@ -4,9 +4,9 @@ import com.ohmyclipping.admin.dto.ActiveSubscriptionsSummaryDto
 import com.ohmyclipping.admin.dto.ForecastDto
 import com.ohmyclipping.admin.dto.UserEngagementTrendDto
 import com.ohmyclipping.service.DashboardService
-import com.ohmyclipping.service.dto.ActiveSubscriptionsSummaryResult
-import com.ohmyclipping.service.dto.EngagementTrendResult
-import com.ohmyclipping.service.dto.TodayForecastResult
+import com.ohmyclipping.service.dto.analytics.ActiveSubscriptionsSummaryResult
+import com.ohmyclipping.service.dto.analytics.EngagementTrendResult
+import com.ohmyclipping.service.dto.analytics.TodayForecastResult
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk

@@ -5,8 +5,8 @@ import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.error.ensureValid
 import com.ohmyclipping.model.BlockedSlackChannel
-import com.ohmyclipping.service.dto.SlackChannelDto
-import com.ohmyclipping.service.dto.SlackChannelListResponse
+import com.ohmyclipping.service.dto.admin.SlackChannelDto
+import com.ohmyclipping.service.dto.admin.SlackChannelListResponse
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.AuditLogStore
 import com.ohmyclipping.store.BlockedSlackChannelStore

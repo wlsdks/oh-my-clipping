@@ -1,7 +1,7 @@
 package com.ohmyclipping.admin
 
-import com.ohmyclipping.service.dto.SlackChannelDto
-import com.ohmyclipping.service.dto.SlackChannelListResponse
+import com.ohmyclipping.service.dto.admin.SlackChannelDto
+import com.ohmyclipping.service.dto.admin.SlackChannelListResponse
 import com.ohmyclipping.admin.dto.SlackConnectionVerifyRequest
 import com.ohmyclipping.admin.dto.SlackConnectionVerifyResponse
 import com.ohmyclipping.service.UserSetupResourceService

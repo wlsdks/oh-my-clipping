@@ -2,8 +2,8 @@ package com.ohmyclipping.service
 
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.ensureValid
-import com.ohmyclipping.service.dto.ReportSettingsResponse
-import com.ohmyclipping.service.dto.ReportSettingsUpdateRequest
+import com.ohmyclipping.service.dto.user.ReportSettingsResponse
+import com.ohmyclipping.service.dto.user.ReportSettingsUpdateRequest
 import com.ohmyclipping.store.AuditLogStore
 import com.ohmyclipping.store.ReportSettingsStore
 import com.ohmyclipping.support.SlackChannelIdNormalizer

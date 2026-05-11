@@ -1,7 +1,7 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.service.source.SourceVerificationClient
-import com.ohmyclipping.service.dto.SlackChannelDto
+import com.ohmyclipping.service.dto.admin.SlackChannelDto
 import com.ohmyclipping.model.AccountRole
 import com.ohmyclipping.model.AdminUser
 import com.ohmyclipping.security.UrlSafetyValidator

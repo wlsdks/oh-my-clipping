@@ -1,6 +1,13 @@
 package com.ohmyclipping.admin
 
-import com.ohmyclipping.service.dto.*
+import com.ohmyclipping.service.dto.analytics.ArticleRankingResponse
+import com.ohmyclipping.service.dto.analytics.CategoryStatsResponse
+import com.ohmyclipping.service.dto.analytics.ClickRateSummaryResponse
+import com.ohmyclipping.service.dto.analytics.DauResponse
+import com.ohmyclipping.service.dto.analytics.DeliveryMatrixResponse
+import com.ohmyclipping.service.dto.analytics.PipelineDailyResponse
+import com.ohmyclipping.service.dto.analytics.PipelineSummaryResponse
+import com.ohmyclipping.service.dto.analytics.WizardFunnelResponse
 import com.ohmyclipping.error.ensureValid
 import com.ohmyclipping.service.AnalyticsService
 import com.ohmyclipping.service.pipeline.PipelineAnalyticsService

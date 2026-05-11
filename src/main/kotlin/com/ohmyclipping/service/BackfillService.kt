@@ -1,9 +1,9 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.BackfillApplyError
-import com.ohmyclipping.service.dto.BackfillApplyResponse
-import com.ohmyclipping.service.dto.BackfillCandidate
-import com.ohmyclipping.service.dto.BackfillPreviewResponse
+import com.ohmyclipping.service.dto.admin.BackfillApplyError
+import com.ohmyclipping.service.dto.admin.BackfillApplyResponse
+import com.ohmyclipping.service.dto.admin.BackfillCandidate
+import com.ohmyclipping.service.dto.admin.BackfillPreviewResponse
 import com.ohmyclipping.error.ConflictException
 import com.ohmyclipping.model.OrganizationOrigins
 import com.ohmyclipping.service.source.CategorySourceBuilder

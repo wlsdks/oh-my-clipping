@@ -3,7 +3,7 @@ package com.ohmyclipping.service
 import com.ohmyclipping.service.source.SourceVerificationClient
 import com.ohmyclipping.service.source.VerificationResult
 
-import com.ohmyclipping.service.dto.SlackChannelDto
+import com.ohmyclipping.service.dto.admin.SlackChannelDto
 import com.ohmyclipping.error.AccessForbiddenException
 import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.NotFoundException
@@ -13,7 +13,7 @@ import com.ohmyclipping.model.Category
 import com.ohmyclipping.service.dto.clipping.PipelineRunResult
 import com.ohmyclipping.model.RssSource
 import com.ohmyclipping.security.UrlSafetyValidator
-import com.ohmyclipping.service.dto.UserSetupSourceUrlValidationView
+import com.ohmyclipping.service.dto.user.UserSetupSourceUrlValidationView
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.BlockedSlackChannelStore
 import com.ohmyclipping.store.CategoryStore

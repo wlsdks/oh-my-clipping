@@ -4,7 +4,7 @@ import com.ohmyclipping.service.dto.clipping.AiDailySummaryResponse
 import com.ohmyclipping.service.dto.clipping.AiSummaryResponse
 import com.ohmyclipping.model.Language
 import com.ohmyclipping.model.Persona
-import com.ohmyclipping.service.dto.CompetitorTimelineItem
+import com.ohmyclipping.service.dto.analytics.CompetitorTimelineItem
 import com.ohmyclipping.service.port.LlmArticleLanguage
 import com.ohmyclipping.service.port.LlmArticleSummaryResult
 import com.ohmyclipping.service.port.LlmCompetitorTimelineItem

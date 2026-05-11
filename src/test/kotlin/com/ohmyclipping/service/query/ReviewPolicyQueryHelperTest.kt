@@ -1,6 +1,6 @@
 package com.ohmyclipping.service.query
 
-import com.ohmyclipping.service.dto.ReviewPolicyStatus
+import com.ohmyclipping.service.dto.admin.ReviewPolicyStatus
 import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.ints.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.doubles.plusOrMinus

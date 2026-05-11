@@ -11,7 +11,7 @@ import com.ohmyclipping.error.ErrorCode
 import com.ohmyclipping.error.SignupException
 import com.ohmyclipping.error.ConflictException
 import com.ohmyclipping.error.ensureValid
-import com.ohmyclipping.service.dto.SignupAvailability
+import com.ohmyclipping.service.dto.user.SignupAvailability
 import com.ohmyclipping.store.AdminUserStore
 import com.ohmyclipping.store.AuditLogStore
 import org.springframework.security.crypto.password.PasswordEncoder

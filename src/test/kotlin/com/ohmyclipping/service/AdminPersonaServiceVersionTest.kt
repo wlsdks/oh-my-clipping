@@ -1,7 +1,7 @@
 package com.ohmyclipping.service
 
-import com.ohmyclipping.service.dto.PersonaVersionDetail
-import com.ohmyclipping.service.dto.PersonaVersionSummary
+import com.ohmyclipping.service.dto.admin.PersonaVersionDetail
+import com.ohmyclipping.service.dto.admin.PersonaVersionSummary
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.model.Persona
 import com.ohmyclipping.store.AuditLogStore

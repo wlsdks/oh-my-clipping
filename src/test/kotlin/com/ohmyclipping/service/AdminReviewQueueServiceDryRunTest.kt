@@ -5,7 +5,7 @@ import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.model.BatchSummary
 import com.ohmyclipping.model.Category
 import com.ohmyclipping.model.CategoryRule
-import com.ohmyclipping.service.dto.RuleEvaluationResult
+import com.ohmyclipping.service.dto.admin.RuleEvaluationResult
 import com.ohmyclipping.service.query.ReviewPolicyQueryHelper
 import com.ohmyclipping.store.BatchSummaryStore
 import com.ohmyclipping.store.CategoryStore
