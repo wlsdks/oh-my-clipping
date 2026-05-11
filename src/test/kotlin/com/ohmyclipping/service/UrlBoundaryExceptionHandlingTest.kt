@@ -10,8 +10,8 @@ class UrlBoundaryExceptionHandlingTest {
     @Test
     fun `URL and RSS boundary helpers should not use broad exception catches`() {
         val paths = listOf(
-            "clipping-source/src/main/kotlin/com/ohmyclipping/service/source/DomainExtractor.kt",
-            "clipping-source/src/main/kotlin/com/ohmyclipping/service/source/RssFeedDiscoveryService.kt",
+            "modules/source/src/main/kotlin/com/ohmyclipping/service/source/DomainExtractor.kt",
+            "modules/source/src/main/kotlin/com/ohmyclipping/service/source/RssFeedDiscoveryService.kt",
             "src/main/kotlin/com/ohmyclipping/rss/HttpRobotsPolicyClient.kt",
             "src/main/kotlin/com/ohmyclipping/rss/HttpSourceVerificationClient.kt"
         )

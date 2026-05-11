@@ -11,10 +11,10 @@ class RssCollectionPortBoundaryTest {
     @Test
     fun `services should depend on rss collection port instead of concrete feed collector`() {
         val serviceSources = listOf(
-            Paths.get("clipping-collection/src/main/kotlin/com/ohmyclipping/service/collection/RssSourceCollectionService.kt"),
+            Paths.get("modules/collection/src/main/kotlin/com/ohmyclipping/service/collection/RssSourceCollectionService.kt"),
             Paths.get("src/main/kotlin/com/ohmyclipping/service/competitor/CompetitorCollectionService.kt"),
             Paths.get("src/main/kotlin/com/ohmyclipping/service/competitor/CompetitorWatchlistService.kt"),
-            Paths.get("clipping-source/src/main/kotlin/com/ohmyclipping/service/source/SourceHealthScheduler.kt")
+            Paths.get("modules/source/src/main/kotlin/com/ohmyclipping/service/source/SourceHealthScheduler.kt")
         )
 
         serviceSources.forEach { sourcePath ->
@@ -28,7 +28,7 @@ class RssCollectionPortBoundaryTest {
     @Test
     fun `rss collection port should not expose app models`() {
         val source = Files.readString(
-            Paths.get("clipping-engine/src/main/kotlin/com/ohmyclipping/service/port/RssCollectionPort.kt")
+            Paths.get("modules/digest-policy/src/main/kotlin/com/ohmyclipping/service/port/RssCollectionPort.kt")
         )
 
         source shouldContain "RssCollectionSource"

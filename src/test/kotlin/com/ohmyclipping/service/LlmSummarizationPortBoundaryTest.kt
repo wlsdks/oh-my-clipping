@@ -33,7 +33,7 @@ class LlmSummarizationPortBoundaryTest {
     @Test
     fun `llm summarization port should not expose app models`() {
         val source = Files.readString(
-            Paths.get("clipping-engine/src/main/kotlin/com/ohmyclipping/service/port/LlmSummarizationPort.kt")
+            Paths.get("modules/digest-policy/src/main/kotlin/com/ohmyclipping/service/port/LlmSummarizationPort.kt")
         )
 
         source shouldContain "LlmArticleSummaryResult"

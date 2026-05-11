@@ -26,7 +26,7 @@ kotlin {
 
 tasks.register("checkDomainBoundaries") {
     group = "verification"
-    description = "Ensure clipping-domain stays free of framework, adapter, store, and app service dependencies."
+    description = "Ensure core/domain stays free of framework, adapter, store, and app service dependencies."
     val sourceRoot = layout.projectDirectory.dir("src/main/kotlin").asFile
     inputs.dir(sourceRoot)
     outputs.upToDateWhen { false }
@@ -63,12 +63,12 @@ tasks.register("checkDomainBoundaries") {
         if (violations.isNotEmpty()) {
             violations.forEach { logger.error(it) }
             throw GradleException(
-                "${violations.size} clipping-domain boundary violation(s) detected. " +
+                "${violations.size} core/domain boundary violation(s) detected. " +
                     "Keep domain models free of framework, adapter, store, and app service dependencies.",
             )
         }
 
-        logger.lifecycle("checkDomainBoundaries: OK (clipping-domain has no forbidden app/framework imports)")
+        logger.lifecycle("checkDomainBoundaries: OK (core/domain has no forbidden app/framework imports)")
     }
 }
 

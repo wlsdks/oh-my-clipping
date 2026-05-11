@@ -12,13 +12,13 @@ class OpsLogNotifierPortBoundaryTest {
     @Test
     fun `ops log notifier port should own its notification DTO contract`() {
         val portSource = Files.readString(
-            Paths.get("clipping-app-ports/src/main/kotlin/com/ohmyclipping/service/port/OpsLogNotifier.kt")
+            Paths.get("ports/workflow/src/main/kotlin/com/ohmyclipping/service/port/OpsLogNotifier.kt")
         )
         val dtoSource = Files.readString(
-            Paths.get("clipping-app-ports/src/main/kotlin/com/ohmyclipping/service/port/OpsLogDtos.kt")
+            Paths.get("ports/workflow/src/main/kotlin/com/ohmyclipping/service/port/OpsLogDtos.kt")
         )
         val notificationEventSource = Files.readString(
-            Paths.get("clipping-app-ports/src/main/kotlin/com/ohmyclipping/service/port/NotificationEvent.kt")
+            Paths.get("ports/workflow/src/main/kotlin/com/ohmyclipping/service/port/NotificationEvent.kt")
         )
 
         portSource shouldContain "interface OpsLogNotifier"

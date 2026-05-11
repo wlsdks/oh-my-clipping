@@ -38,7 +38,7 @@ class PipelinePortBoundaryTest {
     fun `pipeline port should live in engine module and expose independent pipeline DTOs`() {
         val appPortPath = Paths.get("src/main/kotlin/com/ohmyclipping/service/port/ClippingPipelinePort.kt")
         val enginePortPath =
-            Paths.get("clipping-engine/src/main/kotlin/com/ohmyclipping/service/port/ClippingPipelinePort.kt")
+            Paths.get("modules/digest-policy/src/main/kotlin/com/ohmyclipping/service/port/ClippingPipelinePort.kt")
         val portSource = Files.readString(enginePortPath)
 
         Files.exists(appPortPath) shouldBe false
@@ -54,7 +54,7 @@ class PipelinePortBoundaryTest {
     @Test
     fun `engine module should own pure external IO port contracts`() {
         val appPortRoot = Paths.get("src/main/kotlin/com/ohmyclipping/service/port")
-        val enginePortRoot = Paths.get("clipping-engine/src/main/kotlin/com/ohmyclipping/service/port")
+        val enginePortRoot = Paths.get("modules/digest-policy/src/main/kotlin/com/ohmyclipping/service/port")
         val engineOwnedPorts = listOf(
             "ClippingPipelinePort.kt",
             "RssCollectionPort.kt",
@@ -76,8 +76,8 @@ class PipelinePortBoundaryTest {
     fun `app use case ports should remain outside engine module`() {
         val appPortRoot = Paths.get("src/main/kotlin/com/ohmyclipping/service/port")
         val appContractPortRoot =
-            Paths.get("clipping-app-ports/src/main/kotlin/com/ohmyclipping/service/port")
-        val enginePortRoot = Paths.get("clipping-engine/src/main/kotlin/com/ohmyclipping/service/port")
+            Paths.get("ports/workflow/src/main/kotlin/com/ohmyclipping/service/port")
+        val enginePortRoot = Paths.get("modules/digest-policy/src/main/kotlin/com/ohmyclipping/service/port")
 
         Files.exists(appPortRoot.resolve("ClippingQueryPort.kt")) shouldBe false
         Files.exists(appContractPortRoot.resolve("ClippingQueryPort.kt")) shouldBe true
@@ -100,11 +100,11 @@ class PipelinePortBoundaryTest {
     @Test
     fun `app ports should not own API or pipeline DTOs`() {
         val appPortDtoRoot =
-            Paths.get("clipping-app-ports/src/main/kotlin/com/ohmyclipping/service/dto")
+            Paths.get("ports/workflow/src/main/kotlin/com/ohmyclipping/service/dto")
         val apiModelDtoRoot =
-            Paths.get("clipping-api-models/src/main/kotlin/com/ohmyclipping/service/dto/clipping")
+            Paths.get("core/api-models/src/main/kotlin/com/ohmyclipping/service/dto/clipping")
         val pipelineModelDtoRoot =
-            Paths.get("clipping-pipeline-models/src/main/kotlin/com/ohmyclipping/service/dto/pipeline")
+            Paths.get("core/api-models/src/main/kotlin/com/ohmyclipping/service/dto/pipeline")
 
         Files.exists(appPortDtoRoot) shouldBe false
         Files.exists(apiModelDtoRoot.resolve("ClippingResultDtos.kt")) shouldBe true
@@ -114,7 +114,7 @@ class PipelinePortBoundaryTest {
     @Test
     fun `persistence module should own entities and repositories`() {
         val appSourceRoot = Paths.get("src/main/kotlin/com/ohmyclipping")
-        val persistenceSourceRoot = Paths.get("clipping-persistence/src/main/kotlin/com/ohmyclipping")
+        val persistenceSourceRoot = Paths.get("adapters/persistence/src/main/kotlin/com/ohmyclipping")
 
         Files.exists(appSourceRoot.resolve("entity")) shouldBe false
         Files.exists(appSourceRoot.resolve("repository")) shouldBe false
@@ -125,8 +125,8 @@ class PipelinePortBoundaryTest {
     @Test
     fun `store SPI and implementations should be physically separated`() {
         val appSourceRoot = Paths.get("src/main/kotlin/com/ohmyclipping")
-        val storeSpiRoot = Paths.get("clipping-store-spi/src/main/kotlin/com/ohmyclipping")
-        val persistenceSourceRoot = Paths.get("clipping-persistence/src/main/kotlin/com/ohmyclipping")
+        val storeSpiRoot = Paths.get("ports/persistence/src/main/kotlin/com/ohmyclipping")
+        val persistenceSourceRoot = Paths.get("adapters/persistence/src/main/kotlin/com/ohmyclipping")
 
         Files.exists(appSourceRoot.resolve("store")) shouldBe false
         Files.exists(storeSpiRoot.resolve("store")) shouldBe true
@@ -141,7 +141,7 @@ class PipelinePortBoundaryTest {
     @Test
     fun `shared service exceptions should not live in root app`() {
         val appErrorRoot = Paths.get("src/main/kotlin/com/ohmyclipping/error")
-        val errorTypeRoot = Paths.get("clipping-error-types/src/main/kotlin/com/ohmyclipping/error")
+        val errorTypeRoot = Paths.get("core/error-types/src/main/kotlin/com/ohmyclipping/error")
 
         Files.exists(appErrorRoot) shouldBe false
         Files.exists(errorTypeRoot.resolve("ServiceError.kt")) shouldBe true
@@ -208,7 +208,7 @@ class PipelinePortBoundaryTest {
     fun `app service digest package should be root app orchestration boundary`() {
         val digestSourceRoot = Paths.get("src/main/kotlin/com/ohmyclipping/service/digest")
         val digestApplicationSourceRoot =
-            Paths.get("clipping-digest-application/src/main/kotlin/com/ohmyclipping/service/digest")
+            Paths.get("modules/digest/src/main/kotlin/com/ohmyclipping/service/digest")
         val files = Files.list(digestSourceRoot).use { stream ->
             stream.asSequence()
                 .filter { it.isRegularFile() && it.toString().endsWith(".kt") }

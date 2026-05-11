@@ -11,7 +11,7 @@ class SlackDeliveryPortBoundaryTest {
     @Test
     fun `slack delivery port should expose delivery operations only`() {
         val source = Files.readString(
-            Paths.get("clipping-engine/src/main/kotlin/com/ohmyclipping/service/port/SlackDeliveryPort.kt")
+            Paths.get("modules/digest-policy/src/main/kotlin/com/ohmyclipping/service/port/SlackDeliveryPort.kt")
         )
 
         source shouldNotContain "interface SlackDeliveryPort : SlackMessageSender"
@@ -72,7 +72,7 @@ class SlackDeliveryPortBoundaryTest {
 
         val notificationSource = Files.readString(
             Paths.get(
-                "clipping-notification/src/main/kotlin/com/ohmyclipping/service/notification/OperationsNotificationService.kt"
+                "adapters/notification/src/main/kotlin/com/ohmyclipping/service/notification/OperationsNotificationService.kt"
             )
         )
 

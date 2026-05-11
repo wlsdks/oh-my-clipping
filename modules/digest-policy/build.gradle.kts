@@ -37,7 +37,7 @@ tasks.withType<Test> {
 
 tasks.register("checkEngineBoundaries") {
     group = "verification"
-    description = "Ensure clipping-engine stays free of Spring/JPA/store/app model dependencies."
+    description = "Ensure modules/digest-policy stays free of Spring/JPA/store/app model dependencies."
     val sourceRoot = layout.projectDirectory.dir("src/main/kotlin").asFile
     inputs.dir(sourceRoot)
     outputs.upToDateWhen { false }
@@ -71,12 +71,12 @@ tasks.register("checkEngineBoundaries") {
         if (violations.isNotEmpty()) {
             violations.forEach { logger.error(it) }
             throw GradleException(
-                "${violations.size} clipping-engine boundary violation(s) detected. " +
+                "${violations.size} modules/digest-policy boundary violation(s) detected. " +
                     "Keep engine code free of Spring/JPA/store/app model dependencies.",
             )
         }
 
-        logger.lifecycle("checkEngineBoundaries: OK (clipping-engine has no forbidden app/framework imports)")
+        logger.lifecycle("checkEngineBoundaries: OK (modules/digest-policy has no forbidden app/framework imports)")
     }
 }
 
