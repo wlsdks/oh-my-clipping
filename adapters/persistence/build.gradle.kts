@@ -28,7 +28,6 @@ dependencies {
     implementation(project(":core:api-models"))
     implementation(project(":core:domain"))
     implementation(project(":core:error-types"))
-    implementation(project(":core:pipeline-models"))
     implementation(project(":ports:persistence"))
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")

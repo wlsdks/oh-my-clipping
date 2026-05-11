@@ -18,7 +18,6 @@ repositories {
 dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:api-models"))
-    implementation(project(":core:pipeline-models"))
 }
 
 kotlin {

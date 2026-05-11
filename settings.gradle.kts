@@ -4,7 +4,6 @@ include(
     ":core:domain",
     ":core:error-types",
     ":core:api-models",
-    ":core:pipeline-models",
     ":core:application-models",
     ":ports:workflow",
     ":ports:persistence",

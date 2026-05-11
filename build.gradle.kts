@@ -34,7 +34,6 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:error-types"))
     implementation(project(":core:api-models"))
-    implementation(project(":core:pipeline-models"))
     implementation(project(":core:application-models"))
     implementation(project(":ports:workflow"))
     implementation(project(":ports:persistence"))
@@ -230,7 +229,6 @@ tasks.register("checkPostgresSpecificSql") {
         layout.projectDirectory.dir("core/api-models/src/main/kotlin").asFile,
         layout.projectDirectory.dir("core/domain/src/main/kotlin").asFile,
         layout.projectDirectory.dir("core/error-types/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/pipeline-models/src/main/kotlin").asFile,
         layout.projectDirectory.dir("ports/workflow/src/main/kotlin").asFile,
         layout.projectDirectory.dir("ports/persistence/src/main/kotlin").asFile,
         layout.projectDirectory.dir("adapters/notification/src/main/kotlin").asFile,
@@ -317,7 +315,6 @@ tasks.register("checkBroadExceptionBaseline") {
         layout.projectDirectory.dir("core/api-models/src/main/kotlin").asFile,
         layout.projectDirectory.dir("core/domain/src/main/kotlin").asFile,
         layout.projectDirectory.dir("core/error-types/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/pipeline-models/src/main/kotlin").asFile,
         layout.projectDirectory.dir("ports/workflow/src/main/kotlin").asFile,
         layout.projectDirectory.dir("ports/persistence/src/main/kotlin").asFile,
         layout.projectDirectory.dir("adapters/persistence/src/main/kotlin").asFile,
@@ -395,7 +392,6 @@ tasks.named("check") {
         ":core:application-models:checkApplicationModelBoundaries",
         ":core:domain:checkDomainBoundaries",
         ":core:error-types:checkErrorTypeBoundaries",
-        ":core:pipeline-models:checkPipelineModelBoundaries",
         ":ports:workflow:checkAppPortBoundaries",
         ":ports:persistence:checkStoreSpiBoundaries",
         ":adapters:persistence:checkPersistenceBoundaries",
