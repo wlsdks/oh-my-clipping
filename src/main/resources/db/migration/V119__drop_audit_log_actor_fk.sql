@@ -1,0 +1,27 @@
+-- ============================================================
+-- V119: audit_log.actor_id FK 제거 (B 리팩터 전 임시 복구)
+--
+-- 배경:
+--   V117 에서 `audit_log.actor_id → admin_users.id ON DELETE SET NULL` 을
+--   걸었으나 컨트롤러 코드는 `authentication.name` (= username 문자열, 예:
+--   `admin-api`) 를 `actor_id` 에 그대로 저장한다. admin_users 에 해당
+--   username 이 UUID id 로 들어있지 않아 모든 audit-log insert 가 FK
+--   위반으로 500 을 반환한다.
+--
+-- 설계 의도 (B 리팩터):
+--   actor_id 는 `admin_users.id` (UUID) 를, actor_name 은 username/
+--   display-name 을 저장하도록 호출부 전반을 수정해야 한다. 이는 20+
+--   호출 지점과 기존 데이터 backfill 까지 포함하는 별도 PR scope 이다.
+--
+-- 본 migration 의 역할:
+--   파일럿 직전에 설계 결함으로 기능이 멈추지 않도록 FK 만 제거한다.
+--   V117 의 나머지 7개 FK, orphan cleanup, CHECK 제약, 백업 테이블은
+--   그대로 보존한다. `actor_id` 컬럼 자체는 nullable (V117 에서 DROP
+--   NOT NULL) 상태로 남아 B 리팩터 시점에 UUID 로 다시 연결할 수 있다.
+--
+-- 후속 작업: task #8 (post-pilot) 에서 컨트롤러 UUID 리졸버 + FK 재추가.
+--   그 PR 은 반드시 audit_log 의 기존 username 값을 admin_users.id 로
+--   backfill 한 뒤 FK 를 다시 걸어야 한다.
+-- ============================================================
+
+ALTER TABLE audit_log DROP CONSTRAINT IF EXISTS fk_audit_log_actor;

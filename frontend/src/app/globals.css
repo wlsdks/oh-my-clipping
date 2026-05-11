@@ -1,0 +1,243 @@
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+@import "tailwindcss";
+
+/* font-display: swap — 폰트 로딩 중 시스템 폰트로 FOUT 방지 */
+@font-face {
+  font-family: "Pretendard Variable";
+  font-display: swap;
+  src: local("Pretendard Variable");
+}
+
+/* 반드시 유지 — .dark 클래스 기반 다크모드 활성화 */
+@custom-variant dark (&:is(.dark *));
+
+/* ─── Tailwind 유틸리티 생성 토큰 (라이트 모드) ───
+ *
+ * @theme 블록이 디자인 토큰의 단일 소스.
+ * Tailwind 유틸리티 클래스(bg-background, text-primary 등)를 생성한다.
+ * 차트·인라인 스타일에서 var() 직접 참조도 가능하다.
+ *
+ * 아래 :root 블록의 브랜드 토큰은 @theme에 없는 **의미(semantic)** 변수만 정의한다.
+ * 중복 정의를 피하기 위해 :root 토큰은 가능한 한 @theme 변수를 참조한다.
+ */
+@theme {
+  /* 폰트 */
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+
+  /* 배경 — Stone (warm gray) */
+  --color-background: #FAFAF8;
+  --color-foreground: #1C1917;
+
+  /* 카드/팝오버 */
+  --color-card: #FFFFFF;
+  --color-card-foreground: #1C1917;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #1C1917;
+
+  /* Primary (Honey Gold) — WCAG AA 4.5:1 on white (contrast 4.82:1) */
+  --color-primary: #9B6500;
+  --color-primary-foreground: #FFFFFF;
+
+  /* Secondary */
+  --color-secondary: #FDF6E9;
+  --color-secondary-foreground: #6B4F1A;
+
+  /* Muted — Stone tint */
+  --color-muted: #F5F3F0;
+  --color-muted-foreground: #57534E;
+
+  /* Accent */
+  --color-accent: #F5F3F0;
+  --color-accent-foreground: #1C1917;
+
+  /* Destructive */
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+
+  /* Border / Input / Ring */
+  --color-border: #E7E5E4;
+  --color-input: #FAFAF8;
+  --color-ring: #A16B0A;
+
+  /* Sidebar (유지) */
+  --color-sidebar: #0d1526;
+  --color-sidebar-foreground: #c8d5eb;
+  --color-sidebar-accent: #182540;
+  --color-sidebar-accent-foreground: #e8eef8;
+  --color-sidebar-border: #1c2d4a;
+
+  /* 반경 */
+  --radius: 0.625rem;
+}
+
+/* ─── 다크 모드 오버라이드 ─── */
+.dark {
+  --color-background: #121110;
+  --color-foreground: #F5F3F0;
+  --color-card: #1C1A17;
+  --color-card-foreground: #F5F3F0;
+  --color-popover: #1C1A17;
+  --color-popover-foreground: #F5F3F0;
+  --color-primary: #E5A636;
+  --color-primary-foreground: #1A1207;
+  --color-secondary: #2A2117;
+  --color-secondary-foreground: #E5C88A;
+  --color-muted: #292524;
+  --color-muted-foreground: #A8A29E;
+  --color-accent: #292524;
+  --color-accent-foreground: #F5F3F0;
+  --color-destructive: #f87171;
+  --color-destructive-foreground: #ffffff;
+  --color-border: #353330;
+  --color-input: #1C1A17;
+  --color-ring: #C8820A;
+  --color-sidebar: #0d1526;
+  --color-sidebar-foreground: #c8d5eb;
+  --color-sidebar-accent: #182540;
+  --color-sidebar-accent-foreground: #e8eef8;
+  --color-sidebar-border: #1c2d4a;
+}
+
+/* ─── 시맨틱 브랜드 토큰 (차트·인라인 스타일에서 var() 직접 참조) ───
+ *
+ * @theme 토큰과 값이 겹치는 변수는 var()로 위임해 단일 소스를 유지한다.
+ * @theme에 없는 고유 목적 변수만 리터럴 값을 둔다.
+ */
+:root {
+  /* ── @theme 위임 (값 중복 제거) ── */
+  --bg-page: var(--color-background);
+  --bg-surface: var(--color-card);
+  --border-default: var(--color-border);
+  --text-primary: var(--color-foreground);
+  --text-secondary: var(--color-muted-foreground);
+  --accent-primary: var(--color-primary);
+
+  /* ── 고유 시맨틱 토큰 (@theme에 대응 없음) ── */
+  --bg-subtle: #F5F3EE;
+  --border-strong: #D6D3D1;
+  --text-tertiary: #78716C;
+
+  /* Accessibility: text-primary 용 어두운 색조 — AA compliant on light bg */
+  --color-primary-text: #8B6914;
+
+  /* 링크 색상 — primary와 분리, 항상 blue 계열 */
+  --color-link: #2563eb;
+
+  /* Clipping glow 토큰 */
+  --clipping-glow: #E5A636;
+  --clipping-glow-soft: rgba(229, 166, 54, 0.15);
+  --clipping-glow-medium: rgba(229, 166, 54, 0.3);
+  --clipping-glow-ring: 0 0 12px rgba(229, 166, 54, 0.2), 0 0 24px rgba(229, 166, 54, 0.08);
+  --clipping-center: #FFF5D6;
+
+  /* Motion 토큰 */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --duration-gentle: 500ms;
+  --ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* 상태 색상 — 뱃지·카드·차트에서 사용 */
+  --status-success-bg: #faf6ee;
+  --status-success-text: #8a6d1b;
+  --status-warning-bg: #fdf8f3;
+  --status-warning-text: #b45309;
+  --status-danger-bg: #fef2f2;
+  --status-danger-text: #ef4444;
+  --status-neutral-bg: #F5F3EE;
+  --status-neutral-text: #78716C;
+
+  /* 레이아웃 반경 — 모던 미니멀 라운딩 */
+  --radius-card: 16px;
+  --radius-button: 10px;
+  --radius-input: 10px;
+  --radius-badge: 999px;
+
+  /* 차트 색상 */
+  --chart-1: #C8820A;
+  --chart-2: #b8963a;
+  --chart-3: #f59e0b;
+  --chart-4: #8b5cf6;
+  --chart-5: #06b6d4;
+  --chart-6: #ec4899;
+  --chart-7: #64a6a3;
+  --chart-8: #94a37a;
+
+  /* 카드 그림자 */
+  --shadow-card: 0 2px 8px rgba(200, 130, 10, 0.04), 0 4px 16px rgba(0, 0, 0, 0.03);
+}
+
+.dark {
+  /* ── 고유 시맨틱 토큰 다크 오버라이드 ── */
+  --bg-subtle: #292524;
+  --border-strong: rgba(168, 162, 158, 0.25);
+  --text-tertiary: #78716C;
+
+  --color-primary-text: #E5A636;
+  --color-link: #60a5fa;
+
+  --clipping-glow-soft: rgba(229, 166, 54, 0.1);
+  --clipping-glow-medium: rgba(229, 166, 54, 0.2);
+  --clipping-glow-ring: 0 0 16px rgba(229, 166, 54, 0.25), 0 0 32px rgba(229, 166, 54, 0.1);
+
+  --status-success-bg: #1f1a10;
+  --status-success-text: #c4a54a;
+  --status-warning-bg: #2a2018;
+  --status-warning-text: #f59e0b;
+  --status-danger-bg: #2a1a1e;
+  --status-danger-text: #f87171;
+  --status-neutral-bg: #292524;
+  --status-neutral-text: #78716C;
+
+  --chart-1: #E5A636;
+  --chart-2: #d4b45a;
+  --chart-3: #fbbf24;
+  --chart-4: #a78bfa;
+  --chart-5: #22d3ee;
+  --chart-6: #f472b6;
+  --chart-7: #7fc1be;
+  --chart-8: #b0c18f;
+
+  --shadow-card: 0 2px 8px rgba(229, 166, 54, 0.06), 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Clipping 애니메이션 ─── */
+
+@keyframes clipping-ignite {
+  0% { box-shadow: none; }
+  40% { box-shadow: 0 0 8px var(--clipping-glow-soft); }
+  100% { box-shadow: var(--clipping-glow-ring); }
+}
+
+@keyframes clipping-breathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+@keyframes clipping-swing {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(8deg); }
+  40% { transform: rotate(-6deg); }
+  60% { transform: rotate(4deg); }
+  80% { transform: rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+* {
+  box-sizing: border-box;
+  border-color: var(--color-border);
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}

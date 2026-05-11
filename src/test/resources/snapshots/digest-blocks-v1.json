@@ -1,0 +1,108 @@
+[
+  {
+    "type": "header",
+    "text": {
+      "type": "plain_text",
+      "text": "SnapshotCat 클리핑",
+      "emoji": true
+    }
+  },
+  {
+    "type": "context",
+    "elements": [
+      {
+        "type": "mrkdwn",
+        "text": "총 2건 중 2건 선별 · <DATE>"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "text": {
+      "type": "mrkdwn",
+      "text": "*핵심 키워드* `AI` `L&D` `리더십` `학습` `자동화` `코칭`"
+    }
+  },
+  {
+    "type": "divider"
+  },
+  {
+    "type": "context",
+    "elements": [
+      {
+        "type": "mrkdwn",
+        "text": ":newspaper: *출처* <https://example.com/ai-ld-1|example.com>"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "text": {
+      "type": "mrkdwn",
+      "text": "*1. AI 리더십과 학습 전략*"
+    }
+  },
+  {
+    "type": "section",
+    "text": {
+      "type": "mrkdwn",
+      "text": "*요약*\nAI 도구 도입 과정에서 리더십 운영 모델을 재설계하고 학습 체계를 병행해야 한다는 사례를 정리한다."
+    }
+  },
+  {
+    "type": "actions",
+    "elements": [
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "원문 보기",
+          "emoji": true
+        },
+        "url": "https://example.com/ai-ld-1",
+        "action_id": "open_source_1"
+      }
+    ]
+  },
+  {
+    "type": "divider"
+  },
+  {
+    "type": "context",
+    "elements": [
+      {
+        "type": "mrkdwn",
+        "text": ":newspaper: *출처* <https://example.com/ai-ld-2|example.com>"
+      }
+    ]
+  },
+  {
+    "type": "section",
+    "text": {
+      "type": "mrkdwn",
+      "text": "*2. L&D 자동화 사례*"
+    }
+  },
+  {
+    "type": "section",
+    "text": {
+      "type": "mrkdwn",
+      "text": "*요약*\n사내 러닝 운영에서 자동 분류와 추천을 적용해 큐레이션 시간을 줄이고 학습 반응률을 높인 결과를 설명한다."
+    }
+  },
+  {
+    "type": "actions",
+    "elements": [
+      {
+        "type": "button",
+        "text": {
+          "type": "plain_text",
+          "text": "원문 보기",
+          "emoji": true
+        },
+        "url": "https://example.com/ai-ld-2",
+        "action_id": "open_source_2"
+      }
+    ]
+  }
+]

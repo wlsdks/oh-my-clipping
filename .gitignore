@@ -1,0 +1,95 @@
+HELP.md
+.gradle
+.gradle-local
+.gradle-local-run
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### VS Code ###
+.vscode/
+
+### OS ###
+.DS_Store
+
+# local env and runtime configs
+.env
+.env.*
+!.env.example
+docker-compose.override.yml
+docker-compose.*.yml
+application-*.yml
+
+# local runtime artifacts
+admin-setup-tab.md
+cat_form_state.yaml
+play_category_added.png
+post-approve
+source_after_newapprove.yaml
+source_latest.yaml
+sources_after_approve.yaml
+src-state/
+docker/
+playwright-report/
+test-results/
+tmp/
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+playwright/.cache/
+playwright/.local-browsers/
+.pw-artifacts/
+.kotlin/
+META-INF/
+.superpowers/
+.worktrees/
+frontend/tsconfig.tsbuildinfo
+
+# generated frontend bundle served by Spring Boot
+src/main/resources/static/index.html
+src/main/resources/static/assets/
+src/main/resources/static/favicon.png
+src/main/resources/static/logo.png
+src/main/resources/static/logo-dark.png
+src/main/resources/static/logo-light.png
+
+# Continuous improvement loop (local only)
+.claude/improvements/
+.claude/prompts/
+scripts/loop-guard.sh
+.claude/worktrees/
+frontend/coverage/
+.playwright-mcp/
+docs/superpowers/plans/
+docs/superpowers/specs/

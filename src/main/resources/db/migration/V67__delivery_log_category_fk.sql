@@ -1,0 +1,9 @@
+-- delivery_log.category_id 외래키 (ON DELETE SET NULL)
+-- H2 테스트 환경에서 기존 테스트 데이터와 FK 제약이 충돌할 수 있으므로
+-- 운영 PostgreSQL에서 수동 적용을 권장한다:
+--
+-- ALTER TABLE delivery_log
+--     ADD CONSTRAINT fk_delivery_log_category
+--     FOREIGN KEY (category_id) REFERENCES batch_categories(id) ON DELETE SET NULL;
+--
+-- 이 마이그레이션 파일은 빈 파일로 두어 Flyway 버전 순서를 유지한다.

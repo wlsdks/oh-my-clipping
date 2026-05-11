@@ -1,0 +1,43 @@
+# 빌드 산출물
+build/
+frontend/dist/
+src/main/resources/static/
+
+# 의존성 캐시
+frontend/node_modules/
+.gradle/
+
+# 테스트 & 커버리지
+frontend/coverage/
+frontend/test-results/
+frontend/playwright-report/
+jacoco/
+
+# IDE & 에디터
+.idea/
+.vscode/
+*.iml
+
+# Git
+.git/
+.gitignore
+
+# Claude & AI
+.claude/
+CLAUDE.md
+AGENTS.md
+
+# 환경/비밀
+.env
+.env.local
+*.pem
+*.key
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 문서 (빌드에 불필요)
+docs/
+*.md
+!frontend/README.md

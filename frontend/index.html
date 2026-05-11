@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect x='10' y='10' width='28' height='28' rx='4' fill='%234B5563'/><path d='M16 18 L32 18 M16 24 L32 24 M16 30 L26 30' stroke='%23F3F4F6' stroke-width='2.5' stroke-linecap='round'/></svg>" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" as="style" />
+    <meta name="theme-color" content="#FAFAF8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)" />
+    <title>Clipping</title>
+    <!-- FOUC 방지: 페이지 로드 전 테마 적용 -->
+    <script>
+      (function () {
+        try {
+          const stored = localStorage.getItem("ui-store");
+          const theme = stored ? JSON.parse(stored)?.state?.theme : "light";
+          if (theme === "dark") document.documentElement.classList.add("dark");
+        } catch (_) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

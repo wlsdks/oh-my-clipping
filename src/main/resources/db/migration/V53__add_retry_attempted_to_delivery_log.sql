@@ -1,0 +1,1 @@
+ALTER TABLE delivery_log ADD COLUMN retry_attempted BOOLEAN DEFAULT FALSE;

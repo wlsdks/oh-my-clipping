@@ -1,0 +1,1 @@
+ALTER TABLE blocked_slack_channels ADD COLUMN is_private BOOLEAN NOT NULL DEFAULT FALSE;

@@ -1,0 +1,32 @@
+import "@testing-library/jest-dom";
+
+/**
+ * jsdom v26+ 의 localStorage 구현이 zustand persist 미들웨어가 기대하는
+ * Storage 인터페이스(setItem/getItem/removeItem)를 함수로 제공하지 않는 경우가 있다.
+ * 테스트 환경에서 안정적으로 동작하도록 완전한 in-memory Storage를 주입한다.
+ */
+if (typeof globalThis.localStorage === "undefined" || typeof globalThis.localStorage.setItem !== "function") {
+  const store = new Map<string, string>();
+  const storage: Storage = {
+    get length() {
+      return store.size;
+    },
+    clear() {
+      store.clear();
+    },
+    getItem(key: string) {
+      return store.get(key) ?? null;
+    },
+    key(index: number) {
+      return [...store.keys()][index] ?? null;
+    },
+    removeItem(key: string) {
+      store.delete(key);
+    },
+    setItem(key: string, value: string) {
+      store.set(key, value);
+    }
+  };
+  Object.defineProperty(globalThis, "localStorage", { value: storage, writable: true });
+  Object.defineProperty(globalThis, "sessionStorage", { value: storage, writable: true });
+}

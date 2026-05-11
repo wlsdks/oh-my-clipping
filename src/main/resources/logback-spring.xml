@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  환경별 로깅 설정.
+  - local/test: 컬러 콘솔 출력 (사람이 읽기 쉬운 형식)
+  - production: JSON 구조화 출력 (LogstashEncoder, 로그 수집기 연동)
+  MDC 필드(requestId, schedulerName, categoryId)를 자동 포함한다.
+-->
+<configuration>
+
+    <springProfile name="local,test,default">
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>
+                    %d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg [requestId=%X{requestId:-}] [scheduler=%X{schedulerName:-}] [categoryId=%X{categoryId:-}]%n
+                </pattern>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="CONSOLE" />
+        </root>
+    </springProfile>
+
+    <springProfile name="production">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <includeMdcKeyName>requestId</includeMdcKeyName>
+                <includeMdcKeyName>schedulerName</includeMdcKeyName>
+                <includeMdcKeyName>categoryId</includeMdcKeyName>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE" />
+        </root>
+    </springProfile>
+
+    <!-- Slack 발송 실패 시 파일 기반 폴백 로거 (이슈 #6) -->
+    <appender name="OPS_ALERT_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/ops-alerts.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/ops-alerts.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="OPS_ALERT_FALLBACK" level="WARN" additivity="false">
+        <appender-ref ref="OPS_ALERT_FILE" />
+    </logger>
+
+</configuration>

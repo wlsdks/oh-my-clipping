@@ -1,0 +1,230 @@
+server:
+  port: 8086
+  shutdown: graceful
+  reactive:
+    session:
+      cookie:
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:false}
+        same-site: lax
+      timeout: 30m
+
+spring:
+  codec:
+    # 관리자 API 목록 응답(소스 등)이 10KB를 초과할 수 있으므로 256KB로 설정한다.
+    max-in-memory-size: 256KB
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  ai:
+    mcp:
+      server:
+        enabled: ${CLIPPING_MCP_SERVER_ENABLED:false}
+        name: clipping-mcp-server
+        version: 0.1.0
+        type: ASYNC
+        # R_2026-04: SSE → STREAMABLE 전환 (MCP 2025-03-26 spec).
+        # SSE BufferAsyncSink failure 영구 해결 + 2026-06-30 SSE deprecation 대응.
+        protocol: STREAMABLE
+        streamable-http:
+          mcp-endpoint: /mcp
+          keep-alive-interval: 30s
+    google:
+      genai:
+        # Gemini Developer API key only (Vertex AI 미사용)
+        # 운영/로컬 모두 GEMINI_API_KEY 하나만 넣으면 동작하도록 단순화.
+        api-key: ${GEMINI_API_KEY:}
+        # Spring AI Google GenAI autoconfig가 비-Vertex 모드에서도 project-id를 요구하므로
+        # 로컬 기본값을 제공해 불필요한 추가 환경변수 없이 기동 가능하게 한다.
+        project-id: ${GEMINI_PROJECT_ID:local-dev}
+        location: ${GEMINI_LOCATION:us-central1}
+        vertex-ai: false
+        embedding:
+          vertex-ai: false
+        chat:
+          options:
+            # gemini-2.5-flash-lite는 non-thinking 모델이라 reasoning 토큰 변동성이 없어
+            # JSON instruction following이 일관적이고 응답 길이가 안정적이다.
+            # gemini-2.5-flash(thinking)는 reasoning 토큰 폭주로 max-output-tokens 4096을 초과해
+            # finish_reason=MAX_TOKENS 발생률이 높았다 (2026-04 incident).
+            model: gemini-2.5-flash-lite
+            temperature: 0.3
+            max-output-tokens: 8192
+            # Gemini가 프롬프트의 JSON 지시를 무시하고 마크다운/텍스트로 응답하는 문제를
+            # API 레벨에서 강제한다. 이 설정이 없으면 모델이 자유 형식으로 답변해
+            # extractJson이 null을 반환하고 서킷 브레이커가 트리거된다.
+            response-mime-type: application/json
+  task:
+    scheduling:
+      cron:
+        time-zone: Asia/Seoul
+  session:
+    store-type: ${SESSION_STORE_TYPE:none}
+    redis:
+      namespace: clipping:session
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      repositories:
+        enabled: false
+  datasource:
+    # 로컬 기본 실행값 (docker-compose 기준). 필요시 환경변수로 덮어쓴다.
+    # 보안: DB 비밀번호는 환경변수로만 주입한다. 기본값을 소스코드에 포함하지 않는다.
+    url: ${DB_URL:jdbc:postgresql://localhost:5434/clipping}
+    username: ${DB_USERNAME:clipping_admin}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 65
+      minimum-idle: 10
+      connection-timeout: 5000
+      leak-detection-threshold: 60000
+      data-source-properties:
+        sslmode: ${DB_SSL_MODE:disable}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration,classpath:db/migration-pg
+    # V116 의 SQL 본문이 H2 호환을 위해 재작성됐다. 이미 dev/pilot DB 에 V116 이
+    # 기록되어 있을 수 있으므로 checksum 재계산이 필요하다. repair-on-migrate
+    # 는 기동 시 자동으로 history 의 failed/mismatched row 를 복구한다.
+    repair-on-migrate: true
+    # V117 이후에 V116 본문이 바뀌어 일부 환경(dev/pilot)에서는 V116 history
+    # row 가 사라진 상태로 V117 이 먼저 기록된 경우가 존재한다. 누락된 V116
+    # 을 뒤늦게 실행해 정합성을 맞추려면 out-of-order 허용이 필요하다.
+    # V116 은 멱등하므로 재실행돼도 row 결과가 달라지지 않는다.
+    out-of-order: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    redis:
+      enabled: false
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: ${API_DOCS_ENABLED:false}
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: ${SWAGGER_UI_ENABLED:false}
+  default-produces-media-type: application/json
+
+clipping:
+  app:
+    base-url: ${CLIPPING_APP_BASE_URL:http://localhost:8086}
+  collection:
+    max-combinations: ${CLIPPING_COLLECTION_MAX_COMBINATIONS:30}
+  feature:
+    account-based-digest:
+      enabled: ${CLIPPING_FEATURE_ACCOUNT_BASED_DIGEST_ENABLED:false}
+  scheduler:
+    enabled: ${CLIPPING_SCHEDULER_ENABLED:true}
+  slack:
+    delivery:
+      enabled: ${CLIPPING_SLACK_DELIVERY_ENABLED:true}
+  mcp:
+    server:
+      enabled: ${CLIPPING_MCP_SERVER_ENABLED:false}
+    service-token: ${CLIPPING_MCP_SERVICE_TOKEN:}
+  security:
+    # true 로 설정하면 SLACK_SIGNING_SECRET / ENCRYPTION_KEY 미설정 시 서버 부팅 실패.
+    # 운영/파일럿 환경에서는 반드시 true. 로컬 dev 는 false 로 유지해 편의성 확보.
+    fail-fast: ${CLIPPING_SECURITY_FAIL_FAST:false}
+  # 승인/검토 SLA 에스컬레이션 스케줄러 기본값. 파일럿 오픈 이후 PENDING 처리 누락 방지용.
+  sla-escalation:
+    enabled: ${SLA_ESCALATION_ENABLED:true}
+    user-approval-stale-days: ${SLA_USER_APPROVAL_STALE_DAYS:3}
+    clipping-request-stale-days: ${SLA_CLIPPING_REQUEST_STALE_DAYS:7}
+    source-request-stale-days: ${SLA_SOURCE_REQUEST_STALE_DAYS:5}
+
+# 페르소나 인사이트 위험/성장 판정 임계치. 운영 중 튜닝이 잦을 수 있어 상수 대신 설정으로 노출.
+# 스펙: docs/superpowers/specs/2026-04-17-persona-insights-redesign-design.md §2, §2.5
+analytics:
+  risk:
+    churn-min-count: 2           # 이탈 초과 — 최소 이탈 건수
+    churn-baseline-min: 8        # 이탈 초과 — 전주 active_subs 최소치 (구독자 3명 페르소나가 매주 울리는 것 방지)
+    engagement-drop-pp: 10       # 참여 하락 — 퍼센트포인트 기준
+    engagement-min-deliveries: 30  # 참여 하락/상승 공통 — 전·이번 주 모두 delivered_count 최소치
+    idle-weeks: 4                # 유휴 — 연속 0 발송 주 수
+  growth:
+    subs-surge-pct: 20           # 구독 급증 — 전주 대비 증가율 (%)
+    subs-surge-min: 3            # 구독 급증 — 증가 절댓값 최소치
+    engagement-rise-pp: 10       # 참여 상승 — 퍼센트포인트 기준
+
+clipping-mcp-server:
+  default-hours-back: 24
+  batch-size: 50
+  security:
+    admin-token: ${ADMIN_API_TOKEN:}
+    allow-signup: ${ADMIN_ALLOW_SIGNUP:false}
+    allow-user-signup: ${USER_ALLOW_SIGNUP:false}
+    allow-bootstrap-signup: ${ADMIN_ALLOW_BOOTSTRAP_SIGNUP:false}
+    min-password-length: 8
+  job-enabled: true
+  job-poll-delay-ms: 3000
+  job-worker-batch-size: 5
+  job-max-attempts: 3
+  job-initial-backoff-seconds: 30
+  digest-min-importance-score: 0.5
+  digest-default-max-items: 5
+  digest-max-message-chars: 3000
+  digest-item-summary-max-chars: 960
+  digest-keyword-max-count: 6
+  summary-min-chars: 150
+  summary-max-chars: 1200
+  summary-min-paragraph-count: 2
+  summary-min-sentence-count: 3
+  summary-keyword-min-count: 3
+  summary-keyword-max-count: 5
+  ralph-orchestration-enabled: ${RALPH_ORCHESTRATION_ENABLED:false}
+  ralph-loop-enabled: ${RALPH_LOOP_ENABLED:true}
+  ralph-loop-max-iterations: ${RALPH_LOOP_MAX_ITERATIONS:4}
+  ralph-loop-stop-phrase: ${RALPH_LOOP_STOP_PHRASE:RALPH_STOP}
+  screening-threshold: ${SCREENING_THRESHOLD:0.4}
+  llm-input-cost-per-million-usd: ${LLM_INPUT_COST_PER_MILLION_USD:0.10}
+  llm-output-cost-per-million-usd: ${LLM_OUTPUT_COST_PER_MILLION_USD:0.40}
+  gemini-rpm-limit: 800
+  slack-rpm-limit: 18
+  rss-cache-max-size: 1000
+  naver:
+    client-id: ${NAVER_CLIENT_ID:}
+    client-secret: ${NAVER_CLIENT_SECRET:}
+  dart:
+    api-key: ${DART_API_KEY:}
+    corp-code-url: https://opendart.fss.or.kr/api/corpCode.xml
+    refresh-cron: "0 0 3 * * MON"
+  slack:
+    bot-token: ${SLACK_BOT_TOKEN:${SLACK_BOT:}}
+    app-level-token: ${SLACK_APP_TOKEN:${SLACK_APP_LEVEL_TOKEN:}}
+    socket-mode-enabled: ${SLACK_SOCKET_MODE_ENABLED:false}
+    auto-digest-enabled: ${SLACK_AUTO_DIGEST_ENABLED:false}
+    digest-cron: ${SLACK_DIGEST_CRON:-}
+    auto-digest-max-items: 5
+    auto-digest-unsent-only: true
+    daily-channel-message-limit: ${SLACK_DAILY_CHANNEL_MESSAGE_LIMIT:100}
+  app:
+    base-url: ${APP_BASE_URL:http://localhost:8086}
+  rate-limit:
+    max-login-attempts-per-minute: ${MAX_LOGIN_ATTEMPTS_PER_MINUTE:10}
+    max-user-requests-per-minute: ${MAX_USER_REQUESTS_PER_MINUTE:60}
+    max-admin-write-requests-per-minute: ${MAX_ADMIN_WRITE_REQUESTS_PER_MINUTE:100}
+    max-admin-read-requests-per-minute: ${MAX_ADMIN_READ_REQUESTS_PER_MINUTE:500}
+    max-public-ip-requests-per-minute: ${MAX_PUBLIC_IP_REQUESTS_PER_MINUTE:60}
