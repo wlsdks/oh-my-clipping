@@ -80,7 +80,7 @@ class CategorySourceBuilderTest {
             )
             urls shouldHaveSize 2
             urls[0].url kContain "OR"          // alias OR 조합
-            urls[1].url kContain "TestCorp"          // generic test name
+            urls[1].url kContain "ConglomerateCo"
         }
 
         @Test

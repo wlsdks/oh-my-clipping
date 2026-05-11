@@ -15,7 +15,7 @@ class ArticleMatcherTest {
             matchesKeyword("MegaCorp 리스킬링 확대", "MegaCorp") shouldBe true
         }
         @Test fun `MegaCorp 키워드는 MegaCorp 에 NOT match (접미 Hangul)`() {
-            matchesKeyword("MegaCorp 발표", "MegaCorp") shouldBe false
+            matchesKeyword("MegaCorp발표", "MegaCorp") shouldBe false
         }
         @Test fun `MegaCorp 키워드는 우리MegaCorp 에 NOT match (접두 Hangul)`() {
             matchesKeyword("우리MegaCorp 직원", "MegaCorp") shouldBe false

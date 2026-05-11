@@ -31,7 +31,7 @@ class CompetitorWatchlistStoreBatchTest {
     // JUnit 5 기본 lifecycle 은 PER_METHOD — 인스턴스가 메서드마다 새로 생성된다.
     // 공유 H2 컨텍스트에서 UNIQUE(name) 충돌을 피하기 위해 실행마다 고유 suffix 를 사용한다.
     private val suffix = System.nanoTime()
-    private val nameSamsung = "BatchSamsung-$suffix"
+    private val nameTestCorp = "BatchTestCorp-$suffix"
     private val nameAlpha = "BatchLG-$suffix"
     private val nameBeta = "BatchBeta-$suffix"
 
@@ -71,7 +71,7 @@ class CompetitorWatchlistStoreBatchTest {
         fun `존재하는 이름은 대소문자 무관하게 반환된다`() {
             // 소문자 변환 + 원본 대소문자 혼합 → 2개 매칭, "unknown" 제외
             val result = store.findByNamesIgnoreCase(
-                listOf(nameSamsung.lowercase(), nameAlpha, "unknown-that-does-not-exist")
+                listOf(nameTestCorp.lowercase(), nameAlpha, "unknown-that-does-not-exist")
             )
 
             result.map { it.name }.shouldContainExactlyInAnyOrder(nameTestCorp, nameAlpha)
@@ -103,7 +103,7 @@ class CompetitorWatchlistStoreBatchTest {
         fun `대소문자 혼합 입력도 정규화하여 매칭한다`() {
             // 이름 전체를 대문자 또는 소문자로 변환해도 매칭돼야 한다.
             val result = store.findByNamesIgnoreCase(
-                listOf(nameSamsung.uppercase(), nameAlpha.lowercase())
+                listOf(nameTestCorp.uppercase(), nameAlpha.lowercase())
             )
 
             result.map { it.name }.shouldContainExactlyInAnyOrder(nameTestCorp, nameAlpha)

@@ -184,6 +184,9 @@ tasks.withType<Test> {
     systemProperty("spring.datasource.username", "sa")
     systemProperty("spring.datasource.password", "")
     systemProperty("spring.datasource.driver-class-name", "org.h2.Driver")
+    // H2 테스트 환경에선 PostgreSQL 전용 마이그레이션(db/migration-pg)은 제외한다.
+    // application.yml 의 기본값(db/migration,db/migration-pg)을 시스템 프로퍼티로 override.
+    systemProperty("spring.flyway.locations", "classpath:db/migration")
     systemProperty("spring.ai.google.genai.api-key", "test-key")
 }
 
@@ -200,6 +203,7 @@ tasks.register<Test>("stressTest") {
     systemProperty("spring.datasource.username", "sa")
     systemProperty("spring.datasource.password", "")
     systemProperty("spring.datasource.driver-class-name", "org.h2.Driver")
+    systemProperty("spring.flyway.locations", "classpath:db/migration")
     System.getenv("GEMINI_API_KEY")?.takeIf { it.isNotBlank() }?.let {
         systemProperty("spring.ai.google.genai.api-key", it)
     }
