@@ -144,10 +144,10 @@ H2 MODE=PostgreSQL 이 지원하지 **않는** 것들:
   - 사용자 컨트롤러는 `user/` 패키지에 위치한다 (PR #188에서 `admin/` → `user/`로 이동).
 - `service`는 포트(인터페이스)에 의존하고, 구현은 `store/rss/content/ai` 어댑터가 담당한다.
 - 인프라 변경이 서비스 정책을 오염시키지 않도록 분리한다.
-- 파이프라인 오케스트레이션(`AdminClippingService`, `RalphPipelineOrchestrator`, `DeterministicPipelineRunner`)은 구체 `ClippingService`가 아니라 `clipping-engine`의 `service/port/ClippingPipelinePort`에 의존한다. 포트 반환 타입은 앱 응답 모델이 아니라 `PipelineCollectResult`/`PipelineSummarizeResult`/`PipelineDigestResult`이며, `ClippingPipelineAdapter`가 기존 `ClippingService` 결과를 변환한다.
-- RSS 수집, LLM 요약, Slack 발송 포트(`RssCollectionPort`, `LlmSummarizationPort`, `SlackDeliveryPort`)도 `clipping-engine`이 소유한다. 앱 모듈은 이 포트의 어댑터 구현만 제공하고, 포트 DTO에 Spring/JPA/store/app model 의존성을 추가하지 않는다.
+- 파이프라인 오케스트레이션(`AdminClippingService`, `RalphPipelineOrchestrator`, `DeterministicPipelineRunner`)은 구체 `ClippingService`가 아니라 `modules/digest-policy`의 `service/port/ClippingPipelinePort`에 의존한다. 포트 반환 타입은 앱 응답 모델이 아니라 `PipelineCollectResult`/`PipelineSummarizeResult`/`PipelineDigestResult`이며, `ClippingPipelineAdapter`가 기존 `ClippingService` 결과를 변환한다.
+- RSS 수집, LLM 요약, Slack 발송 포트(`RssCollectionPort`, `LlmSummarizationPort`, `SlackDeliveryPort`)도 `modules/digest-policy` 모듈이 소유한다. 앱 모듈은 이 포트의 어댑터 구현만 제공하고, 포트 DTO에 Spring/JPA/store/app model 의존성을 추가하지 않는다.
 - MCP/사용자 조회성 진입점은 구체 `ClippingService`가 아니라 `service/port/ClippingQueryPort`에 의존한다. 기존 조회 응답 모델 호환은 `ClippingQueryAdapter`가 보장한다.
-- prepared digest 생성/발송/finalization 경계는 `clipping-app-ports`의 `service/port/DigestDeliveryWorkflowPort`에 둔다. 포트는 pipeline DTO가 아니라 `PreparedDigestResult`/`PreparedDigestItemResult` 전용 DTO를 노출한다. `SlackDigestWorker`는 스케줄/예약/retry orchestration만 담당하고, 기존 `ClippingService` 호출은 `DigestDeliveryWorkflowAdapter` 내부로 제한한다.
+- prepared digest 생성/발송/finalization 경계는 `ports/workflow`의 `service/port/DigestDeliveryWorkflowPort`에 둔다. 포트는 pipeline DTO가 아니라 `PreparedDigestResult`/`PreparedDigestItemResult` 전용 DTO를 노출한다. `SlackDigestWorker`는 스케줄/예약/retry orchestration만 담당하고, 기존 `ClippingService` 호출은 `DigestDeliveryWorkflowAdapter` 내부로 제한한다.
 - RSS 수집을 호출하는 서비스(`CollectionService`, 경쟁사 수집/프리뷰, 소스 헬스)는 구체 `RssFeedCollector`가 아니라 `service/port/RssCollectionPort`에 의존한다. 포트는 앱 모델 대신 `RssCollectionSource`/`RssCollectedItem` DTO를 사용하고, `rss/RssCollectionAdapter`가 기존 collector API와 매핑한다.
 - RSS 수집 앱 모델과 엔진 포트 DTO 간 변환은 `service/collection/RssCollectionMapper`에 둔다.
 - 단일 RSS source 수집, 중복 필터링, 저장, fail count, 메트릭, crawl log 기록은 `service/collection/RssSourceCollectionService`에 두고, `CollectionService`는 카테고리별 orchestration과 집계만 담당한다.
@@ -159,43 +159,40 @@ H2 MODE=PostgreSQL 이 지원하지 **않는** 것들:
 - 경쟁사 CRUD/미러링/스냅샷/수집/AI 요약/주간 리포트 정책은 일반 카테고리 수집과 분리해 `service/competitor/` 도메인 패키지에 둔다.
 - LLM 요약/번역/스크리닝을 호출하는 서비스는 구체 `ClippingSummarizer`가 아니라 `service/port/LlmSummarizationPort`에 의존한다. 포트는 앱 모델 대신 `LlmArticleSummaryResult`/`LlmDailySummaryResult`/`LlmCompetitorTimelineItem`/`LlmPersona` DTO를 사용하고, `ai/LlmSummarizationAdapter`가 기존 Gemini 구현체와 매핑한다.
 - 배치/파이프라인 Slack 발송 호출자는 발송 전용 `service/port/SlackDeliveryPort`에 의존한다. 포트는 `SlackDeliveryMetadata`/`SlackDeliveryColor`/`SlackDeliveryResult` 독립 DTO만 노출하고, 연결 검증, 채널 조회, DM 개설 같은 운영/설정 API는 기존 `SlackMessageSender` 경계에 남긴다.
-- 운영 알림 발송 호출자는 `clipping-app-ports`의 `service/port/OpsLogNotifier`에 의존한다. 파이프라인 실행/스텝/인시던트/예측/리포트 DTO와 `OpsNotificationEvent`/`UserNotificationEvent`/`OpsRequestNotificationEvent`/`NotificationSeverity`는 app port 모듈의 도메인 알림 계약이다.
-- 알림 발송 정책 서비스는 `clipping-notification` application 모듈의 `service/notification/`에 둔다. 이 모듈은 Slack 발송, runtime 설정, dedup 저장소를 각각 포트로만 접근하고 root app 구현 패키지를 직접 import하지 않는다.
-- RSS/수동 URL/Naver 뉴스 수집 application 서비스는 `clipping-collection` 모듈의 `service/collection/`에 둔다. content extraction, URL safety, metrics, stats, scheduler error 알림은 포트로 접근한다.
-- 사용자 구독/요청/이벤트/전달 로그 application 서비스 중 root 구현 의존이 없는 유스케이스는 `clipping-user-application` 모듈에 둔다. 아직 security/config/content/root service 의존이 남은 사용자 서비스는 root app에 남기고, 포트화가 끝난 뒤 이동한다.
-- 키워드/감성/상위 기사/트렌드/통계 조회 application 서비스는 `clipping-analytics-application` 모듈에 둔다. scheduler/config/observability에 직접 붙은 운영 analytics는 root app에 남긴다.
-- 다이제스트 application 보조 서비스와 포트 매핑/알림 DTO 변환처럼 root 구현 의존이 없는 다이제스트 경계는 `clipping-digest-application` 모듈에 둔다. Slack worker, renderer, preview, finalization orchestration처럼 config/support/root service 의존이 큰 코드는 root app에서 조립한다.
-- 사용자/관리자 RSS 소스 URL 검증, RSS 피드 탐색, 도메인 추출, 소스 헬스/커버리지/신뢰도/SLA 정책과 카테고리 기반 RSS 소스 동기화는 `clipping-source` 모듈의 `service/source/` 도메인 패키지에 둔다. URL safety, SLA 설정, 조직 조회, metrics, ops notification은 포트로 접근하고, HTTP 기반 실제 검증 구현은 `rss/HttpSourceVerificationClient` 어댑터가 담당한다.
-- `clipping-collection/` Gradle 서브모듈은 수집 application 서비스를 소유한다. Spring service bean은 허용하지만 root app `config`, `content`, `security`, `observability`, `rss`, `adapter`, `admin`, `user`, `ai` 구현 패키지는 직접 import하지 않는다.
-- `clipping-user-application/` Gradle 서브모듈은 사용자 application 서비스를 소유한다. Spring service bean은 허용하지만 root app 구현 패키지와 support/config/security/content/adapter를 직접 import하지 않는다.
-- `clipping-analytics-application/` Gradle 서브모듈은 analytics application 서비스를 소유한다. Spring service bean은 허용하지만 root app 구현 패키지와 scheduler/config/observability를 직접 import하지 않는다.
-- `clipping-digest-application/` Gradle 서브모듈은 digest application 보조 서비스를 소유한다. Spring service bean은 허용하지만 root app 구현 패키지와 Slack/RSS/AI/config/support를 직접 import하지 않는다.
-- `clipping-source/` Gradle 서브모듈은 source application 서비스를 소유한다. Spring service bean은 허용하지만 root app `config`, `content`, `security`, `observability`, `rss`, `adapter`, `admin`, `user`, `ai` 구현 패키지는 직접 import하지 않는다.
-- `clipping-domain/` Gradle 서브모듈은 순수 도메인 모델 모듈이다. `Category`, `RssSource`, `Persona`, `AdminUser` 같은 비즈니스 모델만 소유하며 Spring, JPA, store, service, adapter 에 의존하지 않는다.
-- `clipping-persistence/` Gradle 서브모듈은 JPA entity, Spring Data repository, Jpa/Jdbc store 구현을 소유한다. app service/adapter/config에 의존하지 않으며, store SPI를 구현해 DB 접근을 담당한다.
-- `clipping-api-models/` Gradle 서브모듈은 API/MCP/서비스 결과 DTO(`service.dto.clipping`) 계약을 소유하며 Spring, JPA, store, app model(`com.clipping.mcpserver.model`)에 의존하지 않는다.
-- `clipping-application-models/` Gradle 서브모듈은 사용자/관리자 application DTO(`service.dto`) 계약을 소유한다. Spring, JPA, store, service 구현, root app 구현 패키지에 의존하지 않는다.
-- `clipping-pipeline-models/` Gradle 서브모듈은 파이프라인 실행 이력 DTO(`service.dto.pipeline`) 계약을 소유하며 Spring, JPA, store, app model(`com.clipping.mcpserver.model`)에 의존하지 않는다.
-- `clipping-store-spi/` Gradle 서브모듈은 DB 접근 포트와 store 반환 DTO 계약을 소유한다. Spring, JPA, entity, repository, adapter 에 의존하지 않는다.
-- `clipping-app-ports/` Gradle 서브모듈은 앱 내부 workflow/notification 경계 모듈이다. prepared digest workflow 포트/DTO와 ops notification 포트/DTO를 소유하며 Spring, JPA, store, app model(`com.clipping.mcpserver.model`)에 의존하지 않는다.
-- `clipping-notification/` Gradle 서브모듈은 운영/사용자 알림 application 서비스를 소유한다. Spring service bean은 허용하지만 root app `config`, `admin`, `user`, `adapter`, `rss`, `ai`, `content`, `security`, `observability` 구현 패키지는 직접 import하지 않는다.
-- `clipping-error-types/` Gradle 서브모듈은 서비스 공통 예외/에러 코드 계약을 소유한다. root app과 persistence가 같은 예외 타입을 공유하며, app model/store/entity/repository/adapter 에 의존하지 않는다.
-- `clipping-engine/` Gradle 서브모듈은 클리핑 엔진 코어다. Spring, JPA, store, app model(`com.clipping.mcpserver.model`)에 의존하지 않는다.
-- `:clipping-domain:checkDomainBoundaries` Gradle task가 도메인 모델 모듈의 Spring/JPA/store/service/adapter import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-application-models:checkApplicationModelBoundaries` Gradle task가 application DTO 모듈의 Spring/JPA/store/service 구현 import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-persistence:checkPersistenceBoundaries` Gradle task가 persistence 모듈의 app service/adapter/config import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-api-models:checkApiModelBoundaries` Gradle task가 API model 모듈의 Spring/JPA/store/app model import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-pipeline-models:checkPipelineModelBoundaries` Gradle task가 파이프라인 model 모듈의 Spring/JPA/store/app model import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-store-spi:checkStoreSpiBoundaries` Gradle task가 store SPI 모듈의 Spring/JPA/entity/repository/adapter import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-app-ports:checkAppPortBoundaries` Gradle task가 app port 모듈의 Spring/JPA/store/app model import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-collection:checkCollectionBoundaries` Gradle task가 collection 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-user-application:checkUserApplicationBoundaries` Gradle task가 user application 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-analytics-application:checkAnalyticsApplicationBoundaries` Gradle task가 analytics application 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-digest-application:checkDigestApplicationBoundaries` Gradle task가 digest application 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-source:checkSourceBoundaries` Gradle task가 source 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-notification:checkNotificationBoundaries` Gradle task가 notification 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-error-types:checkErrorTypeBoundaries` Gradle task가 error type 모듈의 app/persistence/adapter import를 차단한다. `./gradlew check`는 이 task를 포함한다.
-- `:clipping-engine:checkEngineBoundaries` Gradle task가 엔진 모듈의 Spring/JPA/store/app model import를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- 운영 알림 발송 호출자는 `ports/workflow`의 `service/port/OpsLogNotifier`에 의존한다. 파이프라인 실행/스텝/인시던트/예측/리포트 DTO와 `OpsNotificationEvent`/`UserNotificationEvent`/`OpsRequestNotificationEvent`/`NotificationSeverity`는 app port 모듈의 도메인 알림 계약이다.
+- 알림 발송 정책 서비스는 `adapters/notification` application 모듈의 `service/notification/`에 둔다. 이 모듈은 Slack 발송, runtime 설정, dedup 저장소를 각각 포트로만 접근하고 root app 구현 패키지를 직접 import하지 않는다.
+- RSS/수동 URL/Naver 뉴스 수집 application 서비스는 `modules/collection` 모듈의 `service/collection/`에 둔다. content extraction, URL safety, metrics, stats, scheduler error 알림은 포트로 접근한다.
+- 사용자 구독/요청/이벤트/전달 로그 application 서비스 중 root 구현 의존이 없는 유스케이스는 `modules/user` 모듈에 둔다. 아직 security/config/content/root service 의존이 남은 사용자 서비스는 root app에 남기고, 포트화가 끝난 뒤 이동한다.
+- 키워드/감성/상위 기사/트렌드/통계 조회 application 서비스는 `modules/analytics` 모듈에 둔다. scheduler/config/observability에 직접 붙은 운영 analytics는 root app에 남긴다.
+- 다이제스트 application 보조 서비스와 포트 매핑/알림 DTO 변환처럼 root 구현 의존이 없는 다이제스트 경계는 `modules/digest` 모듈에 둔다. Slack worker, renderer, preview, finalization orchestration처럼 config/support/root service 의존이 큰 코드는 root app에서 조립한다.
+- 사용자/관리자 RSS 소스 URL 검증, RSS 피드 탐색, 도메인 추출, 소스 헬스/커버리지/신뢰도/SLA 정책과 카테고리 기반 RSS 소스 동기화는 `modules/source` 모듈의 `service/source/` 도메인 패키지에 둔다. URL safety, SLA 설정, 조직 조회, metrics, ops notification은 포트로 접근하고, HTTP 기반 실제 검증 구현은 `rss/HttpSourceVerificationClient` 어댑터가 담당한다.
+- `modules/collection/` Gradle 서브모듈은 수집 application 서비스를 소유한다. Spring service bean은 허용하지만 root app `config`, `content`, `security`, `observability`, `rss`, `adapter`, `admin`, `user`, `ai` 구현 패키지는 직접 import하지 않는다.
+- `modules/user/` Gradle 서브모듈은 사용자 application 서비스와 사용자 응답 DTO를 소유한다. Spring service bean은 허용하지만 root app 구현 패키지와 support/config/security/content/adapter를 직접 import하지 않는다.
+- `modules/admin/` Gradle 서브모듈은 관리자 application DTO를 소유한다. 현재는 DTO 전용이며, 관리자 서비스 로직은 아직 root app에 남아 있고 추후 마이그레이션에서 이 모듈로 이동할 수 있다.
+- `modules/analytics/` Gradle 서브모듈은 analytics application 서비스와 analytics 응답 DTO를 소유한다. Spring service bean은 허용하지만 root app 구현 패키지와 scheduler/config/observability를 직접 import하지 않는다.
+- `modules/digest/` Gradle 서브모듈은 digest application 보조 서비스를 소유한다. Spring service bean은 허용하지만 root app 구현 패키지와 Slack/RSS/AI/config/support를 직접 import하지 않는다.
+- `modules/source/` Gradle 서브모듈은 source application 서비스를 소유한다. Spring service bean은 허용하지만 root app `config`, `content`, `security`, `observability`, `rss`, `adapter`, `admin`, `user`, `ai` 구현 패키지는 직접 import하지 않는다.
+- `core/domain/` Gradle 서브모듈은 순수 도메인 모델 모듈이다. `Category`, `RssSource`, `Persona`, `AdminUser` 같은 비즈니스 모델만 소유하며 Spring, JPA, store, service, adapter 에 의존하지 않는다.
+- `adapters/persistence/` Gradle 서브모듈은 JPA entity, Spring Data repository, Jpa/Jdbc store 구현을 소유한다. app service/adapter/config에 의존하지 않으며, store SPI를 구현해 DB 접근을 담당한다.
+- `core/api-models/` Gradle 서브모듈은 API/MCP/서비스 결과 DTO(`service.dto.clipping`), 파이프라인 실행 이력 DTO(`service.dto.pipeline`), 그리고 모듈을 가로지르는 cross-cutting DTO 계약을 소유한다. Spring, JPA, store, app model(`com.ohmyclipping.model`)에 의존하지 않는다.
+- `ports/persistence/` Gradle 서브모듈은 DB 접근 포트와 store 반환 DTO 계약을 소유한다. Spring, JPA, entity, repository, adapter 에 의존하지 않는다.
+- `ports/workflow/` Gradle 서브모듈은 앱 내부 workflow/notification 경계 모듈이다. prepared digest workflow 포트/DTO와 ops notification 포트/DTO를 소유하며 Spring, JPA, store, app model(`com.ohmyclipping.model`)에 의존하지 않는다.
+- `adapters/notification/` Gradle 서브모듈은 운영/사용자 알림 application 서비스를 소유한다. Spring service bean은 허용하지만 root app `config`, `admin`, `user`, `adapter`, `rss`, `ai`, `content`, `security`, `observability` 구현 패키지는 직접 import하지 않는다.
+- `core/error-types/` Gradle 서브모듈은 서비스 공통 예외/에러 코드 계약을 소유한다. root app과 persistence가 같은 예외 타입을 공유하며, app model/store/entity/repository/adapter 에 의존하지 않는다.
+- `modules/digest-policy/` Gradle 서브모듈은 클리핑 엔진 코어다. Spring, JPA, store, app model(`com.ohmyclipping.model`)에 의존하지 않는다.
+- `:core:domain:checkDomainBoundaries` Gradle task가 도메인 모델 모듈의 Spring/JPA/store/service/adapter import를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:adapters:persistence:checkPersistenceBoundaries` Gradle task가 persistence 모듈의 app service/adapter/config import를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:core:api-models:checkApiModelBoundaries` Gradle task가 API model 모듈(API 응답 DTO + pipeline 실행 이력 DTO + cross-cutting DTO)의 Spring/JPA/store/app model import를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:ports:persistence:checkStoreSpiBoundaries` Gradle task가 store SPI 모듈의 Spring/JPA/entity/repository/adapter import를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:ports:workflow:checkAppPortBoundaries` Gradle task가 app port 모듈의 Spring/JPA/store/app model import를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:modules:collection:checkCollectionBoundaries` Gradle task가 collection 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:modules:user:checkUserApplicationBoundaries` Gradle task가 user application 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:modules:analytics:checkAnalyticsApplicationBoundaries` Gradle task가 analytics application 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:modules:digest:checkDigestApplicationBoundaries` Gradle task가 digest application 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:modules:source:checkSourceBoundaries` Gradle task가 source 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:adapters:notification:checkNotificationBoundaries` Gradle task가 notification 모듈의 root app 구현 패키지 역참조를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:core:error-types:checkErrorTypeBoundaries` Gradle task가 error type 모듈의 app/persistence/adapter import를 차단한다. `./gradlew check`는 이 task를 포함한다.
+- `:modules:digest-policy:checkEngineBoundaries` Gradle task가 엔진 모듈의 Spring/JPA/store/app model import를 차단한다. `./gradlew check`는 이 task를 포함한다.
   - 허용: 순수 Kotlin/JDK, 엔진 DTO(`DigestArticle`, `DigestOrganization`, `DigestCandidate`, `DigestDocument`), 엔진 예외, 순수 선정/섹션/매칭/document/summary-formatting policy, deterministic pipeline 실행 순서/trace policy.
   - 엔진 레이어는 Spring/store 의존을 갖지 않는다. root app 의 `service/digest` 패키지는 다이제스트 application orchestration, Slack delivery workflow adapter, rendering/finalization 조립 책임을 둔다.
 - OpenAPI 문서: `/api-docs` (JSON), `/swagger-ui.html` (UI)

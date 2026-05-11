@@ -42,7 +42,7 @@ Phase 3 (2026-04-18 머지) 관련 신규 테스트 영역:
 
 ### 구조
 ```
-src/test/kotlin/com/clipping/mcpserver/
+src/test/kotlin/com/ohmyclipping/
 ├── service/        # 서비스 비즈니스 로직 (핵심)
 ├── store/          # JDBC 스토어 (데이터 접근)
 ├── admin/          # 컨트롤러 (입력 검증)
@@ -58,29 +58,27 @@ src/test/kotlin/com/clipping/mcpserver/
 멀티모듈 경계 검증:
 
 ```bash
-./gradlew :clipping-domain:checkDomainBoundaries
-./gradlew :clipping-application-models:checkApplicationModelBoundaries
-./gradlew :clipping-user-application:checkUserApplicationBoundaries
-./gradlew :clipping-analytics-application:checkAnalyticsApplicationBoundaries
-./gradlew :clipping-digest-application:checkDigestApplicationBoundaries
-./gradlew :clipping-collection:checkCollectionBoundaries
-./gradlew :clipping-source:checkSourceBoundaries
-./gradlew :clipping-engine:checkEngineBoundaries
-./gradlew :clipping-persistence:checkPersistenceBoundaries
-./gradlew :clipping-api-models:checkApiModelBoundaries
-./gradlew :clipping-pipeline-models:checkPipelineModelBoundaries
-./gradlew :clipping-store-spi:checkStoreSpiBoundaries
-./gradlew :clipping-app-ports:checkAppPortBoundaries
-./gradlew :clipping-notification:checkNotificationBoundaries
-./gradlew :clipping-error-types:checkErrorTypeBoundaries
+./gradlew :core:domain:checkDomainBoundaries
+./gradlew :core:api-models:checkApiModelBoundaries
+./gradlew :core:error-types:checkErrorTypeBoundaries
+./gradlew :ports:persistence:checkStoreSpiBoundaries
+./gradlew :ports:workflow:checkAppPortBoundaries
+./gradlew :adapters:persistence:checkPersistenceBoundaries
+./gradlew :adapters:notification:checkNotificationBoundaries
+./gradlew :modules:digest-policy:checkEngineBoundaries
+./gradlew :modules:collection:checkCollectionBoundaries
+./gradlew :modules:source:checkSourceBoundaries
+./gradlew :modules:digest:checkDigestApplicationBoundaries
+./gradlew :modules:user:checkUserApplicationBoundaries
+./gradlew :modules:analytics:checkAnalyticsApplicationBoundaries
 ```
 
-`./gradlew check`는 위 경계 검사를 포함한다. domain 모듈은 Spring, JPA, store,
-entity, repository, service, adapter import를 허용하지 않는다. 엔진/API/파이프라인/app 계약
-모듈은 Spring, JPA, store, entity, repository, root app model import를 허용하지 않는다.
-collection/source/notification 모듈은 Spring service bean은 허용하지만 root app 구현 패키지 역참조를 허용하지 않는다.
-store SPI 모듈은 Spring/JPA/entity/repository/adapter import를 허용하지 않고, persistence
-모듈은 app service/adapter/config import를 허용하지 않는다.
+`./gradlew check`는 위 경계 검사를 포함한다. `core/domain`은 Spring, JPA, store,
+entity, repository, service, adapter import를 허용하지 않는다. 엔진/API/app 계약
+모듈(`modules/digest-policy`, `core/api-models`, `ports/workflow`)은 Spring, JPA, store, entity, repository, root app model import를 허용하지 않는다.
+피처 모듈(`modules/collection`, `modules/source`, `modules/user`, `modules/analytics`, `modules/digest`, `adapters/notification`)은 Spring service bean은 허용하지만 root app 구현 패키지 역참조를 허용하지 않는다.
+`ports/persistence`는 Spring/JPA/entity/repository/adapter import를 허용하지 않고, `adapters/persistence`는
+app service/adapter/config import를 허용하지 않는다.
 
 ### 네이밍 규칙
 ```kotlin

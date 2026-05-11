@@ -4,7 +4,7 @@ This is a quick map of the codebase. For the full rulebook with rationale, see [
 
 ## Shape
 
-oh-my-clipping is a **modular monolith**: one Spring Boot app composed from 15 Gradle submodules.
+oh-my-clipping is a **modular monolith**: one Spring Boot app composed from 14 Gradle submodules grouped into `core/`, `ports/`, `adapters/`, and `modules/`.
 
 ```
                  ┌─────────────────────────────────────┐
@@ -16,52 +16,54 @@ oh-my-clipping is a **modular monolith**: one Spring Boot app composed from 15 G
         ┌─────────────────────────┼─────────────────────────┐
         │                         │                         │
         ▼                         ▼                         ▼
- application services      domain / engine            persistence /
- (clipping-collection,     (clipping-domain,           SPI / models
-  clipping-digest-          clipping-engine)          (clipping-persistence,
-  application, …)                                     clipping-store-spi,
-                                                      clipping-api-models, …)
+ application services        core / engine               adapters
+ (modules/collection,     (core/domain,                (adapters/persistence,
+  modules/digest,          modules/digest-policy)       adapters/notification)
+  modules/source, …)                                         ▲
+        │                         │                          │
+        └────────────► ports/ ◄───┴──────────────────────────┘
+                       (ports/persistence,
+                        ports/workflow)
 ```
 
-Dependency direction is **only** root → application/domain/engine/SPI. Submodules never depend back into the root app. The `./gradlew check` task includes a `:checkBoundaries` task per submodule that fails the build on a violation.
+Dependency direction is **only** root → modules/core/engine → ports ← adapters. Submodules never depend back into the root app. The `./gradlew check` task includes a `:checkBoundaries` task per submodule that fails the build on a violation.
 
 ## Module map
 
 | Module | Role |
 |---|---|
 | **root app** (`src/`) | Spring Boot entry point. API controllers, scheduler, security, adapter wiring (Slack, Gemini, RSS, Naver). |
-| `clipping-domain` | Pure domain models (Category, RssSource, Persona, AdminUser, …). No Spring/JPA/store/service. |
-| `clipping-engine` | Clipping engine core — digest/pipeline policy + RSS/LLM/Slack/pipeline port DTOs. |
-| `clipping-collection` | RSS / manual URL / Naver News collection application services. |
-| `clipping-source` | RSS source verification, health, coverage, SLA, category sync. |
-| `clipping-user-application` | User subscription / request / event / delivery-log services. |
-| `clipping-analytics-application` | Keyword / sentiment / top-article / trend / stats query services. |
-| `clipping-digest-application` | Digest application helpers — port mapping, notification DTO conversion. |
-| `clipping-notification` | Operational and user notification services. Slack delivery, runtime settings, dedup via ports. |
-| `clipping-persistence` | JPA entities, Spring Data repositories, JPA/JDBC store implementations. |
-| `clipping-store-spi` | Store SPI ports and their return DTOs. |
-| `clipping-app-ports` | App-internal workflow / notification port boundaries (e.g. prepared digest workflow). |
-| `clipping-api-models` | API / MCP / service-result DTO contracts. |
-| `clipping-application-models` | User / admin application DTOs. |
-| `clipping-pipeline-models` | Pipeline-execution history DTOs. |
-| `clipping-error-types` | Shared exception / error-code types. |
+| `core/domain` | Pure domain models (Category, RssSource, Persona, AdminUser, …). No Spring/JPA/store/service. |
+| `core/api-models` | API / MCP / service-result DTO contracts, pipeline-execution history DTOs, and DTOs that cross multiple feature modules. |
+| `core/error-types` | Shared exception / error-code types. |
+| `ports/persistence` | Store SPI ports and their return DTOs. |
+| `ports/workflow` | App-internal workflow / notification port boundaries (e.g. prepared digest workflow). |
+| `adapters/persistence` | JPA entities, Spring Data repositories, JPA/JDBC store implementations. |
+| `adapters/notification` | Operational and user notification services. Slack delivery, runtime settings, dedup via ports. |
+| `modules/digest-policy` | Clipping engine core — digest/pipeline policy + RSS/LLM/Slack/pipeline port DTOs. |
+| `modules/collection` | RSS / manual URL / Naver News collection application services. |
+| `modules/source` | RSS source verification, health, coverage, SLA, category sync. |
+| `modules/digest` | Digest application helpers — port mapping, notification DTO conversion. |
+| `modules/user` | User subscription / request / event / delivery-log services, plus user-facing application DTOs. |
+| `modules/admin` | Admin application DTOs. Service logic currently lives in the root app; may migrate here later. |
+| `modules/analytics` | Keyword / sentiment / top-article / trend / stats query services, plus analytics application DTOs. |
 
 ## Layers in plain terms
 
-- **Domain** (`clipping-domain`, `clipping-engine`): the rules. What a digest *is*, what a category *is*, how scoring works. Has no idea how data is stored or how Slack works.
-- **Application** (`clipping-*-application`, `clipping-collection`, `clipping-source`, `clipping-notification`): use cases. "Collect feeds for category X", "build today's digest for user Y". Calls into the domain and out through ports.
-- **Ports / SPI** (`clipping-store-spi`, `clipping-app-ports`): interfaces application code uses to reach external systems. No implementation.
-- **Adapters** (root app `src/main/kotlin/…`, `clipping-persistence`): the implementations of those ports — JPA repositories, HTTP clients, Slack senders, Gemini callers.
-- **Models** (`clipping-api-models`, `clipping-application-models`, `clipping-pipeline-models`): the DTO contracts that cross layer boundaries.
+- **Core** (`core/domain`, `core/api-models`, `core/error-types`): the pure types and contracts. No Spring, no JPA, no I/O.
+- **Engine / domain policy** (`modules/digest-policy`): the rules. What a digest *is*, what a category *is*, how scoring works. Has no idea how data is stored or how Slack works.
+- **Application** (`modules/collection`, `modules/source`, `modules/digest`, `modules/user`, `modules/analytics`): use cases. "Collect feeds for category X", "build today's digest for user Y". Calls into the domain and out through ports.
+- **Ports / SPI** (`ports/persistence`, `ports/workflow`): interfaces application code uses to reach external systems. No implementation.
+- **Adapters** (`adapters/persistence`, `adapters/notification`, root app `src/main/kotlin/…`): the implementations of those ports — JPA repositories, HTTP clients, Slack senders, Gemini callers.
 
 ## "Where should this change go?"
 
 Examples:
 
 - New REST endpoint → controller in `src/main/kotlin/…/admin` or `…/user`. Wire to an application service.
-- New domain rule (e.g. selection policy) → `clipping-engine` (no Spring).
-- New DB table / migration → `clipping-persistence` + a Flyway file in `src/main/resources/db/migration/V{N}__*.sql`.
-- New external integration → start with a port in `clipping-store-spi` or `clipping-app-ports`, then an adapter in the root app.
+- New domain rule (e.g. selection policy) → `modules/digest-policy` (no Spring).
+- New DB table / migration → `adapters/persistence` + a Flyway file in `src/main/resources/db/migration/V{N}__*.sql`.
+- New external integration → start with a port in `ports/persistence` or `ports/workflow`, then an adapter in the root app or under `adapters/`.
 - New MCP tool → tool class in the root app, alongside the existing `admin_*` and `user_*` tools.
 
 When in doubt, grep for an existing thing that does roughly what you want, follow that pattern, and ask the reviewer.

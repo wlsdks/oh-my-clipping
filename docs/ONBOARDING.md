@@ -58,127 +58,111 @@ open http://localhost:8086
 
 ```
 oh-my-clipping/
-├── settings.gradle.kts      # Gradle 멀티모듈 선언
-├── build.gradle.kts         # root app 빌드 + Spring Boot 실행 설정
-├── clipping-domain/         # 순수 도메인 모델 (Spring/JPA/store/service 의존 없음)
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/model/
-├── clipping-engine/         # 클리핑 엔진 코어 (Spring/JPA/store 의존 없음)
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/
-│           ├── digest/      # 다이제스트 선정/섹션/문서 구성 정책
-│           ├── pipeline/    # deterministic pipeline 실행 순서
-│           └── port/        # RSS/LLM/Slack/파이프라인 포트 DTO
-├── clipping-persistence/    # JPA entity + Spring Data repository + store 구현
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/
-│           ├── entity/
-│           ├── repository/
-│           └── store/
-├── clipping-api-models/  # API/MCP/서비스 결과 DTO 모델
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/dto/clipping/
-├── clipping-application-models/  # 사용자/관리자 application DTO 모델
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/dto/
-├── clipping-pipeline-models/  # 파이프라인 실행 이력 DTO 모델
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/dto/pipeline/
-├── clipping-store-spi/  # DB 접근 포트 + store 반환 DTO
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/
-│           ├── store/
-│           ├── store/analytics/dto/
-│           └── store/pipeline/
-├── clipping-app-ports/  # 앱 내부 workflow/notification 경계 모듈
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/port/
+├── settings.gradle.kts          # Gradle 멀티모듈 선언
+├── build.gradle.kts             # root app 빌드 + Spring Boot 실행 설정
+├── core/                        # 순수 타입과 계약 (Spring/JPA/IO 없음)
+│   ├── domain/                  # 도메인 모델 (Category, RssSource, Persona, AdminUser …)
+│   │   └── src/main/kotlin/com/ohmyclipping/model/
+│   ├── api-models/              # API/MCP/서비스 결과 DTO + 파이프라인 실행 이력 DTO + cross-cutting DTO
+│   │   └── src/main/kotlin/com/ohmyclipping/service/dto/
+│   │       ├── clipping/        # API/MCP 응답 DTO
+│   │       └── pipeline/        # 파이프라인 실행 이력 DTO
+│   └── error-types/             # 서비스 공통 예외/에러 코드 계약
+│       └── src/main/kotlin/com/ohmyclipping/error/
+├── ports/                       # 앱 내부 경계 인터페이스 (구현 없음)
+│   ├── persistence/             # DB 접근 포트 + store 반환 DTO
+│   │   └── src/main/kotlin/com/ohmyclipping/
+│   │       ├── store/
+│   │       ├── store/analytics/dto/
+│   │       └── store/pipeline/
+│   └── workflow/                # workflow / notification 포트 + DTO
+│       └── src/main/kotlin/com/ohmyclipping/service/port/
 │           ├── DigestDeliveryWorkflowPort.kt
 │           ├── OpsLogNotifier.kt
 │           └── NotificationEvent.kt
-├── clipping-collection/ # RSS/수동 URL/Naver 뉴스 수집 application 서비스
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/collection/
-├── clipping-user-application/ # 사용자 구독/요청/이벤트 application 서비스
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/
-├── clipping-analytics-application/ # 통계/트렌드 조회 application 서비스
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/
-├── clipping-digest-application/ # 다이제스트 application 보조 서비스/포트 매핑
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/digest/
-├── clipping-source/  # RSS source 검증/탐색/헬스/SLA application 서비스
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/source/
-├── clipping-notification/ # 운영/사용자 알림 application 서비스
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/service/notification/
-├── clipping-error-types/  # 서비스 공통 예외/에러 타입
-│   └── src/main/kotlin/
-│       └── com/clipping/mcpserver/error/
-├── src/main/kotlin/         # root app: Spring Boot composition root
-│   └── com/clipping/mcpserver/
-│       ├── admin/           # REST 컨트롤러 (인바운드)
-│       ├── user/            # 사용자 API 컨트롤러 (인바운드)
-│       ├── mcp/             # MCP 서버/인증/도구 진입점
-│       ├── service/         # 앱 서비스, scheduler, workflow, 포트 어댑터
-│       │   ├── digest/      # 다이제스트 application orchestration/rendering/delivery workflow
-│       │   ├── pipeline/    # root app pipeline orchestration/adapter
-│       │   ├── collection/  # RSS/URL 수집 포트 어댑터/호환 경계
-│       │   └── notification/# 운영/사용자 알림 호환 경계
-│       ├── adapter/         # 외부 시스템 어댑터 (Slack, Naver 등)
-│       ├── rss/             # RSS/본문/robots HTTP 어댑터
-│       ├── ai/              # Gemini 구현 어댑터
-│       ├── config/          # 설정
-│       └── support/         # 공통 유틸/정규화/보안 보조
+├── adapters/                    # 외부 시스템 어댑터 (Spring 허용)
+│   ├── persistence/             # JPA entity + Spring Data repository + Jpa/Jdbc store 구현
+│   │   └── src/main/kotlin/com/ohmyclipping/{entity,repository,store}/
+│   └── notification/            # 운영/사용자 알림 application 서비스
+│       └── src/main/kotlin/com/ohmyclipping/service/notification/
+├── modules/                     # 피처 모듈 (Spring service 허용, root app 역참조 금지)
+│   ├── digest-policy/           # 클리핑 엔진 코어 (Spring/JPA/store/app model 의존 없음)
+│   │   └── src/main/kotlin/com/ohmyclipping/service/
+│   │       ├── digest/          # 다이제스트 선정/섹션/문서 구성 정책
+│   │       ├── pipeline/        # deterministic pipeline 실행 순서
+│   │       └── port/            # RSS/LLM/Slack/파이프라인 포트 DTO
+│   ├── collection/              # RSS/수동 URL/Naver 뉴스 수집 application 서비스
+│   │   └── src/main/kotlin/com/ohmyclipping/service/collection/
+│   ├── source/                  # RSS source 검증/탐색/헬스/SLA application 서비스
+│   │   └── src/main/kotlin/com/ohmyclipping/service/source/
+│   ├── digest/                  # 다이제스트 application 보조 서비스/포트 매핑
+│   │   └── src/main/kotlin/com/ohmyclipping/service/digest/
+│   ├── user/                    # 사용자 구독/요청/이벤트 application 서비스 + 사용자 DTO
+│   │   └── src/main/kotlin/com/ohmyclipping/service/
+│   ├── admin/                   # 관리자 application DTO (서비스 로직은 아직 root app)
+│   │   └── src/main/kotlin/com/ohmyclipping/service/dto/
+│   └── analytics/               # 통계/트렌드 조회 application 서비스 + analytics DTO
+│       └── src/main/kotlin/com/ohmyclipping/service/
+├── src/main/kotlin/             # root app: Spring Boot composition root
+│   └── com/ohmyclipping/
+│       ├── admin/               # REST 컨트롤러 (인바운드)
+│       ├── user/                # 사용자 API 컨트롤러 (인바운드)
+│       ├── mcp/                 # MCP 서버/인증/도구 진입점
+│       ├── service/             # 앱 서비스, scheduler, workflow, 포트 어댑터
+│       │   ├── digest/          # 다이제스트 application orchestration/rendering/delivery workflow
+│       │   ├── pipeline/        # root app pipeline orchestration/adapter
+│       │   ├── collection/      # RSS/URL 수집 포트 어댑터/호환 경계
+│       │   └── notification/    # 운영/사용자 알림 호환 경계
+│       ├── adapter/             # 외부 시스템 어댑터 (Slack, Naver 등)
+│       ├── rss/                 # RSS/본문/robots HTTP 어댑터
+│       ├── ai/                  # Gemini 구현 어댑터
+│       ├── config/              # 설정
+│       └── support/             # 공통 유틸/정규화/보안 보조
 ├── src/main/resources/
-│   ├── db/migration/        # Flyway SQL
-│   ├── db/migration-pg/     # PostgreSQL 전용 Flyway SQL
-│   ├── db/dev-seed/         # 개발용 시드 데이터
-│   └── application.yml      # 서버 설정
-├── frontend/                # 프론트엔드 (React 19 + TypeScript)
+│   ├── db/migration/            # Flyway SQL
+│   ├── db/migration-pg/         # PostgreSQL 전용 Flyway SQL
+│   ├── db/dev-seed/             # 개발용 시드 데이터
+│   └── application.yml          # 서버 설정
+├── frontend/                    # 프론트엔드 (React 19 + TypeScript)
 │   └── src/
-│       ├── pages/           # 페이지 컴포넌트
-│       ├── components/      # 공통 컴포넌트
-│       ├── services/        # API 호출
+│       ├── pages/               # 페이지 컴포넌트
+│       ├── components/          # 공통 컴포넌트
+│       ├── services/            # API 호출
 │       └── ...
-└── docs/                    # 문서
+└── docs/                        # 문서
 ```
 
-백엔드는 root app과 15개 Gradle 서브모듈, 총 16개 빌드 단위로 구성된다:
-- root app: 실제 서버 실행 모듈. Spring Boot, DB, API, scheduler, 외부 어댑터를 조립한다.
-- `clipping-collection`: RSS/수동 URL/Naver 뉴스 수집 application 서비스를 가진다.
-- `clipping-source`: RSS source 검증/탐색/헬스/커버리지/SLA와 카테고리 기반 source 동기화 application 서비스를 가진다.
-- `clipping-user-application`: 사용자 구독/요청/이벤트/전달 로그 application 서비스 중 root 구현 의존이 없는 유스케이스를 가진다.
-- `clipping-analytics-application`: 키워드/감성/상위 기사/트렌드/통계 조회 application 서비스를 가진다.
-- `clipping-digest-application`: 다이제스트 application 보조 서비스와 포트 매핑/알림 DTO 변환 경계를 가진다.
-- `clipping-domain`: 순수 도메인 모델. `Category`, `RssSource`, `Persona`, `AdminUser` 같은 비즈니스 모델만 소유한다.
-- `clipping-engine`: 클리핑 엔진 코어. Spring/JPA/store/root app model 의존 없이 재사용 가능한 정책과 포트를 가진다.
-- `clipping-persistence`: JPA entity, Spring Data repository, Jpa/Jdbc store 구현을 소유한다.
-- `clipping-api-models`: API/MCP/서비스 결과 DTO(`service.dto.clipping`) 모델을 가진다.
-- `clipping-application-models`: 사용자/관리자 application DTO(`service.dto`) 모델을 가진다.
-- `clipping-pipeline-models`: 파이프라인 실행 이력 DTO(`service.dto.pipeline`) 모델을 가진다.
-- `clipping-store-spi`: DB 접근 포트와 store 반환 DTO를 가진다.
-- `clipping-app-ports`: root app 내부 workflow/notification 경계 모듈. prepared digest workflow와 운영 알림 포트를 가진다.
-- `clipping-notification`: 운영/사용자 알림 application 서비스. Slack 발송, runtime 설정, dedup 저장소를 포트로 접근한다.
-- `clipping-error-types`: 서비스 공통 예외/에러 타입을 가진다.
+백엔드는 root app과 14개 Gradle 서브모듈, 총 15개 빌드 단위로 구성된다. 서브모듈은 `core/`, `ports/`, `adapters/`, `modules/` 네 그룹으로 묶인다:
 
-모듈 경계는 `./gradlew check`에 포함된 `:clipping-domain:checkDomainBoundaries`,
-`:clipping-collection:checkCollectionBoundaries`,
-`:clipping-user-application:checkUserApplicationBoundaries`,
-`:clipping-analytics-application:checkAnalyticsApplicationBoundaries`,
-`:clipping-digest-application:checkDigestApplicationBoundaries`,
-`:clipping-source:checkSourceBoundaries`,
-`:clipping-engine:checkEngineBoundaries`,
-`:clipping-persistence:checkPersistenceBoundaries`,
-`:clipping-api-models:checkApiModelBoundaries`,
-`:clipping-application-models:checkApplicationModelBoundaries`,
-`:clipping-pipeline-models:checkPipelineModelBoundaries`,
-`:clipping-store-spi:checkStoreSpiBoundaries`,
-`:clipping-app-ports:checkAppPortBoundaries`,
-`:clipping-notification:checkNotificationBoundaries`,
-`:clipping-error-types:checkErrorTypeBoundaries`가 검증한다.
+- root app: 실제 서버 실행 모듈. Spring Boot, DB, API, scheduler, 외부 어댑터를 조립한다.
+- `core/domain`: 순수 도메인 모델. `Category`, `RssSource`, `Persona`, `AdminUser` 같은 비즈니스 모델만 소유한다.
+- `core/api-models`: API/MCP/서비스 결과 DTO(`service.dto.clipping`), 파이프라인 실행 이력 DTO(`service.dto.pipeline`), 그리고 모듈을 가로지르는 cross-cutting DTO를 가진다.
+- `core/error-types`: 서비스 공통 예외/에러 타입을 가진다.
+- `ports/persistence`: DB 접근 포트와 store 반환 DTO를 가진다.
+- `ports/workflow`: root app 내부 workflow/notification 경계 모듈. prepared digest workflow와 운영 알림 포트를 가진다.
+- `adapters/persistence`: JPA entity, Spring Data repository, Jpa/Jdbc store 구현을 소유한다.
+- `adapters/notification`: 운영/사용자 알림 application 서비스. Slack 발송, runtime 설정, dedup 저장소를 포트로 접근한다.
+- `modules/digest-policy`: 클리핑 엔진 코어. Spring/JPA/store/root app model 의존 없이 재사용 가능한 정책과 포트를 가진다.
+- `modules/collection`: RSS/수동 URL/Naver 뉴스 수집 application 서비스를 가진다.
+- `modules/source`: RSS source 검증/탐색/헬스/커버리지/SLA와 카테고리 기반 source 동기화 application 서비스를 가진다.
+- `modules/digest`: 다이제스트 application 보조 서비스와 포트 매핑/알림 DTO 변환 경계를 가진다.
+- `modules/user`: 사용자 구독/요청/이벤트/전달 로그 application 서비스 중 root 구현 의존이 없는 유스케이스와 사용자 응답 DTO를 가진다.
+- `modules/admin`: 관리자 application DTO를 가진다. 관리자 서비스 로직은 현재 root app에 있고 추후 마이그레이션에서 이 모듈로 이동할 수 있다.
+- `modules/analytics`: 키워드/감성/상위 기사/트렌드/통계 조회 application 서비스와 analytics 응답 DTO를 가진다.
+
+모듈 경계는 `./gradlew check`에 포함된 `:core:domain:checkDomainBoundaries`,
+`:core:api-models:checkApiModelBoundaries`,
+`:core:error-types:checkErrorTypeBoundaries`,
+`:ports:persistence:checkStoreSpiBoundaries`,
+`:ports:workflow:checkAppPortBoundaries`,
+`:adapters:persistence:checkPersistenceBoundaries`,
+`:adapters:notification:checkNotificationBoundaries`,
+`:modules:digest-policy:checkEngineBoundaries`,
+`:modules:collection:checkCollectionBoundaries`,
+`:modules:source:checkSourceBoundaries`,
+`:modules:digest:checkDigestApplicationBoundaries`,
+`:modules:user:checkUserApplicationBoundaries`,
+`:modules:analytics:checkAnalyticsApplicationBoundaries`가 검증한다.
 
 ### 핵심 문서
 | 문서 | 내용 |

@@ -114,7 +114,7 @@ Slack Attachment `color` 바는 3색 + neutral:
 | DANGER | `#e01e5a` | 🚨 | 파이프라인 실패, 인시던트, 예산 90%+ |
 | NEUTRAL | `#dddddd` | (없음) | 주간 리포트 등 정보성 메시지 |
 
-구현: `SlackStatusColor` enum (`src/main/kotlin/com/clipping/mcpserver/adapter/out/slack/builder/SlackStatusColor.kt`)
+구현: `SlackStatusColor` enum (`src/main/kotlin/com/ohmyclipping/adapter/out/slack/builder/SlackStatusColor.kt`)
 
 적용 범위: M1~M13 모든 운영 알림(`SlackOpsLogNotifier`)에서 `attachments.color`로 전달됨 (2026-04-17 완료). 기존 digest/auto-report 발송 경로(`SlackMessageSender` 비색상 호출)는 변경 없음.
 

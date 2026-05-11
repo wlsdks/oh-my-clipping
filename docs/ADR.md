@@ -1104,3 +1104,31 @@ A narrow `setKeywordsAndExcludeEventTypes` method was added to `CategoryRuleStor
 - `./gradlew :clipping-source:test --tests "com.clipping.mcpserver.service.source.DomainExtractorTest" --tests "com.clipping.mcpserver.service.source.RssFeedDiscoveryServiceTest" -PskipFrontendBuild=true`
 - `./gradlew :test --tests "com.clipping.mcpserver.service.UrlBoundaryExceptionHandlingTest" -PskipFrontendBuild=true`
 - `./gradlew checkPostgresSpecificSql test -PskipFrontendBuild=true --rerun-tasks`
+
+---
+
+## ADR-040: Hierarchical module layout and root package rename (2026-05-12)
+
+**상태**: 채택
+
+**맥락**: Pre-publish 시점에 15개의 Gradle 서브모듈이 모두 평탄한 `clipping-*` 이름(`clipping-domain`, `clipping-engine`, `clipping-app-ports` …)을 사용했고, 루트 Java 패키지는 `com.clipping.mcpserver`였다. 세 가지 문제가 있었다:
+
+1. 디렉터리 목록만 봐서는 어떤 모듈이 어느 레이어에 속하는지 알 수 없었다.
+2. 세 개의 "models" 모듈(`clipping-api-models`, `clipping-application-models`, `clipping-pipeline-models`)의 책임 경계가 불분명했고, 그 중 하나는 단일 파일만 소유했다.
+3. `com.clipping.mcpserver` 루트 패키지가 새로운 공개 프로젝트 이름 `oh-my-clipping`과 일치하지 않았다.
+
+**결정**: Gradle/IntelliJ Platform 관례를 따라 `core/`, `ports/`, `adapters/`, `modules/` 4 그룹의 디렉터리 레이아웃을 채택한다. 루트 패키지는 `com.ohmyclipping`으로 변경한다. `pipeline-models`는 `api-models`로 흡수하고, `application-models`는 피처별로 분리해 사용자 DTO는 `modules/user`, 관리자 DTO는 새로운 `modules/admin`, analytics DTO는 `modules/analytics`, 모듈을 가로지르는 cross-cutting DTO는 `core/api-models`로 옮긴다.
+
+각 모듈 내부의 서브 패키지(`.engine.`, `.service.dto.` 등)는 새 모듈 이름과 맞추기 위해 다시 쓰지 않았다 — 디렉터리 트리가 아키텍처 신호를 충분히 전달하고, 안정된 패키지 경로는 그 자체로 가치 있는 식별자다. Gradle artifact `group`은 당분간 `com.clipping.mcpserver`를 유지한다(아직 외부에 발행되는 artifact가 없으므로, 발행 시점에 다시 검토한다).
+
+**결과**:
+
+- 저장소 루트의 `ls` 출력만으로 아키텍처가 드러난다.
+- 새 모듈의 위치가 명확해진다: 순수 타입과 계약은 `core/`, 경계 인터페이스는 `ports/`, 외부 시스템 구현은 `adapters/`, 피처 로직은 `modules/`.
+- 모든 디렉터리 이동은 `git mv` 체인으로 수행했으므로 `git log --follow`가 기존 파일 이력을 계속 추적한다.
+- `modules/admin`은 현재 DTO 전용이다. 관리자 서비스 로직은 root app에 남아 있고, 추후 코드베이스 진화에 따라 이 모듈로 이동할 수 있다.
+
+**참고**:
+
+- 설계 문서: `docs/superpowers/specs/2026-05-11-module-restructure-design.md` (로컬 작업용)
+- 실행 계획: `docs/superpowers/plans/2026-05-11-module-restructure.md` (로컬 작업용)
