@@ -1226,3 +1226,13 @@ A narrow `setKeywordsAndExcludeEventTypes` method was added to `CategoryRuleStor
 - ADR-043 의 follow-up 인 "656 latent failure triage" 가 (대부분) 해소됐다. Spring 컨텍스트 로딩이 다시 표준 동작하므로 향후 root-app 리팩토링이 통합 테스트로 회귀 보호된다.
 
 **향후 작업**: 잔여 218건 중 assertion 실패는 진단/수정이 필요하다 (대표 사례: `SESSION cookie not found`, JPA query result mismatch). 운영 환경에서 실제 Slack/SearchCo 통합이 필요한 경우 본 stub 들을 production 어댑터(`@Primary` 빈 또는 fork 단위 대체) 로 교체한다.
+
+**Update 2026-05-12**: 잔여 218건 triage 완료.
+- **214건 (98%) 이 단일 원인**: `src/test/resources/application-test.yml` 에 `clipping-mcp-server.security.admin-token=test-admin-token` 과 `allow-signup=true` 등 테스트 전제 값이 없어 모든 admin controller 테스트가 401 UNAUTHORIZED 를 받고 있었다. application-test.yml 에 해당 값을 채워 해소.
+- **3건 (CompanySearchServiceTest)**: OSS sanitization 으로 회사명을 "MegaCorp"/"MegaCorpSDI"/"TestCorp Energy" 로 바꿨지만 테스트 expectation 을 못 따라간 stale test. 실제 정렬(`isListed desc, corpName asc`) 결과에 맞춰 expected 를 갱신하고, 대소문자 검색 케이스는 sanitized fixture("MessengerCo") 로 교체.
+- **1건 (SlackDeliveryPortBoundaryTest)**: 본 ADR 에서 복원한 `SlackOpsLogNotifier` 가 ADR-038 의 "batch/pipeline Slack 호출자는 SlackDeliveryPort 에 의존한다" 규칙을 만족하도록 constructor 에 `SlackDeliveryPort` 를 주입.
+- **3건 잔여 (개별 도메인 버그)**: `ClippingAdminControllerTest` 2건은 `clipping.digest.fair_share.min_raw_score=0.3` 보조 임계값과 `selectWithSoftPenalty` 의 same-source lambda penalty 가 fixture 설정에 영향을 줘 selectedCount 가 기대치와 어긋난다. `TitleSimilarityTest` 1건은 "extra publisher suffix" 케이스를 duplicate 판정하지 못한다. 모두 개별 도메인 로직 조사 필요.
+
+**Update 2026-05-12 (ddl-auto)**: H2 2.3 + MODE=PostgreSQL + DATABASE_TO_UPPER=false 조합에서 Flyway 가 schema 를 생성해도 Hibernate `validate` 가 missing table 을 던지는 사례를 추가 조사. `spring.jpa.properties.hibernate.default_schema=PUBLIC`, `spring.jpa.database-platform=org.hibernate.dialect.H2Dialect` 모두 시도했으나 동일하게 실패. 운영(PostgreSQL) 은 application.yml 의 `validate` 를 유지하고, 테스트만 application-test.yml 에서 `ddl-auto: none` 으로 두는 우회를 공식 결정. H2 INFORMATION_SCHEMA metadata 와 Hibernate validator 의 정합성 문제로 추정되며 근본 원인은 후속 작업으로 남긴다.
+
+**최종 테스트 통과율**: 657 → 3 (-99.5%, 99.91% pass rate).

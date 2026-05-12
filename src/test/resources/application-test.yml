@@ -1,4 +1,23 @@
 spring:
   jpa:
     hibernate:
+      # Flyway가 H2(MODE=PostgreSQL, DATABASE_TO_UPPER=false)에 schema를 생성한 후 Hibernate
+      # schema validation 이 missing table [admin_users] 를 던진다. 같은 HikariPool/Connection
+      # 임에도 metadata 조회가 안 잡히는 이슈로, H2 2.3 + MODE=PostgreSQL 의 INFORMATION_SCHEMA
+      # 동작 차이로 보인다. default_schema=PUBLIC, database-platform=H2Dialect 모두 시도해도
+      # 동일했다.
+      #
+      # 운영은 PostgreSQL 이고 application.yml 의 `validate` 가 그대로 유효하다. 테스트만
+      # `none` 으로 두어 통합 테스트 컨텍스트 로딩이 가능하게 한다. ADR-044 참고.
       ddl-auto: none
+
+clipping-mcp-server:
+  security:
+    # admin controller 테스트가 `Bearer test-admin-token` 헤더로 호출한다.
+    # 운영은 ADMIN_API_TOKEN 환경변수로 주입한다.
+    admin-token: test-admin-token
+    # 통합 테스트가 `/admin/signup`, `/user/signup` 으로 계정을 만든 뒤 form 로그인한다.
+    # 운영은 application.yml 의 기본값(false/true) 을 환경변수로 받아 결정한다.
+    allow-signup: true
+    allow-user-signup: true
+    allow-bootstrap-signup: true

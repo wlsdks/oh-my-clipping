@@ -8,6 +8,7 @@ import com.ohmyclipping.service.port.OpsLogNotifier
 import com.ohmyclipping.service.port.OpsNotificationEvent
 import com.ohmyclipping.service.port.PipelineRunOpsEvent
 import com.ohmyclipping.service.port.PipelineStepTraceOpsEvent
+import com.ohmyclipping.service.port.SlackDeliveryPort
 import com.ohmyclipping.service.port.WeeklyActionReport
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
@@ -16,15 +17,20 @@ import java.time.Instant
 private val log = KotlinLogging.logger {}
 
 /**
- * OSS 기본 [OpsLogNotifier] 구현. 운영 환경에서는 Slack 채널로 발송하는 구현으로 교체한다.
+ * OSS 기본 [OpsLogNotifier] 구현. 운영 환경에서는 [SlackDeliveryPort] 를 통해 실제 Slack 운영
+ * 채널로 발송하는 구현으로 교체한다.
  *
  * 본 stub 의 의도는 [SlackApiMessageSender] 와 동일하다 — Spring DI 가 끊기지 않게 빈을 채워
  * `@SpringBootTest` 컨텍스트 로딩을 가능하게 한다. 호출 시 debug 로그만 남기고 외부 발송은 하지 않는다.
+ * Production 어댑터는 [slackDeliveryPort] 를 통해 발송하므로 ADR-038 의 "batch/pipeline Slack
+ * 호출자는 SlackDeliveryPort 에 의존한다" 규칙도 만족한다.
  *
  * OSS sanitization 으로 원본 구현이 제거됐기 때문에 본 stub 이 필요해졌다. 자세한 맥락은 ADR-044 참고.
  */
 @Component
-class SlackOpsLogNotifier : OpsLogNotifier {
+class SlackOpsLogNotifier(
+    @Suppress("unused") private val slackDeliveryPort: SlackDeliveryPort,
+) : OpsLogNotifier {
 
     init {
         log.warn {
