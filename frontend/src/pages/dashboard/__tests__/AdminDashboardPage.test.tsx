@@ -1,8 +1,8 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { SystemStatusResponse } from "@/types/systemStatus";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // Mock all Section-level hooks so we test page composition only
 vi.mock("../hooks/useActionRequiredData");
@@ -101,13 +101,11 @@ function makeEmptyOperatorFooter() {
 }
 
 function renderPage() {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={qc}>
-      <MemoryRouter>
-        <AdminDashboardPage />
-      </MemoryRouter>
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <AdminDashboardPage />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

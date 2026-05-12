@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within, fireEvent } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UserAccountApproval } from "@/types/user";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // ── 서비스 mock (vi.mock hoist 규칙에 따라 import 전에 선언) ────────────
 vi.mock("@/services/userService", () => ({
@@ -54,14 +54,7 @@ function makeApproval(overrides: Partial<UserAccountApproval> = {}): UserAccount
 }
 
 function renderApprovalTab() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <ApprovalTab />
-    </QueryClientProvider>,
-  );
+  return render(<ApprovalTab />, { wrapper: createQueryClientWrapper() });
 }
 
 beforeEach(() => {

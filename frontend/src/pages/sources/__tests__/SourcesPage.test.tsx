@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import type { Source, SourcePage } from "@/types/source";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // ── 서비스 mock (vi.mock 은 import 전에 호이스팅 됨) ────────────────────
 vi.mock("@/services/sourceService", () => ({
@@ -112,15 +112,11 @@ function makeSourcePage(sources: Source[] = []): SourcePage {
 }
 
 function renderSourcesPage(initialEntries: string[] = ["/admin/sources"]) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={initialEntries}>
-        <SourcesPage />
-      </MemoryRouter>
-    </QueryClientProvider>,
+    <MemoryRouter initialEntries={initialEntries}>
+      <SourcesPage />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

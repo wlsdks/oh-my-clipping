@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import type { Category } from "@/types/category";
 import type { UserClippingRequest } from "@/types/user";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // ── 서비스 mock ────────────────────────────────────────────────────────
 vi.mock("@/services/userService", () => ({
@@ -110,15 +110,11 @@ function makeClippingRequest(overrides: Partial<UserClippingRequest> = {}): User
 }
 
 function renderPage(initialEntries: string[] = ["/admin/subscriptions"]) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={initialEntries}>
-        <SubscriptionManagementPage />
-      </MemoryRouter>
-    </QueryClientProvider>,
+    <MemoryRouter initialEntries={initialEntries}>
+      <SubscriptionManagementPage />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 
