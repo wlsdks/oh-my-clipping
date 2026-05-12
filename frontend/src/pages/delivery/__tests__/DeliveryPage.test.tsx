@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { DeliveryLogRecord, DeliveryLogsPage, DeliverySummary } from "@/types/delivery";
 
 // ── 외부 의존성 mock ────────────────────────────────────────────────
@@ -39,18 +39,11 @@ import { categoryService } from "@/services/categoryService";
 import { DeliveryPage } from "../DeliveryPage";
 
 function renderPage() {
-  const qc = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, staleTime: 0 },
-      mutations: { retry: false },
-    },
-  });
   return render(
     <MemoryRouter>
-      <QueryClientProvider client={qc}>
-        <DeliveryPage />
-      </QueryClientProvider>
-    </MemoryRouter>
+      <DeliveryPage />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

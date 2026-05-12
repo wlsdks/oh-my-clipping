@@ -1,10 +1,10 @@
-import React from "react";
+import type { ReactNode } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { OrganizationsPage } from "../OrganizationsPage";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { Organization, OrganizationListResponse } from "@/types/organization";
 
 // 서비스 mock — 테스트별로 구현체를 갈아끼운다.
@@ -43,15 +43,11 @@ function makeOrg(overrides: Partial<Organization> = {}): Organization {
 }
 
 function renderPage() {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
     <MemoryRouter>
-      <QueryClientProvider client={qc}>
-        <OrganizationsPage />
-      </QueryClientProvider>
+      <OrganizationsPage />
     </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 
@@ -215,11 +211,12 @@ describe("OrganizationsPage — 탭 + 확장 컬럼 + 삭제 가드", () => {
 
 // helper
 function withSearchParams(search: string) {
-  return ({ children }: { children: React.ReactNode }) => (
-    <MemoryRouter initialEntries={[{ pathname: "/admin/organizations", search }]}>
-      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+  const QueryClientWrapper = createQueryClientWrapper();
+  return ({ children }: { children: ReactNode }) => (
+    <QueryClientWrapper>
+      <MemoryRouter initialEntries={[{ pathname: "/admin/organizations", search }]}>
         {children}
-      </QueryClientProvider>
-    </MemoryRouter>
+      </MemoryRouter>
+    </QueryClientWrapper>
   );
 }
