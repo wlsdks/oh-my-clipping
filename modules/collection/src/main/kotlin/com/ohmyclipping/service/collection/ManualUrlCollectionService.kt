@@ -65,7 +65,7 @@ class ManualUrlCollectionService(
         val extractionStartedAt = Instant.now()
         val extracted = try {
             articleContentExtractor.extract(safeUrl)
-        } catch (e: RuntimeException) {
+        } catch (e: Exception) {
             metrics.recordExtraction(
                 "clip_add_url", false,
                 Duration.between(extractionStartedAt, Instant.now()).toMillis()

@@ -20,7 +20,6 @@ src/main/kotlin/com/ohmyclipping/observability/TokenHealthTracker.kt=3
 src/main/kotlin/com/ohmyclipping/rss/RssFeedCollector.kt=2
 src/main/kotlin/com/ohmyclipping/service/AdminAuthService.kt=1
 src/main/kotlin/com/ohmyclipping/service/AdminSourceService.kt=2
-src/main/kotlin/com/ohmyclipping/service/AdminTrendSnapshotService.kt=1
 src/main/kotlin/com/ohmyclipping/service/AiQaService.kt=2
 src/main/kotlin/com/ohmyclipping/service/AnalyticsService.kt=2
 src/main/kotlin/com/ohmyclipping/service/AutoReportScheduler.kt=5
@@ -45,3 +44,5 @@ adapters/persistence/src/main/kotlin/com/ohmyclipping/store/JpaRssSourceStore.kt
 adapters/persistence/src/main/kotlin/com/ohmyclipping/store/JpaStatsStore.kt=1
 src/main/kotlin/com/ohmyclipping/support/IdempotencyKeyService.kt=5
 src/main/kotlin/com/ohmyclipping/user/ArticleClickTrackController.kt=1
+modules/collection/src/main/kotlin/com/ohmyclipping/service/collection/ManualUrlCollectionService.kt=1
+modules/collection/src/main/kotlin/com/ohmyclipping/service/collection/RssSourceCollectionService.kt=1

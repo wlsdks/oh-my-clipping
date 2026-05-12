@@ -108,7 +108,7 @@ class RssSourceCollectionService(
                 durationMs = durationMs,
                 articlesFound = sourceCollected
             )
-        } catch (e: RuntimeException) {
+        } catch (e: Exception) {
             log.warn(e) { "Failed to collect from source '${source.name}': ${e.message}" }
             sourceStore.incrementFailCount(source.id, e.message ?: "Unknown error")
             schedulerErrorNotifier?.notifyCollectionError("RSS 수집", e, "source=${source.name}")
