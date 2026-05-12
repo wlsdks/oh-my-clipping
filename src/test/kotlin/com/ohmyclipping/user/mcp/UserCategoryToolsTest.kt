@@ -80,14 +80,15 @@ class UserCategoryToolsTest {
         }
 
         @Test
-        fun `서비스 예외는 에러 JSON으로 감싸진다`() {
+        fun `내부 서비스 예외는 에러 JSON으로 감싸되 메시지를 숨긴다`() {
             every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
             every { categoryService.listCategories() } throws RuntimeException("boom")
 
             val json = tools.user_list_categories()
 
             json shouldContain "\"error\""
-            json shouldContain "boom"
+            json shouldContain "Internal error"
+            json shouldNotContain "boom"
         }
 
         @Test
