@@ -45,13 +45,24 @@ class AdminRetryFailedDeliveryToolTest {
 
         @Test
         fun `빈 deliveryLogId 는 validation error 로 거부된다`() {
-            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
-
-            val json = tool.admin_retry_failed_delivery(deliveryLogId = "")
+            val json = tool.admin_retry_failed_delivery(deliveryLogId = " ")
 
             json shouldContain "\"error\""
             json shouldContain "-32024"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { service.retryDelivery(any()) }
+        }
+
+        @Test
+        fun `deliveryLogId 는 trim 해서 재시도 서비스에 전달한다`() {
+            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
+            every { service.retryDelivery("log1") } returns Unit
+
+            val json = tool.admin_retry_failed_delivery(deliveryLogId = " log1 ")
+
+            json shouldContain "\"success\":true"
+            json shouldContain "\"deliveryLogId\":\"log1\""
+            verify(exactly = 1) { service.retryDelivery("log1") }
         }
 
         @Test
