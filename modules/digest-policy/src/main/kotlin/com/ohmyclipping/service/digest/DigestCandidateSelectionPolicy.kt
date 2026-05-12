@@ -37,7 +37,8 @@ data class DigestCandidateSelectionPolicy(
         if (!minImportanceScore.isFinite() || minImportanceScore < 0.0) {
             throw EngineInvalidInputException("minImportanceScore must be a finite non-negative number")
         }
-        if (maxItems <= 0 || candidates.isEmpty()) return emptyList()
+        validateMaxItems(maxItems)
+        if (candidates.isEmpty()) return emptyList()
         validateCandidateScores(candidates)
 
         val filtered = candidates.filter { candidate ->
@@ -55,7 +56,8 @@ data class DigestCandidateSelectionPolicy(
         candidates: List<DigestCandidate>,
         maxItems: Int,
     ): List<DigestCandidate> {
-        if (maxItems <= 0 || candidates.isEmpty()) return emptyList()
+        validateMaxItems(maxItems)
+        if (candidates.isEmpty()) return emptyList()
         validateCandidateScores(candidates)
 
         val pool = candidates.toMutableList()
@@ -96,6 +98,12 @@ data class DigestCandidateSelectionPolicy(
             if (!candidate.combinedScore.isFinite()) {
                 throw EngineInvalidInputException("candidate combinedScore must be finite: ${candidate.id}")
             }
+        }
+    }
+
+    private fun validateMaxItems(maxItems: Int) {
+        if (maxItems <= 0) {
+            throw EngineInvalidInputException("maxItems must be greater than 0")
         }
     }
 

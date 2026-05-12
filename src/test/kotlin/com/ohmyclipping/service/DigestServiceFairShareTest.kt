@@ -13,6 +13,7 @@ import com.ohmyclipping.store.SummaryFeedbackStore
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.assertions.throwables.shouldThrow
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Nested
@@ -29,7 +30,7 @@ import java.time.Instant
  * - null source 버킷 처리
  * - 결정론적 tie-breaking
  * - lambda=0 / lambda=1 극단값
- * - 빈 pool, maxItems=0 경계 케이스
+ * - 빈 pool, maxItems 입력 검증 경계 케이스
  */
 class DigestServiceFairShareTest {
 
@@ -226,10 +227,12 @@ class DigestServiceFairShareTest {
         }
 
         @Test
-        fun `시나리오15 maxItems0 빈결과`() {
+        fun `시나리오15 maxItems0 입력 오류`() {
             val pool = listOf(candidate("a", "A", 0.8))
-            val result = makeService().selectWithSoftPenalty(pool, 0)
-            result.shouldBeEmpty()
+
+            shouldThrow<EngineInvalidInputException> {
+                makeService().selectWithSoftPenalty(pool, 0)
+            }.message shouldBe "maxItems must be greater than 0"
         }
     }
 

@@ -100,12 +100,26 @@ class DigestCandidateSelectionPolicyTest {
         }
 
         @Test
-        fun `빈 후보와 maxItems 0 은 빈 결과를 반환한다`() {
+        fun `빈 후보는 빈 결과를 반환한다`() {
             DigestCandidateSelectionPolicy().selectWithSoftPenalty(emptyList(), maxItems = 5).shouldBeEmpty()
-            DigestCandidateSelectionPolicy().selectWithSoftPenalty(
-                listOf(candidate("a", "A", 0.8)),
-                maxItems = 0
-            ).shouldBeEmpty()
+        }
+
+        @Test
+        fun `maxItems 0 이하는 엔진 입력 오류로 거부한다`() {
+            shouldThrow<EngineInvalidInputException> {
+                DigestCandidateSelectionPolicy().selectWithSoftPenalty(
+                    listOf(candidate("a", "A", 0.8)),
+                    maxItems = 0
+                )
+            }.message shouldBe "maxItems must be greater than 0"
+
+            shouldThrow<EngineInvalidInputException> {
+                DigestCandidateSelectionPolicy().select(
+                    candidates = listOf(candidate("a", "A", 0.8)),
+                    maxItems = -1,
+                    minImportanceScore = 0.0
+                )
+            }.message shouldBe "maxItems must be greater than 0"
         }
 
         @Test
