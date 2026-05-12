@@ -1,5 +1,6 @@
 package com.ohmyclipping.admin.mcp
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.service.AsyncClipJobService
@@ -34,13 +35,25 @@ class AdminCollectAsyncTool(
         @ToolParam(description = "수집 대상 카테고리 ID (생략 시 전체)", required = false) categoryId: String?,
         @ToolParam(description = "몇 시간 이전까지 조회할지 (생략 시 서버 기본값)", required = false) hoursBack: Int?,
     ): String = mcpToolCall {
+        val normalizedCategoryId = categoryId.normalizeOptionalId()
+        validateHoursBack(hoursBack)
+
         // 호출 빈도 제한: 카테고리 단위로 최대 20회/시간. 전체 수집은 dimension null.
         rateLimiter.checkOrThrow(
             toolName = "admin_collect_async",
             maxRequests = 20,
             windowSeconds = 3600,
-            dimension = categoryId
+            dimension = normalizedCategoryId
         )
-        asyncClipJobService.enqueueCollect(categoryId, hoursBack)
+        asyncClipJobService.enqueueCollect(normalizedCategoryId, hoursBack)
+    }
+
+    private fun String?.normalizeOptionalId(): String? =
+        this?.trim()?.takeIf { it.isNotBlank() }
+
+    private fun validateHoursBack(hoursBack: Int?) {
+        if (hoursBack != null && hoursBack <= 0) {
+            throw InvalidInputException("hoursBack must be greater than 0")
+        }
     }
 }
