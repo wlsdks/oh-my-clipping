@@ -31,7 +31,7 @@ import { categoryRuleService } from "@/services/categoryRuleService";
 import { categoryService } from "@/services/categoryService";
 import { AutoExcludeAuditPage } from "../AutoExcludeAuditPage";
 import type { AutoExcludedItem, AutoExcludedResponse } from "@/types/autoExcludedItem";
-import type { Category } from "@/types/category";
+import type { Category, CategoryRule } from "@/types/category";
 
 /* ── 픽스처 ── */
 
@@ -86,6 +86,21 @@ const mockCategories: Category[] = [
   } as Category
 ];
 
+const defaultCategoryRule: CategoryRule = {
+  categoryId: "cat-1",
+  includeKeywords: ["HBM"],
+  excludeKeywords: [],
+  riskTags: [],
+  excludeEventTypes: ["ANNOUNCEMENT"],
+  includeThreshold: 0.7,
+  reviewThreshold: 0.4,
+  uncertainToReview: true,
+  autoExcludeEnabled: true,
+  revision: 1,
+  updatedBy: "admin",
+  updatedAt: "2026-04-01T00:00:00Z"
+};
+
 function renderPage() {
   return render(<AutoExcludeAuditPage />, { wrapper: createQueryClientWrapper() });
 }
@@ -105,11 +120,7 @@ describe("AutoExcludeAuditPage", () => {
     // 기본 카테고리 fetch 성공 응답.
     vi.mocked(categoryService.getAll).mockResolvedValue(mockCategories);
     // 드로어가 언마운트/마운트될 때 getById 가 unresolved 로 매달리지 않도록 기본값 제공.
-    vi.mocked(categoryRuleService.getById).mockResolvedValue({
-      categoryId: "cat-1",
-      excludeEventTypes: ["ANNOUNCEMENT"],
-      includeKeywords: ["HBM"]
-    } as unknown as Awaited<ReturnType<typeof categoryRuleService.getById>>);
+    vi.mocked(categoryRuleService.getById).mockResolvedValue(defaultCategoryRule);
   });
 
   it("리스트 로드 시 제목/reason 한국어 라벨/복구 버튼을 렌더한다", async () => {

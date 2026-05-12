@@ -10,17 +10,19 @@ vi.mock("@/lib/kyInstance", () => ({
 import { api } from "@/lib/kyInstance";
 import { tokenHealthService } from "@/services/tokenHealthService";
 
-const mockedApi = api as unknown as {
-  get: ReturnType<typeof vi.fn>;
-};
+const mockApiGet = vi.mocked(api.get);
 
 describe("tokenHealthService.getStatus", () => {
   beforeEach(() => {
-    mockedApi.get.mockReset();
+    mockApiGet.mockReset();
   });
 
+  function mockResponse(json: () => Promise<unknown>): ReturnType<typeof api.get> {
+    return { json } as ReturnType<typeof api.get>;
+  }
+
   function mockJson(payload: unknown) {
-    mockedApi.get.mockReturnValue({ json: vi.fn().mockResolvedValue(payload) });
+    mockApiGet.mockReturnValue(mockResponse(vi.fn().mockResolvedValue(payload)));
   }
 
   it("`admin/system/token-health` 경로로 GET을 호출한다", async () => {
@@ -28,7 +30,7 @@ describe("tokenHealthService.getStatus", () => {
 
     await tokenHealthService.getStatus();
 
-    expect(mockedApi.get).toHaveBeenCalledWith("admin/system/token-health");
+    expect(mockApiGet).toHaveBeenCalledWith("admin/system/token-health");
   });
 
   it("응답 JSON을 그대로 반환한다 (정상 상태)", async () => {
@@ -52,9 +54,7 @@ describe("tokenHealthService.getStatus", () => {
   });
 
   it("네트워크 에러는 호출자에게 전파된다", async () => {
-    mockedApi.get.mockReturnValue({
-      json: vi.fn().mockRejectedValue(new Error("network fail")),
-    });
+    mockApiGet.mockReturnValue(mockResponse(vi.fn().mockRejectedValue(new Error("network fail"))));
 
     await expect(tokenHealthService.getStatus()).rejects.toThrow("network fail");
   });

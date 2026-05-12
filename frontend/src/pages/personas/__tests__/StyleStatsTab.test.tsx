@@ -7,6 +7,8 @@ import { createQueryClientWrapper } from "@/test/queryClient";
 
 vi.mock("@/services/personaAnalyticsService");
 
+const mockGetLive = vi.mocked(personaAnalyticsService.getLive);
+
 const liveResponse = {
   totals: {
     totalStyles: 18,
@@ -42,9 +44,7 @@ describe("StyleStatsTab (축소판)", () => {
   });
 
   it("3 개 스타일 카드와 Analytics 링크를 렌더링하고 활성 구독 카드는 없다", async () => {
-    (personaAnalyticsService.getLive as ReturnType<typeof vi.fn>).mockResolvedValue(
-      liveResponse
-    );
+    mockGetLive.mockResolvedValue(liveResponse);
 
     renderTab();
 
@@ -62,7 +62,7 @@ describe("StyleStatsTab (축소판)", () => {
   });
 
   it("Analytics 안내 문구가 표시된다", async () => {
-    (personaAnalyticsService.getLive as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockGetLive.mockResolvedValue({
       ...liveResponse,
       totals: { ...liveResponse.totals, totalStyles: 0 },
     });
@@ -75,9 +75,7 @@ describe("StyleStatsTab (축소판)", () => {
   });
 
   it("로딩 중에는 스켈레톤이 보인다", () => {
-    (personaAnalyticsService.getLive as ReturnType<typeof vi.fn>).mockReturnValue(
-      new Promise(() => {})
-    );
+    mockGetLive.mockReturnValue(new Promise(() => {}));
 
     const { container } = renderTab();
 
