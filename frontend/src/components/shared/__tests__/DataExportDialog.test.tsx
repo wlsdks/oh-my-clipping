@@ -20,6 +20,8 @@ vi.mock("sonner", () => ({
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
 
+const mockDownloadPersonalData = vi.mocked(userService.downloadPersonalData);
+
 function renderWithQueryClient(ui: ReactElement) {
   return render(ui, { wrapper: createQueryClientWrapper() });
 }
@@ -61,7 +63,7 @@ describe("DataExportDialog", () => {
   it("JSON 기본 선택 상태에서 다운로드 버튼을 누르면 json 포맷으로 요청한다", async () => {
     const onClose = vi.fn();
     const blob = new Blob(["{\"ok\":true}"], { type: "application/json" });
-    (userService.downloadPersonalData as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockDownloadPersonalData.mockResolvedValue({
       blob,
       filename: "personal_data_2026-04-17.json"
     });
@@ -82,7 +84,7 @@ describe("DataExportDialog", () => {
 
   it("CSV 옵션을 선택하면 csv 포맷으로 다운로드 요청한다", async () => {
     const blob = new Blob(["section,field,value\n"], { type: "text/csv" });
-    (userService.downloadPersonalData as ReturnType<typeof vi.fn>).mockResolvedValue({
+    mockDownloadPersonalData.mockResolvedValue({
       blob,
       filename: "personal_data_2026-04-17.csv"
     });
@@ -99,9 +101,7 @@ describe("DataExportDialog", () => {
 
   it("다운로드 실패 시 에러 toast 가 뜨고 onClose 는 호출되지 않는다", async () => {
     const onClose = vi.fn();
-    (userService.downloadPersonalData as ReturnType<typeof vi.fn>).mockRejectedValue(
-      new Error("rate limit")
-    );
+    mockDownloadPersonalData.mockRejectedValue(new Error("rate limit"));
 
     renderWithQueryClient(<DataExportDialog open onClose={onClose} />);
 
