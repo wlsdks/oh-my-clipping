@@ -22,7 +22,7 @@ object DigestSummaryFormattingPolicy {
     )
 
     fun sanitizeSummaryForDisplay(text: String): String {
-        val normalized = text
+        val normalized = normalizeText(text)
             .replace(crOrCrLf, "\n")
             .replace(Regex("$sectionEmoji(?:\\s*\\1)+"), "$1")
             .replace(Regex("$sectionEmoji[ \\t]*$sectionEmojiNonCapturing"), "$1")
