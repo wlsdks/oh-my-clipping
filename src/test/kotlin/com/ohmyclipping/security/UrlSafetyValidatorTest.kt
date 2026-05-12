@@ -1,5 +1,6 @@
 package com.ohmyclipping.security
 
+import com.ohmyclipping.error.InvalidInputException
 import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Test
@@ -17,7 +18,7 @@ class UrlSafetyValidatorTest {
 
     @Test
     fun `rejects localhost url`() {
-        val ex = assertThrows<IllegalArgumentException> {
+        val ex = assertThrows<InvalidInputException> {
             validator.validatePublicHttpUrl("https://localhost/feed.xml")
         }
         ex.message shouldContain "localhost"
@@ -25,7 +26,7 @@ class UrlSafetyValidatorTest {
 
     @Test
     fun `rejects private network ipv4`() {
-        val ex = assertThrows<IllegalArgumentException> {
+        val ex = assertThrows<InvalidInputException> {
             validator.validatePublicHttpUrl("https://10.1.2.3/feed.xml")
         }
         ex.message shouldContain "내부 네트워크"
@@ -33,7 +34,7 @@ class UrlSafetyValidatorTest {
 
     @Test
     fun `rejects loopback ipv4`() {
-        val ex = assertThrows<IllegalArgumentException> {
+        val ex = assertThrows<InvalidInputException> {
             validator.validatePublicHttpUrl("https://127.0.0.1/feed.xml")
         }
         ex.message shouldContain "내부 네트워크"
@@ -53,7 +54,7 @@ class UrlSafetyValidatorTest {
         )
 
         blockedUrls.forEach { url ->
-            val ex = assertThrows<IllegalArgumentException> {
+            val ex = assertThrows<InvalidInputException> {
                 validator.validatePublicHttpUrl(url)
             }
             ex.message shouldContain "내부 네트워크"
@@ -62,7 +63,7 @@ class UrlSafetyValidatorTest {
 
     @Test
     fun `rejects ipv4 mapped ipv6 loopback`() {
-        val ex = assertThrows<IllegalArgumentException> {
+        val ex = assertThrows<InvalidInputException> {
             validator.validatePublicHttpUrl("https://[::ffff:127.0.0.1]/feed.xml")
         }
         ex.message shouldContain "내부 네트워크"
@@ -70,7 +71,7 @@ class UrlSafetyValidatorTest {
 
     @Test
     fun `rejects integer encoded loopback ipv4`() {
-        val ex = assertThrows<IllegalArgumentException> {
+        val ex = assertThrows<InvalidInputException> {
             validator.validatePublicHttpUrl("https://2130706433/feed.xml")
         }
         ex.message shouldContain "내부 네트워크"
@@ -78,7 +79,7 @@ class UrlSafetyValidatorTest {
 
     @Test
     fun `rejects non http scheme`() {
-        val ex = assertThrows<IllegalArgumentException> {
+        val ex = assertThrows<InvalidInputException> {
             validator.validatePublicHttpUrl("file:///etc/passwd")
         }
         ex.message shouldContain "http"

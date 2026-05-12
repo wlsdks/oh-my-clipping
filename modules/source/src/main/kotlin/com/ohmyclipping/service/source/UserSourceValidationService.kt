@@ -1,5 +1,6 @@
 package com.ohmyclipping.service.source
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.model.SourceLegalBasis
 import com.ohmyclipping.service.dto.ExistingSourceInfo
 import com.ohmyclipping.service.dto.UrlValidationResult
@@ -64,6 +65,13 @@ class UserSourceValidationService(
         } catch (e: IOException) {
             log.warn(e) { "URL 검증 중 외부 요청 실패: $url" }
             // API 오류/타임아웃 시 경고만 표시하고 제출을 허용한다.
+            return UrlValidationResult(
+                rssValid = false,
+                robotsAllowed = true,
+                existingSource = existingInfo
+            )
+        } catch (e: InvalidInputException) {
+            log.warn(e) { "URL 검증 중 리다이렉트 URL 검증 실패: $url" }
             return UrlValidationResult(
                 rssValid = false,
                 robotsAllowed = true,

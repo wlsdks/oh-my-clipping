@@ -1,5 +1,6 @@
 package com.ohmyclipping.service.source
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.model.RssSource
 import com.ohmyclipping.model.SourceLegalBasis
 import com.ohmyclipping.service.port.SourceUrlSafetyPort
@@ -141,7 +142,7 @@ class UserSourceValidationServiceTest {
             every { sourceStore.list(any()) } returns listOf(
                 makeSource("https://example.com/rss", name = "Example RSS")
             )
-            every { verificationClient.verify(URI(url)) } throws IllegalArgumentException("blocked redirect")
+            every { verificationClient.verify(URI(url)) } throws InvalidInputException("blocked redirect")
 
             val result = service.validate(url)
 

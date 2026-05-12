@@ -1,5 +1,6 @@
 package com.ohmyclipping.service.source
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.model.RssSource
 import com.ohmyclipping.service.port.SourceUrlSafetyPort
@@ -42,7 +43,7 @@ class SourceVerificationServiceTest {
             val source = testSource("src-blocked")
             every { sourceStore.findById("src-blocked") } returns source
             every { urlSafetyValidator.validatePublicHttpUrl(source.url) } throws
-                IllegalArgumentException("Private IP address is not allowed")
+                InvalidInputException("Private IP address is not allowed")
             every { sourceStore.updateVerificationStatus("src-blocked", "BLOCKED_URL") } just Runs
 
             val result = service.verify("src-blocked")

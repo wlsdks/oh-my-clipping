@@ -1,5 +1,6 @@
 package com.ohmyclipping.service.source
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.service.port.SourceUrlSafetyPort
 import com.ohmyclipping.store.RssSourceStore
@@ -27,6 +28,9 @@ class SourceVerificationService(
         val result = try {
             val sourceUri = urlSafetyValidator.validatePublicHttpUrl(source.url)
             sourceVerificationClient.verify(sourceUri)
+        } catch (e: InvalidInputException) {
+            log.warn(e) { "Blocked source URL for ${source.name}: ${e.message}" }
+            VerificationResult.BLOCKED_URL
         } catch (e: IllegalArgumentException) {
             log.warn(e) { "Blocked source URL for ${source.name}: ${e.message}" }
             VerificationResult.BLOCKED_URL

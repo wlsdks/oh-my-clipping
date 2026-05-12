@@ -1,5 +1,6 @@
 package com.ohmyclipping.service.source
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.model.KnownNewsSource
 import com.ohmyclipping.service.port.SourceUrlSafetyPort
 import com.ohmyclipping.store.KnownNewsSourceStore
@@ -91,6 +92,8 @@ class RssFeedDiscoveryService(
                     val title = extractFeedTitle(body) ?: "$domain RSS"
                     feeds.add(DiscoveredFeed(url = url, title = title))
                 }
+            } catch (_: InvalidInputException) {
+                // 경로 실패는 무시
             } catch (_: IllegalArgumentException) {
                 // 경로 실패는 무시
             } catch (_: IOException) {

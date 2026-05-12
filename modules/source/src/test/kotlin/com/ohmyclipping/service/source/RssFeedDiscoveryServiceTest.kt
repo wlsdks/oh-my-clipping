@@ -1,5 +1,6 @@
 package com.ohmyclipping.service.source
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.model.KnownNewsSource
 import com.ohmyclipping.service.port.SourceUrlSafetyPort
 import com.ohmyclipping.store.KnownNewsSourceStore
@@ -65,7 +66,7 @@ class RssFeedDiscoveryServiceTest {
         @Test
         fun `도메인 경로 입력은 host만 추출해 RSS 후보를 만든다`() {
             every { knownStore.search("example.com/news?utm=1") } returns emptyList()
-            every { urlSafetyValidator.validatePublicHttpUrl(any()) } throws IllegalArgumentException("blocked in test")
+            every { urlSafetyValidator.validatePublicHttpUrl(any()) } throws InvalidInputException("blocked in test")
 
             val result = service.discover("example.com/news?utm=1")
 
@@ -78,7 +79,7 @@ class RssFeedDiscoveryServiceTest {
         @Test
         fun `대문자 HTTP URL도 host를 추출해 RSS 후보를 만든다`() {
             every { knownStore.search("HTTP://WWW.EXAMPLE.COM/news") } returns emptyList()
-            every { urlSafetyValidator.validatePublicHttpUrl(any()) } throws IllegalArgumentException("blocked in test")
+            every { urlSafetyValidator.validatePublicHttpUrl(any()) } throws InvalidInputException("blocked in test")
 
             val result = service.discover("HTTP://WWW.EXAMPLE.COM/news")
 
