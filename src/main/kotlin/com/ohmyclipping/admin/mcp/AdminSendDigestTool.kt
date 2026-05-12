@@ -37,6 +37,9 @@ class AdminSendDigestTool(
         /** KST 기준 하루 단위 키를 만들기 위한 존. */
         private val KST_ZONE: ZoneId = ZoneId.of("Asia/Seoul")
 
+        private const val MIN_MAX_ITEMS = 1
+        private const val MAX_MAX_ITEMS = 5
+
         /** confirmationSummary 포맷 예: "3건 to #tech-news" 또는 "3 to tech-news". */
         private val CONFIRMATION_PATTERN =
             Regex("^\\s*(\\d{1,3})\\s*건?\\s*to\\s*#?([A-Za-z0-9._\\-가-힣]+)\\s*$")
@@ -64,6 +67,17 @@ class AdminSendDigestTool(
             required = false,
         ) confirmationSummary: String?,
     ): String = mcpToolCall {
+        val normalizedCategoryId = validateCategoryId(categoryId)
+        val normalizedMaxItems = validateMaxItems(maxItems)
+        val normalizedSlackChannelId = slackChannelId?.trim()?.ifBlank { null }
+        val confirmation = confirmationSummary?.trim()?.ifBlank { null }
+        val parsedConfirmation = confirmation?.let { parseConfirmationSummary(it) }
+        if (parsedConfirmation != null && normalizedMaxItems != null && parsedConfirmation.itemCount != normalizedMaxItems) {
+            throw InvalidInputException(
+                "확인 요약의 아이템 수(${parsedConfirmation.itemCount})가 maxItems($normalizedMaxItems)와 일치하지 않습니다 — 미리보기(admin_pipeline)와 재확인 필요",
+            )
+        }
+
         // 호출 빈도 제한: 최대 2회/시간. Slack 발송은 되돌릴 수 없으므로 엄격히 제한한다.
         rateLimiter.checkOrThrow("admin_send_digest", maxRequests = 2, windowSeconds = 3600)
 
@@ -71,18 +85,18 @@ class AdminSendDigestTool(
         // 오타/잘못된 ID로 인한 실패를 감지한다. 존재하지 않으면 NotFoundException 발생.
         // mock/테스트 환경에서 info 가 null 로 나올 수 있으므로 safe-call 로 감싼다.
         var resolvedChannelName: String? = null
-        if (!slackChannelId.isNullOrBlank()) {
-            val info = slackMessageSender.getChannelInfo(botToken = null, channelId = slackChannelId)
+        if (normalizedSlackChannelId != null) {
+            val info = slackMessageSender.getChannelInfo(botToken = null, channelId = normalizedSlackChannelId)
             @Suppress("UNNECESSARY_SAFE_CALL")
             resolvedChannelName = info?.name
         }
 
         // confirmationSummary 가 들어온 경우 형식을 검증하고 maxItems/채널이름과 맞춰본다.
-        if (!confirmationSummary.isNullOrBlank()) {
-            validateConfirmationSummary(
-                summary = confirmationSummary,
-                maxItems = maxItems,
-                channelName = resolvedChannelName,
+        if (parsedConfirmation != null && resolvedChannelName != null &&
+            !parsedConfirmation.channelName.equals(resolvedChannelName, ignoreCase = true)
+        ) {
+            throw InvalidInputException(
+                "확인 요약의 채널명(#${parsedConfirmation.channelName})이 실제 채널(#$resolvedChannelName)과 일치하지 않습니다 — 미리보기(admin_pipeline)와 재확인 필요",
             )
         }
 
@@ -90,8 +104,8 @@ class AdminSendDigestTool(
         // slackChannelId 가 null 이면 "default" 로 치환해 "카테고리 기본 채널" 로의 반복 발송도 잠근다.
         val idempotencyKey = buildIdempotencyKey(
             actor = McpCallerContext.tokenKid() ?: "anonymous",
-            categoryId = categoryId,
-            channelId = slackChannelId,
+            categoryId = normalizedCategoryId,
+            channelId = normalizedSlackChannelId,
         )
         if (!idempotencyCache.tryAcquire(idempotencyKey)) {
             throw ConflictException(
@@ -101,8 +115,29 @@ class AdminSendDigestTool(
 
         // sendToSlack 파라미터는 PR-06 에서 제거됨 (admin_pipeline 과의 역할 중복 제거).
         // 이 도구는 항상 Slack 에 게시하므로 내부적으로 true 로 고정한다.
-        clippingPipelinePort.digest(categoryId, maxItems, unsentOnly, sendToSlack = true, slackChannelId)
+        clippingPipelinePort.digest(
+            normalizedCategoryId,
+            normalizedMaxItems,
+            unsentOnly,
+            sendToSlack = true,
+            normalizedSlackChannelId,
+        )
             .toDigestResult()
+    }
+
+    private fun validateCategoryId(categoryId: String): String {
+        val normalized = categoryId.trim()
+        if (normalized.isBlank()) {
+            throw InvalidInputException("categoryId must not be blank")
+        }
+        return normalized
+    }
+
+    private fun validateMaxItems(maxItems: Int?): Int? {
+        if (maxItems != null && maxItems !in MIN_MAX_ITEMS..MAX_MAX_ITEMS) {
+            throw InvalidInputException("maxItems must be between $MIN_MAX_ITEMS and $MAX_MAX_ITEMS")
+        }
+        return maxItems
     }
 
     private fun buildIdempotencyKey(actor: String, categoryId: String, channelId: String?): String {
@@ -115,27 +150,19 @@ class AdminSendDigestTool(
      * "3건 to #tech-news" 형태의 요약을 파싱해 아이템 수/채널명과 교차 검증한다.
      * 형식이 맞지 않으면 발송 직전에 InvalidInputException 으로 차단한다.
      */
-    private fun validateConfirmationSummary(
-        summary: String,
-        maxItems: Int?,
-        channelName: String?,
-    ) {
+    private fun parseConfirmationSummary(summary: String): ParsedConfirmationSummary {
         val match = CONFIRMATION_PATTERN.matchEntire(summary)
             ?: throw InvalidInputException(
                 "confirmationSummary 형식이 올바르지 않습니다 — '{N}건 to #{채널이름}' 형태를 사용하세요",
             )
-        val claimedCount = match.groupValues[1].toInt()
-        val claimedChannel = match.groupValues[2]
-
-        if (maxItems != null && claimedCount != maxItems) {
-            throw InvalidInputException(
-                "확인 요약의 아이템 수($claimedCount)가 maxItems($maxItems)와 일치하지 않습니다 — 미리보기(admin_pipeline)와 재확인 필요",
-            )
-        }
-        if (channelName != null && !claimedChannel.equals(channelName, ignoreCase = true)) {
-            throw InvalidInputException(
-                "확인 요약의 채널명(#$claimedChannel)이 실제 채널(#$channelName)과 일치하지 않습니다 — 미리보기(admin_pipeline)와 재확인 필요",
-            )
-        }
+        return ParsedConfirmationSummary(
+            itemCount = match.groupValues[1].toInt(),
+            channelName = match.groupValues[2],
+        )
     }
+
+    private data class ParsedConfirmationSummary(
+        val itemCount: Int,
+        val channelName: String,
+    )
 }
