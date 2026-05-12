@@ -105,6 +105,26 @@ class AdminOrganizationToolsTest {
         }
 
         @Test
+        fun `categoryId 는 trim 해서 rate limit dimension 과 서비스에 전달한다`() {
+            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
+            every { service.findByCategoryId("c1") } returns listOf(org("o1"))
+
+            val json = tool.admin_category_organizations(categoryId = " c1 ")
+
+            json shouldContain "\"id\":\"o1\""
+            verify(exactly = 1) {
+                rateLimiter.checkOrThrow(
+                    toolName = "admin_category_organizations",
+                    maxRequests = 60,
+                    windowSeconds = 3600,
+                    dimension = "c1",
+                    actor = null,
+                )
+            }
+            verify(exactly = 1) { service.findByCategoryId("c1") }
+        }
+
+        @Test
         fun `빈 categoryId 는 InvalidInputException 으로 거부된다`() {
             val json = tool.admin_category_organizations(categoryId = "")
 
@@ -121,7 +141,7 @@ class AdminOrganizationToolsTest {
                     toolName = "admin_category_organizations",
                     maxRequests = 60,
                     windowSeconds = 3600,
-                    dimension = null,
+                    dimension = "c1",
                     actor = null,
                 )
             } throws RateLimitExceededException("Too many", retryAfterSeconds = 3600)
