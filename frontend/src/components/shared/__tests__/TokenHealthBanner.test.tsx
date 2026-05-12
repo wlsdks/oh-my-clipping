@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { act, render, screen, waitFor, cleanup } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { TokenHealthBanner } from "@/components/shared/TokenHealthBanner";
 import { authStore } from "@/store/authStore";
+import { createQueryClientWrapper, createTestQueryClient } from "@/test/queryClient";
 
 /**
  * tokenHealthService 는 네트워크를 타므로 항상 mock 한다. 각 테스트에서
@@ -28,18 +28,9 @@ function getStatusMock() {
 }
 
 function renderBanner() {
-  const qc = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: 0, staleTime: 0 },
-      mutations: { retry: false }
-    }
-  });
+  const qc = createTestQueryClient();
   return {
-    ...render(
-      <QueryClientProvider client={qc}>
-        <TokenHealthBanner />
-      </QueryClientProvider>
-    ),
+    ...render(<TokenHealthBanner />, { wrapper: createQueryClientWrapper(qc) }),
     qc
   };
 }

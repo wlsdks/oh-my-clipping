@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 /* dbMetricsService 모킹 */
 vi.mock("@/services/dbMetricsService", () => ({
@@ -62,15 +62,11 @@ const EMPTY_TABLES_SNAPSHOT: DbMetricsSnapshot = {
 /* ── 렌더 헬퍼 ── */
 
 function renderPage() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
     <MemoryRouter>
-      <QueryClientProvider client={client}>
-        <DbHealthPage />
-      </QueryClientProvider>
-    </MemoryRouter>
+      <DbHealthPage />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

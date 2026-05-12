@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // 사내 부서·팀 admin UI — master-detail 렌더링 + mutation 성공 토스트 + DnD 정렬 검증.
 
@@ -65,14 +65,7 @@ import { departmentService } from "@/services/departmentService";
 import { toast } from "sonner";
 
 function renderPage() {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-  return render(
-    <QueryClientProvider client={qc}>
-      <DepartmentsPage />
-    </QueryClientProvider>
-  );
+  return render(<DepartmentsPage />, { wrapper: createQueryClientWrapper() });
 }
 
 describe("DepartmentsPage", () => {
