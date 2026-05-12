@@ -74,8 +74,8 @@ function createTracker(): EventTracker {
   }
 
   return {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    init(_userId: string): void {
+    init(userId: string): void {
+      void userId;
       // userId는 백엔드가 인증 쿠키로 식별하므로 직접 전송하지 않는다.
       // 세션 ID: sessionStorage에 있으면 재사용, 없으면 생성
       const stored = sessionStorage.getItem(SESSION_KEY);

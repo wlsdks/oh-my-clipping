@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ApiError } from "../../api/httpClient";
+import type { ApiErrorShape } from "../../types/common";
 import {
   isHttpStatus,
   isConflictError,
@@ -444,8 +445,7 @@ describe("extractStaleEditInfo", () => {
         latestUpdatedAt: "2026-04-17T10:00:00Z",
         latestEditorName: "a",
         changedFieldNames: [],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
+      } as unknown as ApiErrorShape["staleEditInfo"],
     });
     expect(extractStaleEditInfo(err)).toBeNull();
   });

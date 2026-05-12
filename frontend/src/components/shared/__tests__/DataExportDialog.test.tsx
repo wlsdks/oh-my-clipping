@@ -30,14 +30,18 @@ describe("DataExportDialog", () => {
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     // jsdom 의 기본 createObjectURL 구현이 없어 수동 stub.
     if (!("createObjectURL" in URL)) {
-      // @ts-expect-error URL 타입 확장
-      URL.createObjectURL = vi.fn(() => "blob:mock");
+      Object.defineProperty(URL, "createObjectURL", {
+        configurable: true,
+        value: vi.fn(() => "blob:mock")
+      });
     } else {
       vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:mock");
     }
     if (!("revokeObjectURL" in URL)) {
-      // @ts-expect-error URL 타입 확장
-      URL.revokeObjectURL = vi.fn();
+      Object.defineProperty(URL, "revokeObjectURL", {
+        configurable: true,
+        value: vi.fn()
+      });
     } else {
       vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     }
