@@ -38,6 +38,7 @@ data class DigestCandidateSelectionPolicy(
             throw EngineInvalidInputException("minImportanceScore must be a finite non-negative number")
         }
         if (maxItems <= 0 || candidates.isEmpty()) return emptyList()
+        validateCandidateScores(candidates)
 
         val filtered = candidates.filter { candidate ->
             candidate.importanceScore >= minImportanceScore ||

@@ -138,6 +138,22 @@ class DigestCandidateSelectionPolicyTest {
                 )
             }.message shouldBe "candidate importanceScore must be finite: bad"
         }
+
+        @Test
+        fun `select 는 품질 필터에서 빠지는 비정상 후보도 거부한다`() {
+            val pool = listOf(
+                candidate("good", "A", importance = 0.9, combined = 0.9),
+                candidate("bad", "B", importance = Double.NaN, combined = Double.NaN),
+            )
+
+            shouldThrow<EngineInvalidInputException> {
+                DigestCandidateSelectionPolicy().select(
+                    candidates = pool,
+                    maxItems = 1,
+                    minImportanceScore = 0.8
+                )
+            }.message shouldBe "candidate importanceScore must be finite: bad"
+        }
     }
 
     @Nested
