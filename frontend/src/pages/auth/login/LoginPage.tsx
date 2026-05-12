@@ -64,7 +64,7 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Brand panel — visible on lg+ */}
-      <div className="hidden lg:flex lg:w-[480px] flex-col items-center justify-center bg-[#0d1526] text-white p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[480px] flex-col items-center justify-center bg-sidebar text-white p-12 relative overflow-hidden">
         {/* Ambient glow */}
         <div
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full pointer-events-none"
