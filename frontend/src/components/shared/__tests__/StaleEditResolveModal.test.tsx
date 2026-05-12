@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { StaleEditResolveModal } from "@/components/shared/StaleEditResolveModal";
 import type { StaleEditInfo } from "@/shared/types/common";
 
@@ -141,7 +141,9 @@ describe("StaleEditResolveModal", () => {
       expect(screen.getByText(/불러오는 중/)).toBeInTheDocument();
     });
 
-    resolveReload();
+    await act(async () => {
+      resolveReload();
+    });
   });
 
   it("staleEditInfo가 null이어도 open=false면 렌더되지 않는다", () => {
