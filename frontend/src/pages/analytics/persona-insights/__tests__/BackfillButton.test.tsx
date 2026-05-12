@@ -1,4 +1,5 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BackfillButton } from "../BackfillButton";
@@ -49,6 +50,7 @@ describe("BackfillButton", () => {
   });
 
   it("클릭 시 runBackfill 을 호출한다", async () => {
+    const user = userEvent.setup();
     vi.mocked(personaAnalyticsService.runBackfill).mockResolvedValue({
       weeksProcessed: 12,
       personasAggregated: 5,
@@ -57,7 +59,7 @@ describe("BackfillButton", () => {
     });
 
     render(<BackfillButton weeks={12} />, { wrapper: createWrapper() });
-    fireEvent.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
 
     await vi.waitFor(() => {
       expect(personaAnalyticsService.runBackfill).toHaveBeenCalledWith(12);
@@ -65,6 +67,7 @@ describe("BackfillButton", () => {
   });
 
   it("성공 시 toast.success 가 호출된다", async () => {
+    const user = userEvent.setup();
     vi.mocked(personaAnalyticsService.runBackfill).mockResolvedValue({
       weeksProcessed: 12,
       personasAggregated: 5,
@@ -73,7 +76,7 @@ describe("BackfillButton", () => {
     });
 
     render(<BackfillButton weeks={12} />, { wrapper: createWrapper() });
-    fireEvent.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
 
     // mutation resolve 후 확인
     await vi.waitFor(() => {
@@ -84,12 +87,13 @@ describe("BackfillButton", () => {
   });
 
   it("실패 시 toast.error 가 호출된다", async () => {
+    const user = userEvent.setup();
     vi.mocked(personaAnalyticsService.runBackfill).mockRejectedValue(
       new Error("network error"),
     );
 
     render(<BackfillButton weeks={12} />, { wrapper: createWrapper() });
-    fireEvent.click(screen.getByRole("button"));
+    await user.click(screen.getByRole("button"));
 
     await vi.waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
