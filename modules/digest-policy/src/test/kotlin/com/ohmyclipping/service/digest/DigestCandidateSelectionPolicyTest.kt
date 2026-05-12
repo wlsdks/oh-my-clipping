@@ -3,6 +3,7 @@ package com.ohmyclipping.service.digest
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -108,6 +109,34 @@ class DigestCandidateSelectionPolicyTest {
             )
 
             result.map { it.id } shouldBe listOf("a", "b")
+        }
+
+        @Test
+        fun `음수 minRawScore 는 엔진 설정 오류로 거부한다`() {
+            shouldThrow<EngineInvalidInputException> {
+                DigestCandidateSelectionPolicy(minRawScore = -0.1)
+            }.message shouldBe "minRawScore must be a finite non-negative number"
+        }
+
+        @Test
+        fun `비정상 minImportanceScore 는 선택 전에 거부한다`() {
+            shouldThrow<EngineInvalidInputException> {
+                DigestCandidateSelectionPolicy().select(
+                    candidates = listOf(candidate("a", "A", 0.8)),
+                    maxItems = 1,
+                    minImportanceScore = Double.NaN
+                )
+            }.message shouldBe "minImportanceScore must be a finite non-negative number"
+        }
+
+        @Test
+        fun `비정상 후보 점수는 결정론적 정렬 전에 거부한다`() {
+            shouldThrow<EngineInvalidInputException> {
+                DigestCandidateSelectionPolicy().selectWithSoftPenalty(
+                    candidates = listOf(candidate("bad", "A", importance = Double.POSITIVE_INFINITY)),
+                    maxItems = 1
+                )
+            }.message shouldBe "candidate importanceScore must be finite: bad"
         }
     }
 

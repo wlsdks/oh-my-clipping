@@ -24,8 +24,8 @@ data class DigestCandidateSelectionPolicy(
         if (!lambda.isFinite() || lambda < 0.0) {
             throw EngineInvalidInputException("lambda must be a finite non-negative number")
         }
-        if (!minRawScore.isFinite()) {
-            throw EngineInvalidInputException("minRawScore must be finite")
+        if (!minRawScore.isFinite() || minRawScore < 0.0) {
+            throw EngineInvalidInputException("minRawScore must be a finite non-negative number")
         }
     }
 
@@ -34,6 +34,9 @@ data class DigestCandidateSelectionPolicy(
         maxItems: Int,
         minImportanceScore: Double,
     ): List<DigestCandidate> {
+        if (!minImportanceScore.isFinite() || minImportanceScore < 0.0) {
+            throw EngineInvalidInputException("minImportanceScore must be a finite non-negative number")
+        }
         if (maxItems <= 0 || candidates.isEmpty()) return emptyList()
 
         val filtered = candidates.filter { candidate ->
@@ -52,6 +55,7 @@ data class DigestCandidateSelectionPolicy(
         maxItems: Int,
     ): List<DigestCandidate> {
         if (maxItems <= 0 || candidates.isEmpty()) return emptyList()
+        validateCandidateScores(candidates)
 
         val pool = candidates.toMutableList()
         val pickedPerSource = mutableMapOf<String, Int>()
@@ -81,6 +85,17 @@ data class DigestCandidateSelectionPolicy(
                 .thenByDescending { it.createdAt }
                 .thenBy { it.id }
         )
+    }
+
+    private fun validateCandidateScores(candidates: List<DigestCandidate>) {
+        candidates.forEach { candidate ->
+            if (!candidate.importanceScore.isFinite()) {
+                throw EngineInvalidInputException("candidate importanceScore must be finite: ${candidate.id}")
+            }
+            if (!candidate.combinedScore.isFinite()) {
+                throw EngineInvalidInputException("candidate combinedScore must be finite: ${candidate.id}")
+            }
+        }
     }
 
     fun dedupeCandidates(candidates: List<DigestCandidate>): List<DigestCandidate> {
