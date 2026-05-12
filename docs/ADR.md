@@ -1135,6 +1135,47 @@ A narrow `setKeywordsAndExcludeEventTypes` method was added to `CategoryRuleStor
 - 설계 문서: `docs/superpowers/specs/2026-05-11-module-restructure-design.md` (로컬 작업용)
 - 실행 계획: `docs/superpowers/plans/2026-05-11-module-restructure.md` (로컬 작업용)
 
+## ADR-041: `ClippingQueryAdapter` 1:1 pass-through 유지 (2026-05-12)
+
+**상태**: 채택
+
+**맥락**: 아키텍처 리뷰에서 `ClippingQueryPort` + `ClippingQueryAdapter`(68줄, 11개 forwarding 메서드, 두 번째 구현 없음)가 "one adapter = hypothetical seam" 안티패턴처럼 보였다. Adapter 모든 메서드가 `clippingService.foo() = clippingService.foo()` 형태로 mechanical forward 만 한다.
+
+**검증된 deletion test 결과**: 단순 mechanical forward 처럼 보이지만 port 가 흡수하는 실질 비용이 셋이다.
+- **Cross-module seam**: `modules/user/UserSubscriptionQueryService` 가 `clippingQueryPort.listRecentForCategories()` 를 호출한다. `modules/user` 는 별도 Gradle 모듈이라 root app 의 concrete `ClippingService` 를 직접 import 할 수 없다. Port 삭제 시 (a) `ClippingService` 를 모듈로 이동(과한 변경)하거나 (b) `modules/user` → root app 의존(금지 방향)을 만들어야 한다.
+- **MCP tool 테스트 격리**: 5개 테스트 파일(`AdminExportToolTest`, `UserSummaryToolsTest`, `UserInsightToolsTest`, `UserSubscriptionToolsTest`, `UserSummaryDetailsTest`)이 `ClippingQueryPort` 를 mock 한다. Port 제거 시 의존성 20+ 의 `ClippingService` 전체를 mock 해야 해 테스트 setup 이 폭증한다.
+- **엔진 추출 안정 seam**: ADR-035 Update -2 가 명시한 "concrete `ClippingService` 직접 주입 제거" 정책의 한 조각. 향후 엔진 또는 query 모듈로 분리 시 호출자 코드를 건드리지 않는다.
+
+**결정**: `ClippingQueryAdapter` 의 mechanical forwarding 은 비용 < 효용 이므로 그대로 유지한다. "shallow module" 휴리스틱만 보고 제거하지 않는다.
+
+**결과**:
+- 향후 아키텍처 리뷰에서 동일 후보가 "1:1 pass-through 이므로 제거"로 다시 제안되지 않는다.
+- Port 가 실제로 분기될 필요가 생기면(e.g. 두 번째 어댑터 등장, 모듈 추가 분리) 이 ADR 을 폐기/대체한다.
+- 이 결정은 ADR-035 Update -2 의 연장이며, "shallow port = bad" 휴리스틱보다 "moduel boundary + test isolation 비용" 을 우선한다.
+
+**참고**: 이 ADR 은 `improve-codebase-architecture` 리뷰에서 도출된 후보 #1 의 grilling 결과를 잠그기 위해 작성됐다. 같은 리뷰에서 도출된 후보 #2(PreparedDigestResult 통합)는 ADR-035 Update 2026-05-12 에 기록되어 진행됐다.
+
+## ADR-042: `SummaryDeliveryStore` narrow port 유지 (2026-05-12)
+
+**상태**: 채택
+
+**맥락**: 아키텍처 리뷰에서 `SummaryDeliveryStore`(15줄, 3개 메서드 — `findUnsent` / `markSent` / `findLatestSentByCategoryId`)가 `BatchSummaryStore` 의 작은 슬라이스라 "병합해도 무방" 처럼 보였다. 두 인터페이스는 같은 어댑터(`JpaBatchSummaryStore`, `JdbcBatchSummaryStore`)가 구현하고, 실제로 `BatchSummaryStore : SummaryDeliveryStore` 상속 관계다.
+
+**검증된 deletion test 결과**: 좁은 인터페이스가 **Interface Segregation Principle (ISP)** 가치를 흡수한다.
+- 6개 서비스(`ClippingService`, `AdminReviewQueueService`, `RalphPipelineOrchestrator`, `DigestService`, `AdminCategoryService`, `DigestDeliveryFinalizationService`)가 발송 상태 조회/갱신만 필요하다. 이들이 모두 `BatchSummaryStore` 의 wide 인터페이스(~10개 메서드)에 의존하게 되면:
+  - 테스트 mock 비용 3배 증가
+  - 호출하지 말아야 할 메서드(예: `DigestService` 가 `findByDateRange` 호출)에 우발적 접근 가능
+  - 코드만 봐도 "이 서비스는 발송 상태만 쓰는구나" 가독성 손실
+- 더 깊게 키우는 안(retry count, dedup keys, failure tracking 추가) 은 현재 호출자가 필요로 하지 않는 기능이라 YAGNI 위반.
+
+**결정**: `SummaryDeliveryStore` 의 3-메서드 narrow port 형태를 그대로 유지한다. "shallow port" 휴리스틱만 보고 병합하지 않는다. `BatchSummaryStore : SummaryDeliveryStore` 상속 + 어댑터 동일 구현 패턴도 그대로 둔다.
+
+**결과**:
+- 향후 아키텍처 리뷰에서 동일 후보가 "BatchSummaryStore 의 슬라이스이므로 병합"으로 다시 제안되지 않는다.
+- Port 가 실제로 분기될 필요(다른 어댑터, 다른 backing store) 가 생기거나 의미적으로 다른 책임(예: send retry queue) 이 들어와야 하면 이 ADR 을 폐기/대체한다.
+
+**참고**: ADR-041 과 같이 `improve-codebase-architecture` 리뷰의 "shallow seam" 휴리스틱이 ISP/test-isolation 가치를 못 본 사례. "narrow port" 와 "shallow port" 는 다르다.
+
 ## ADR-043: `:ports:persistence` group 변경으로 capability 충돌 해소 (2026-05-12)
 
 **상태**: 채택
