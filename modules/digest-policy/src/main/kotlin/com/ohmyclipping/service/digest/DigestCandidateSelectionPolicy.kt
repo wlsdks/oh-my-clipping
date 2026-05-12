@@ -154,8 +154,8 @@ data class DigestCandidateSelectionPolicy(
             append(keywords.joinToString(" "))
         }
             .lowercase(Locale.ROOT)
-            .replace(Regex("[^\\p{L}\\p{N}\\s]"), " ")
-            .split(Regex("\\s+"))
+            .replace(nonTokenChars, " ")
+            .split(tokenSeparator)
             .map { it.trim() }
             .filter { it.length >= 3 }
             .filterNot { STOPWORDS.contains(it) }
@@ -181,8 +181,8 @@ data class DigestCandidateSelectionPolicy(
 
     private fun tokenize(text: String): Set<String> =
         text.lowercase(Locale.ROOT)
-            .replace(Regex("[^\\p{L}\\p{N}\\s]"), " ")
-            .split(Regex("\\s+"))
+            .replace(nonTokenChars, " ")
+            .split(tokenSeparator)
             .filter { it.length > 1 }
             .toSet()
 
@@ -194,6 +194,8 @@ data class DigestCandidateSelectionPolicy(
         private const val TITLE_DUPLICATE_THRESHOLD = 0.65
         private const val TITLE_WEAK_DUPLICATE_THRESHOLD = 0.35
         private const val SEMANTIC_DUPLICATE_THRESHOLD = 0.90
+        private val nonTokenChars = Regex("[^\\p{L}\\p{N}\\s]")
+        private val tokenSeparator = Regex("\\s+")
 
         private val STOPWORDS = setOf(
             "summary", "translated", "title", "digest", "item", "slack", "news", "update",

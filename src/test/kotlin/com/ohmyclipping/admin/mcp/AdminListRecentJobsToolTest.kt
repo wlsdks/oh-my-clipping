@@ -41,6 +41,8 @@ class AdminListRecentJobsToolTest {
             val json = tool.admin_list_recent_jobs(limit = 51)
 
             json shouldContain "\"error\""
+            json shouldContain "\"type\":\"VALIDATION_ERROR\""
+            json shouldContain "\"retryable\":false"
             json shouldContain "limit must be between 1 and 50"
             verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { asyncClipJobService.listRecentJobs(any()) }
@@ -62,6 +64,8 @@ class AdminListRecentJobsToolTest {
 
             json shouldContain "\"error\""
             json shouldContain "-32022"
+            json shouldContain "\"type\":\"RATE_LIMITED\""
+            json shouldContain "\"retryable\":true"
             verify(exactly = 0) { asyncClipJobService.listRecentJobs(any()) }
         }
     }

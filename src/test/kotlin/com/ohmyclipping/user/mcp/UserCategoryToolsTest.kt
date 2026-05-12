@@ -87,6 +87,8 @@ class UserCategoryToolsTest {
             val json = tools.user_list_categories()
 
             json shouldContain "\"error\""
+            json shouldContain "\"type\":\"INTERNAL_ERROR\""
+            json shouldContain "\"retryable\":false"
             json shouldContain "Internal error"
             json shouldNotContain "boom"
         }
@@ -107,6 +109,8 @@ class UserCategoryToolsTest {
 
             json shouldContain "\"error\""
             json shouldContain "-32022"
+            json shouldContain "\"type\":\"RATE_LIMITED\""
+            json shouldContain "\"retryable\":true"
             verify(exactly = 0) { categoryService.listCategories() }
         }
     }
