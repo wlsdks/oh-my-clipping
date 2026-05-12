@@ -36,6 +36,7 @@ object DigestDocumentBuilder {
         keywordLimit: Int,
         items: List<DigestDocumentItem>,
     ): DigestDocument {
+        validateInputs(totalCandidates, requestedMaxItems, items)
         val safeKeywordLimit = keywordLimit.coerceIn(1, 10)
         return DigestDocument(
             categoryName = categoryName,
@@ -67,4 +68,22 @@ object DigestDocumentBuilder {
             .sortedByDescending { it.second }
             .map { it.first }
             .take(max.coerceAtLeast(0))
+
+    private fun validateInputs(
+        totalCandidates: Int,
+        requestedMaxItems: Int,
+        items: List<DigestDocumentItem>,
+    ) {
+        if (totalCandidates < 0) {
+            throw EngineInvalidInputException("totalCandidates must be non-negative")
+        }
+        if (requestedMaxItems < 0) {
+            throw EngineInvalidInputException("requestedMaxItems must be non-negative")
+        }
+        items.forEach { item ->
+            if (!item.importanceScore.isFinite()) {
+                throw EngineInvalidInputException("document item importanceScore must be finite: ${item.id}")
+            }
+        }
+    }
 }

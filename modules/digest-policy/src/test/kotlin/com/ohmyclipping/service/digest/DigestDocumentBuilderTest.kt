@@ -1,6 +1,7 @@
 package com.ohmyclipping.service.digest
 
 import io.kotest.matchers.shouldBe
+import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Test
 import java.time.Instant
 
@@ -10,12 +11,13 @@ class DigestDocumentBuilderTest {
         id: String,
         keywords: List<String>,
         fallback: Boolean = false,
+        importanceScore: Double = 0.8,
     ) = DigestDocumentItem(
         id = id,
         title = "Title $id",
         summary = "Summary $id",
         keywords = keywords,
-        importanceScore = 0.8,
+        importanceScore = importanceScore,
         whyImportant = "reason",
         sourceLink = "https://example.com/$id",
         createdAt = Instant.parse("2026-04-15T00:00:00Z"),
@@ -67,5 +69,44 @@ class DigestDocumentBuilderTest {
         )
 
         document.hasFallbackItems shouldBe true
+    }
+
+    @Test
+    fun `음수 totalCandidates 는 엔진 입력 오류로 거부한다`() {
+        shouldThrow<EngineInvalidInputException> {
+            DigestDocumentBuilder.build(
+                categoryName = "AI",
+                totalCandidates = -1,
+                requestedMaxItems = 3,
+                keywordLimit = 10,
+                items = listOf(item("a", listOf("AI"))),
+            )
+        }.message shouldBe "totalCandidates must be non-negative"
+    }
+
+    @Test
+    fun `음수 requestedMaxItems 는 엔진 입력 오류로 거부한다`() {
+        shouldThrow<EngineInvalidInputException> {
+            DigestDocumentBuilder.build(
+                categoryName = "AI",
+                totalCandidates = 1,
+                requestedMaxItems = -1,
+                keywordLimit = 10,
+                items = listOf(item("a", listOf("AI"))),
+            )
+        }.message shouldBe "requestedMaxItems must be non-negative"
+    }
+
+    @Test
+    fun `비정상 item importanceScore 는 엔진 입력 오류로 거부한다`() {
+        shouldThrow<EngineInvalidInputException> {
+            DigestDocumentBuilder.build(
+                categoryName = "AI",
+                totalCandidates = 1,
+                requestedMaxItems = 1,
+                keywordLimit = 10,
+                items = listOf(item("bad", listOf("AI"), importanceScore = Double.NaN)),
+            )
+        }.message shouldBe "document item importanceScore must be finite: bad"
     }
 }

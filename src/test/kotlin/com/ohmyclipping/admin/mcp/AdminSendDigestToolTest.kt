@@ -178,6 +178,38 @@ class AdminSendDigestToolTest {
     inner class `확인 요약 검증` {
 
         @Test
+        fun `빈 categoryId 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_send_digest(
+                categoryId = " ",
+                maxItems = null,
+                unsentOnly = null,
+                slackChannelId = null,
+                confirmationSummary = null,
+            )
+
+            json shouldContain "\"error\""
+            json shouldContain "categoryId must not be blank"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.digest(any(), any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `0 이하 maxItems 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_send_digest(
+                categoryId = "c1",
+                maxItems = 0,
+                unsentOnly = null,
+                slackChannelId = null,
+                confirmationSummary = null,
+            )
+
+            json shouldContain "\"error\""
+            json shouldContain "maxItems must be greater than 0"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.digest(any(), any(), any(), any(), any()) }
+        }
+
+        @Test
         fun `confirmationSummary 의 N건 이 maxItems 와 다르면 InvalidInputException`() {
             every {
                 slackMessageSender.getChannelInfo(botToken = null, channelId = "C0123ABC")
@@ -193,6 +225,8 @@ class AdminSendDigestToolTest {
 
             json shouldContain "\"error\""
             json shouldContain "확인 요약의 아이템 수"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { slackMessageSender.getChannelInfo(any(), any()) }
             verify(exactly = 0) { clippingService.digest(any(), any(), any(), any(), any()) }
         }
 
@@ -256,6 +290,22 @@ class AdminSendDigestToolTest {
 
             json shouldContain "\"error\""
             json shouldContain "형식이 올바르지 않습니다"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.digest(any(), any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `공백 slackChannelId 는 기본 채널 발송으로 정규화한다`() {
+            tool.admin_send_digest(
+                categoryId = " c1 ",
+                maxItems = 3,
+                unsentOnly = null,
+                slackChannelId = " ",
+                confirmationSummary = null,
+            )
+
+            verify(exactly = 0) { slackMessageSender.getChannelInfo(any(), any()) }
+            verify(exactly = 1) { clippingService.digest("c1", 3, null, true, null) }
         }
 
         @Test
