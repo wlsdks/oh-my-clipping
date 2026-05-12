@@ -16,9 +16,9 @@ describe("buildDonutData", () => {
     const result = buildDonutData(sentiment);
 
     expect(result).toEqual([
-      { name: "긍정", value: 10, fill: "#10b981" },
-      { name: "중립", value: 5, fill: "#94a3b8" },
-      { name: "부정", value: 3, fill: "#f43f5e" }
+      { name: "긍정", value: 10, fill: "var(--status-success-text)" },
+      { name: "중립", value: 5, fill: "var(--status-neutral-text)" },
+      { name: "부정", value: 3, fill: "var(--status-danger-text)" }
     ]);
   });
 

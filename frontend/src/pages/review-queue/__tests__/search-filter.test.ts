@@ -7,7 +7,7 @@ describe("review queue search filter", () => {
   });
 
   it("matches Korean initial consonants in title", () => {
-    expect(matchesKoreanSearch("MegaCorp 실적 발표", "ㅅㅅ")).toBe(true);
+    expect(matchesKoreanSearch("MegaCorp 실적 발표", "ㅅㅈ")).toBe(true);
   });
 
   it("does not match unrelated query", () => {
