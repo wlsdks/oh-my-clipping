@@ -77,8 +77,8 @@ object DigestDocumentBuilder {
         if (totalCandidates < 0) {
             throw EngineInvalidInputException("totalCandidates must be non-negative")
         }
-        if (requestedMaxItems <= 0) {
-            throw EngineInvalidInputException("requestedMaxItems must be greater than 0")
+        if (requestedMaxItems < 0) {
+            throw EngineInvalidInputException("requestedMaxItems must be non-negative")
         }
         items.forEach { item ->
             if (!item.importanceScore.isFinite()) {

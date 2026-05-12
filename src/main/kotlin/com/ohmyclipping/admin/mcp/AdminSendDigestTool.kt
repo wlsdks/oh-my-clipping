@@ -37,9 +37,6 @@ class AdminSendDigestTool(
         /** KST 기준 하루 단위 키를 만들기 위한 존. */
         private val KST_ZONE: ZoneId = ZoneId.of("Asia/Seoul")
 
-        private const val MIN_MAX_ITEMS = 1
-        private const val MAX_MAX_ITEMS = 5
-
         /** confirmationSummary 포맷 예: "3건 to #tech-news" 또는 "3 to tech-news". */
         private val CONFIRMATION_PATTERN =
             Regex("^\\s*(\\d{1,3})\\s*건?\\s*to\\s*#?([A-Za-z0-9._\\-가-힣]+)\\s*$")
@@ -134,8 +131,8 @@ class AdminSendDigestTool(
     }
 
     private fun validateMaxItems(maxItems: Int?): Int? {
-        if (maxItems != null && maxItems !in MIN_MAX_ITEMS..MAX_MAX_ITEMS) {
-            throw InvalidInputException("maxItems must be between $MIN_MAX_ITEMS and $MAX_MAX_ITEMS")
+        if (maxItems != null && maxItems <= 0) {
+            throw InvalidInputException("maxItems must be greater than 0")
         }
         return maxItems
     }

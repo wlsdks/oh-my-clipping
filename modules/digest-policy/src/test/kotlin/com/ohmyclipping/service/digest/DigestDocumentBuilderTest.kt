@@ -85,16 +85,16 @@ class DigestDocumentBuilderTest {
     }
 
     @Test
-    fun `0 이하 requestedMaxItems 는 엔진 입력 오류로 거부한다`() {
+    fun `음수 requestedMaxItems 는 엔진 입력 오류로 거부한다`() {
         shouldThrow<EngineInvalidInputException> {
             DigestDocumentBuilder.build(
                 categoryName = "AI",
                 totalCandidates = 1,
-                requestedMaxItems = 0,
+                requestedMaxItems = -1,
                 keywordLimit = 10,
                 items = listOf(item("a", listOf("AI"))),
             )
-        }.message shouldBe "requestedMaxItems must be greater than 0"
+        }.message shouldBe "requestedMaxItems must be non-negative"
     }
 
     @Test

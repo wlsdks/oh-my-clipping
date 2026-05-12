@@ -194,17 +194,17 @@ class AdminSendDigestToolTest {
         }
 
         @Test
-        fun `maxItems 범위 밖이면 rate limit 차감 없이 validation error 로 거부된다`() {
+        fun `0 이하 maxItems 는 rate limit 차감 없이 validation error 로 거부된다`() {
             val json = tool.admin_send_digest(
                 categoryId = "c1",
-                maxItems = 6,
+                maxItems = 0,
                 unsentOnly = null,
                 slackChannelId = null,
                 confirmationSummary = null,
             )
 
             json shouldContain "\"error\""
-            json shouldContain "maxItems must be between 1 and 5"
+            json shouldContain "maxItems must be greater than 0"
             verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { clippingService.digest(any(), any(), any(), any(), any()) }
         }
