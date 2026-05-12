@@ -29,6 +29,7 @@ function renderWithQueryClient(ui: React.ReactElement) {
 describe("DataExportDialog", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
     // jsdom 의 기본 createObjectURL 구현이 없어 수동 stub.
     if (!("createObjectURL" in URL)) {
       // @ts-expect-error URL 타입 확장
@@ -74,6 +75,7 @@ describe("DataExportDialog", () => {
       expect(toast.success).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
     });
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:mock");
   });
 
   it("CSV 옵션을 선택하면 csv 포맷으로 다운로드 요청한다", async () => {
