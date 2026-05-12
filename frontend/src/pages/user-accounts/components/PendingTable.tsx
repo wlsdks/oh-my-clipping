@@ -63,7 +63,7 @@ export function PendingTable({
                     ? "이 페이지 선택 해제"
                     : "이 페이지 전체 선택"
                 }
-                className="h-4 w-4 rounded border-gray-300 accent-primary"
+                className="h-4 w-4 rounded border-border accent-primary"
               />
             </TableHead>
             <TableHead scope="col">신청자</TableHead>
@@ -89,7 +89,7 @@ export function PendingTable({
                     checked={isChecked}
                     onChange={() => onToggleSelect(item.id)}
                     aria-label={`${displayLabel} 선택`}
-                    className="h-4 w-4 rounded border-gray-300 accent-primary"
+                    className="h-4 w-4 rounded border-border accent-primary"
                   />
                 </TableCell>
                 <TableCell>

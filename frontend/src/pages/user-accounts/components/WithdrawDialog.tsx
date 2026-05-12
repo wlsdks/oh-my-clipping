@@ -48,7 +48,7 @@ export function WithdrawDialog({ state, onClose, onNoteChange, onSlackCheckChang
             <Textarea id="withdraw-note" rows={3} value={state.note} onChange={(e) => onNoteChange(e.target.value)} placeholder="예: 퇴사로 인한 탈퇴 처리" />
           </div>
           <label className="flex items-start gap-3 cursor-pointer select-none">
-            <input type="checkbox" checked={state.slackCleanupConfirmed} onChange={(e) => onSlackCheckChange(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-gray-300 accent-primary" />
+            <input type="checkbox" checked={state.slackCleanupConfirmed} onChange={(e) => onSlackCheckChange(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-border accent-primary" />
             <span className="text-sm">Slack 채널에서 해당 사용자 관련 설정을 정리했어요</span>
           </label>
         </div>
