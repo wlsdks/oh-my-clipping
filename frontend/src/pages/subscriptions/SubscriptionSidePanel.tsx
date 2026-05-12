@@ -90,7 +90,7 @@ export function SubscriptionSidePanel({
     if (!item) return null;
 
     return (
-      <div className="w-[480px] shrink-0 border-l bg-card flex flex-col" style={{ maxHeight: "calc(100vh - 64px)" }}>
+      <div className="flex max-h-[calc(100vh-64px)] w-[480px] shrink-0 flex-col border-l bg-card">
         <div className="flex items-center justify-between border-b bg-card px-5 py-3 shrink-0">
           <h2 className="text-base font-semibold line-clamp-2">
             {panelTitle(item)}

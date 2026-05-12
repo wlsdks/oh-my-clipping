@@ -67,8 +67,7 @@ export function ReviewListPanel({
         ref={containerRef}
         role="listbox"
         aria-label="뉴스 목록"
-        className="overflow-y-auto space-y-1 pr-1"
-        style={{ maxHeight: "calc(100vh - 240px)" }}
+        className="max-h-[calc(100vh-240px)] overflow-y-auto space-y-1 pr-1"
       >
         <AnimatePresence initial={false}>
           {items.map((item) => {

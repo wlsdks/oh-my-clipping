@@ -29,7 +29,7 @@ export function ReviewDetailPanel({ item, isPending, onAction, allDone, channelL
   }
 
   return (
-    <div className="overflow-y-auto px-1" style={{ maxHeight: "calc(100vh - 200px)" }}>
+    <div className="max-h-[calc(100vh-200px)] overflow-y-auto px-1">
       <AnimatePresence mode="wait">
         <motion.div
           key={item.summaryId}
