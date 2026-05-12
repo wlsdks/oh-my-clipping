@@ -49,7 +49,7 @@ vi.mock("sonner", () => ({
 
 // SourceEditModal 은 프리젠테이션 + 내부에 다른 쿼리를 많이 쓰므로
 // 단위 테스트에서는 열림 여부만 확인하는 경량 stub 으로 대체한다.
-vi.mock("@/pages/sources/SourceEditModal", () => ({
+vi.mock("@/features/source-edit/SourceEditModal", () => ({
   SourceEditModal: ({
     open,
     source,

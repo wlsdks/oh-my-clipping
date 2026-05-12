@@ -24,7 +24,7 @@ import { CoverageGapBanner } from "./CoverageGapBanner";
 import { SourceQualityDashboard } from "./SourceQualityDashboard";
 import { SourcesEmptyState } from "./SourcesEmptyState";
 import { SourceCreateForm } from "./SourceCreateForm";
-import { SourceEditModal } from "./SourceEditModal";
+import { SourceEditModal } from "@/features/source-edit/SourceEditModal";
 import { SourceComplianceModal } from "./SourceComplianceModal";
 import { SourceAnalyticsDrawer } from "./SourceAnalyticsDrawer";
 import { Button } from "@/components/ui/button";

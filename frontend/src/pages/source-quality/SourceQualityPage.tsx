@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { SourceEditModal } from "@/pages/sources/SourceEditModal";
+import { SourceEditModal } from "@/features/source-edit/SourceEditModal";
 import { sourceQualityKeys } from "@/queries/sourceQualityKeys";
 import { sourceQualityService } from "@/services/sourceQualityService";
 import { sourceService } from "@/services/sourceService";
@@ -33,7 +33,7 @@ interface MutationArgs {
  *
  * - 상단 KPI 4장 (검토 필요, 신호 부족, 평균 클릭률, 총 발송)
  * - 하단 소스 테이블 (클릭률 오름차순 기본 + 상태 필터 chips + 편집/일시중지/활성화)
- * - 편집 → `SourceEditModal` 를 공용으로 재사용 (단건 조회 + 카테고리 목록 프리페치)
+ * - 편집 → source edit feature 를 공용으로 재사용 (단건 조회 + 카테고리 목록 프리페치)
  * - 수집 일시중지 → destructive 확정 다이얼로그 경유
  * - 활성화 → 다이얼로그 없이 즉시 호출 (실패 카운트 초기화)
  */
