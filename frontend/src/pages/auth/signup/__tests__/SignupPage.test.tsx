@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // departmentService 와 authService 는 훅이 import 하므로 반드시 SignupPage 보다 먼저 모킹해야 한다.
 vi.mock("@/services/authService", () => ({
@@ -52,15 +52,11 @@ vi.mock("sonner", () => ({
 import { SignupPage } from "../SignupPage";
 
 function renderSignup() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <SignupPage />
-      </MemoryRouter>
-    </QueryClientProvider>
+    <MemoryRouter>
+      <SignupPage />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

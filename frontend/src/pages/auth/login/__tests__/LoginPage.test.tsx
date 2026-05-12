@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { z } from "zod";
 import { LoginPage } from "../LoginPage";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // authService mock
 vi.mock("@/services/authService", () => ({
@@ -79,15 +79,11 @@ vi.mock("framer-motion", async () => {
 });
 
 function renderLogin() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-  });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>
-    </QueryClientProvider>
+    <MemoryRouter>
+      <LoginPage />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

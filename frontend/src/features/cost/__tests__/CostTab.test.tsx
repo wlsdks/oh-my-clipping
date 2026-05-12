@@ -1,9 +1,9 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 import { CostTab } from "../CostTab";
 import { costService } from "@/services/costService";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { CostDetail } from "@/types/cost";
 
 vi.mock("@/services/costService", () => ({
@@ -16,15 +16,9 @@ vi.mock("@/services/costService", () => ({
 const mockCostService = vi.mocked(costService);
 
 function renderCostTab() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+  return render(<CostTab categoryId="cat-tech" from="2026-05-01" to="2026-05-31" days={31} />, {
+    wrapper: createQueryClientWrapper(),
   });
-
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <CostTab categoryId="cat-tech" from="2026-05-01" to="2026-05-31" days={31} />
-    </QueryClientProvider>,
-  );
 }
 
 describe("CostTab", () => {
