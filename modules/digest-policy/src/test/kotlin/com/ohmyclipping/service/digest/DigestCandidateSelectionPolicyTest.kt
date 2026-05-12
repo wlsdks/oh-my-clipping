@@ -56,6 +56,19 @@ class DigestCandidateSelectionPolicyTest {
         }
 
         @Test
+        fun `공백 sourceId 는 manual source 로 정규화해 다양성 페널티를 적용한다`() {
+            val pool = listOf(
+                candidate("manual-1", " ", importance = 0.9, combined = 0.9),
+                candidate("manual-2", "", importance = 0.85, combined = 0.85),
+                candidate("external", "source-A", importance = 0.84, combined = 0.84),
+            )
+
+            val result = DigestCandidateSelectionPolicy(lambda = 0.5).selectWithSoftPenalty(pool, maxItems = 2)
+
+            result.map { it.id }.toSet() shouldBe setOf("manual-1", "external")
+        }
+
+        @Test
         fun `강한 소스 페널티에서도 최종 표시는 중요도 순서로 정렬한다`() {
             val pool = listOf(
                 candidate("a1", "A", 0.9),

@@ -64,7 +64,7 @@ data class DigestCandidateSelectionPolicy(
 
         fun comparator(picked: Map<String, Int>): Comparator<DigestCandidate> =
             compareByDescending<DigestCandidate> { candidate ->
-                val source = candidate.sourceId ?: NULL_SOURCE_KEY
+                val source = candidate.normalizedSourceKey()
                 candidate.combinedScore - lambda * (picked[source] ?: 0)
             }
                 .thenByDescending { it.importanceScore }
@@ -77,7 +77,7 @@ data class DigestCandidateSelectionPolicy(
 
             selected += best
             pool.remove(best)
-            val source = best.sourceId ?: NULL_SOURCE_KEY
+            val source = best.normalizedSourceKey()
             pickedPerSource[source] = (pickedPerSource[source] ?: 0) + 1
         }
 
@@ -152,6 +152,9 @@ data class DigestCandidateSelectionPolicy(
             .filter { it.length >= 3 }
             .filterNot { STOPWORDS.contains(it) }
             .toSet()
+
+    private fun DigestCandidate.normalizedSourceKey(): String =
+        sourceId?.trim()?.takeIf { it.isNotBlank() } ?: NULL_SOURCE_KEY
 
     private data class DigestCandidateFingerprint(
         val candidate: DigestCandidate,
