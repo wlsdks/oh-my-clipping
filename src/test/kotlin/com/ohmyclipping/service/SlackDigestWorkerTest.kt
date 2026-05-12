@@ -1,6 +1,7 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.service.digest.*
+import com.ohmyclipping.service.pipeline.toPipelineDigestResult
 
 import com.ohmyclipping.model.*
 import com.ohmyclipping.service.dto.clipping.*
@@ -164,7 +165,7 @@ class SlackDigestWorkerTest {
         every { deliveryLogStore.findLastSentDate(any(), any()) } returns null
         every { deliveryLogStore.hasNotifiedSinceLastSent(any(), any()) } returns false
         every { deliveryLogStore.savePreparedDigest(any(), any()) } just runs
-        every { clippingService.prepareDigest(any(), any(), any(), false, null) } returns digestResult.toPreparedDigestResult()
+        every { clippingService.prepareDigest(any(), any(), any(), false, null) } returns digestResult.toPipelineDigestResult()
         every { clippingService.sendPreparedDigest(any(), any(), any(), any()) } answers {
             val categoryId = firstArg<String>()
             val targetId = thirdArg<String>()
@@ -174,7 +175,7 @@ class SlackDigestWorkerTest {
                 slackChannelId = targetId,
                 slackMessageTs = "123.456",
                 markedSentCount = digestResult.items.size
-            ).toPreparedDigestResult()
+            ).toPipelineDigestResult()
         }
     }
 
@@ -201,7 +202,7 @@ class SlackDigestWorkerTest {
 
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
             verify(exactly = 1) { deliveryLogStore.savePreparedDigest("log-1", digestResult) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any()) }
             verify(exactly = 1) { deliveryLogStore.updateStatus("log-1", "SENT", 3, "123.456") }
         }
 
@@ -233,7 +234,7 @@ class SlackDigestWorkerTest {
             worker.publishDigests()
 
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any()) }
             verify(exactly = 1) { scheduleStore.findSchedulesDueNow(dayOfWeek, currentHour) }
             verify(exactly = 0) { requestStore.listByRequesterUserId(any()) }
             verify(exactly = 0) { requestStore.listAll(UserClippingRequestStatus.APPROVED) }
@@ -262,7 +263,7 @@ class SlackDigestWorkerTest {
 
             // 카테고리 채널(C9999)과 유저 채널(C0123) 모두 발송
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C9999", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C9999", any()) }
         }
 
         @Test
@@ -297,7 +298,7 @@ class SlackDigestWorkerTest {
 
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
             verify(exactly = 1) {
-                clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "D_DM_TEST", any())
+                clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "D_DM_TEST", any())
             }
             verify(exactly = 0) { adminUserStore.findById(any()) }
         }
@@ -333,9 +334,9 @@ class SlackDigestWorkerTest {
             worker.publishDigests()
 
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any()) }
             verify(exactly = 1) {
-                clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "D_DM_TEST", any())
+                clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "D_DM_TEST", any())
             }
         }
 
@@ -471,7 +472,7 @@ class SlackDigestWorkerTest {
             worker.publishDigests()
 
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any()) }
         }
     }
 
@@ -504,19 +505,19 @@ class SlackDigestWorkerTest {
 
             // cat-1은 prepared digest 전송 실패, cat-2는 성공
             every {
-                clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any())
+                clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any())
             } throws RuntimeException("Slack error")
             every {
                 clippingService.prepareDigest("cat-2", any(), any(), false, null)
-            } returns digestResult.copy(categoryId = "cat-2").toPreparedDigestResult()
+            } returns digestResult.copy(categoryId = "cat-2").toPipelineDigestResult()
             every {
                 clippingService.sendPreparedDigest(
                     "cat-2",
-                    digestResult.copy(categoryId = "cat-2").toPreparedDigestResult(),
+                    digestResult.copy(categoryId = "cat-2").toPipelineDigestResult(),
                     "C0123",
                     any()
                 )
-            } returns digestResult.copy(categoryId = "cat-2", postedToSlack = true, slackChannelId = "C0123", slackMessageTs = "123.456", markedSentCount = 3).toPreparedDigestResult()
+            } returns digestResult.copy(categoryId = "cat-2", postedToSlack = true, slackChannelId = "C0123", slackMessageTs = "123.456", markedSentCount = 3).toPipelineDigestResult()
 
             worker.publishDigests()
 
@@ -526,11 +527,11 @@ class SlackDigestWorkerTest {
             // 두 카테고리 모두 snapshot 생성 후 전송 시도
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
             verify(exactly = 1) { clippingService.prepareDigest("cat-2", any(), any(), false, null) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any()) }
             verify(exactly = 1) {
                 clippingService.sendPreparedDigest(
                     "cat-2",
-                    digestResult.copy(categoryId = "cat-2").toPreparedDigestResult(),
+                    digestResult.copy(categoryId = "cat-2").toPipelineDigestResult(),
                     "C0123",
                     any()
                 )
@@ -552,7 +553,7 @@ class SlackDigestWorkerTest {
             every { deliveryLogStore.tryReserve("cat-1", "C0123", today, currentHour) } returns "log-finalize"
             every { deliveryLogStore.updateStatus(any(), any(), any(), any()) } just runs
             every {
-                clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any())
+                clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any())
             } throws DigestDeliveryFinalizationException(
                 categoryId = "cat-1",
                 channelId = "C0123",
@@ -585,7 +586,7 @@ class SlackDigestWorkerTest {
             every { deliveryLogStore.tryReserve("cat-1", "C0123", today, currentHour) } returns "log-finalize"
             every { deliveryLogStore.updateStatus(any(), any(), any(), any()) } just runs
             every {
-                clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any())
+                clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any())
             } throws DigestDeliveryFinalizationException(
                 categoryId = "cat-1",
                 channelId = "C0123",
@@ -667,7 +668,7 @@ class SlackDigestWorkerTest {
 
             verify(exactly = 1) { retryOrchestrator.claim("retry-1") }
             verify(exactly = 0) { clippingService.prepareDigest(any(), any(), any(), any(), any()) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any()) }
             verify(exactly = 1) { deliveryLogStore.updateStatus("retry-1", "SENT", 3, "123.456") }
         }
 
@@ -689,7 +690,7 @@ class SlackDigestWorkerTest {
             )
             every { retryOrchestrator.claim("retry-finalize") } returns true
             every { categoryStore.findById("cat-1") } returns Category(id = "cat-1", name = "AI", isActive = true, slackChannelId = "C0123")
-            every { clippingService.finalizePreparedDigest("cat-1", digestResult.toPreparedDigestResult()) } returns 3
+            every { clippingService.finalizePreparedDigest("cat-1", digestResult.toPipelineDigestResult()) } returns 3
             every { deliveryLogStore.updateStatus(any(), any(), any(), any()) } just runs
 
             worker.publishDigests()
@@ -697,7 +698,7 @@ class SlackDigestWorkerTest {
             verify(exactly = 1) { retryOrchestrator.claim("retry-finalize") }
             verify(exactly = 0) { clippingService.prepareDigest(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { clippingService.sendPreparedDigest(any(), any(), any(), any()) }
-            verify(exactly = 1) { clippingService.finalizePreparedDigest("cat-1", digestResult.toPreparedDigestResult()) }
+            verify(exactly = 1) { clippingService.finalizePreparedDigest("cat-1", digestResult.toPipelineDigestResult()) }
             verify(exactly = 1) {
                 deliveryLogStore.updateStatus("retry-finalize", "SENT", 3, "ts-after-send")
             }
@@ -724,7 +725,7 @@ class SlackDigestWorkerTest {
             worker.publishDigests()
 
             verify(exactly = 1) { clippingService.prepareDigest("cat-1", any(), any(), false, null) }
-            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPreparedDigestResult(), "C0123", any()) }
+            verify(exactly = 1) { clippingService.sendPreparedDigest("cat-1", digestResult.toPipelineDigestResult(), "C0123", any()) }
         }
 
         @Test
@@ -761,7 +762,7 @@ class SlackDigestWorkerTest {
             every { deliveryLogStore.updateStatus(any(), any(), any(), any()) } just runs
             // sendPreparedDigest가 postedToSlack=false를 반환하면 SKIPPED
             every { clippingService.sendPreparedDigest("cat-1", any(), "C0123", any()) } returns
-                digestResult.copy(postedToSlack = false, slackChannelId = "C0123", markedSentCount = 0).toPreparedDigestResult()
+                digestResult.copy(postedToSlack = false, slackChannelId = "C0123", markedSentCount = 0).toPipelineDigestResult()
         }
 
         @Test

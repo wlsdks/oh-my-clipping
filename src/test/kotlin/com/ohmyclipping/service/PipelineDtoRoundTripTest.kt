@@ -55,11 +55,10 @@ class PipelineDtoRoundTripTest {
     }
 
     @Test
-    fun `pipeline and prepared DTO round trips preserve digest result contract`() {
+    fun `pipeline DTO round trip preserves digest result contract`() {
         val original = sampleDigestResult()
 
         original.toPipelineDigestResult().toDigestResult() shouldBe original
-        original.toPreparedDigestResult().toDigestResult() shouldBe original
     }
 
     private fun sampleDigestResult(): DigestResult =

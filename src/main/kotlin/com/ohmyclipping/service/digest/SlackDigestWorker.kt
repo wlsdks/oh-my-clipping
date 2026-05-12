@@ -5,6 +5,8 @@ import com.ohmyclipping.resilience.TokenBucketRateLimiter
 import com.ohmyclipping.service.DeliveryRetryOrchestrator
 import com.ohmyclipping.service.RuntimeSettingService
 import com.ohmyclipping.service.event.DigestDeliveryFinalizationRequestedEvent
+import com.ohmyclipping.service.pipeline.toDigestResult
+import com.ohmyclipping.service.pipeline.toPipelineDigestResult
 import com.ohmyclipping.service.port.DigestDeliveryWorkflowPort
 import com.ohmyclipping.service.port.SlackDeliveryPort
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -276,7 +278,7 @@ class SlackDigestWorker(
             // 준비된 스냅샷을 그대로 전송해 채널과 DM이 같은 후보 집합을 공유하게 한다.
             val result = digestDeliveryWorkflowPort.sendPreparedDigest(
                 categoryId = category.id,
-                preparedDigest = mergedDigest.toPreparedDigestResult(),
+                preparedDigest = mergedDigest.toPipelineDigestResult(),
                 slackChannelId = reservedTarget.targetId,
                 categoryNameOverride = reservedTarget.requestNameOverride
             ).toDigestResult()
@@ -509,7 +511,7 @@ class SlackDigestWorker(
             }
             val markedCount = digestDeliveryWorkflowPort.finalizePreparedDigest(
                 candidate.categoryId,
-                preparedDigest.toPreparedDigestResult()
+                preparedDigest.toPipelineDigestResult()
             )
             deliveryLogStore.updateStatus(candidate.id, "SENT", markedCount, candidate.slackMessageTs)
             log.info {
@@ -528,7 +530,7 @@ class SlackDigestWorker(
         ).toDigestResult()
         val result = digestDeliveryWorkflowPort.sendPreparedDigest(
             categoryId = candidate.categoryId,
-            preparedDigest = preparedDigest.toPreparedDigestResult(),
+            preparedDigest = preparedDigest.toPipelineDigestResult(),
             slackChannelId = candidate.channelId
         ).toDigestResult()
         // 재시도 성공 시 기존 로그의 상태를 갱신한다.

@@ -89,11 +89,10 @@ class PipelinePortBoundaryTest {
         Files.exists(enginePortRoot.resolve("DigestDeliveryWorkflowPort.kt")) shouldBe false
 
         val digestDeliveryPortSource = Files.readString(digestDeliveryPort)
-        digestDeliveryPortSource shouldContain "PreparedDigestResult"
-        digestDeliveryPortSource shouldContain "PreparedDigestItemResult"
-        digestDeliveryPortSource shouldNotContain "import com.ohmyclipping.service.port.PipelineDigestResult"
-        digestDeliveryPortSource shouldNotContain "): PipelineDigestResult"
-        digestDeliveryPortSource shouldNotContain "preparedDigest: PipelineDigestResult"
+        // PipelineDigestResult 는 core/api-models 에서 공유한다 (PreparedDigestResult 통합 후).
+        digestDeliveryPortSource shouldContain "PipelineDigestResult"
+        digestDeliveryPortSource shouldNotContain "PreparedDigestResult"
+        digestDeliveryPortSource shouldNotContain "PreparedDigestItemResult"
         digestDeliveryPortSource shouldNotContain "com.ohmyclipping.model"
     }
 

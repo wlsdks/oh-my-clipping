@@ -5,6 +5,10 @@ package com.ohmyclipping.service.port
  *
  * SlackDigestWorker 는 스케줄, 대상 예약, retry orchestration 만 담당하고
  * 실제 digest 생성/전송/finalization 세부 구현은 이 포트 뒤 adapter 에 둔다.
+ *
+ * 반환 타입은 엔진 파이프라인 DTO 와 공유하는 [PipelineDigestResult] 다.
+ * prepared digest 와 pipeline digest 는 동일한 실행 결과 스냅샷이므로
+ * 별도의 워크플로 전용 DTO 를 두지 않는다.
  */
 interface DigestDeliveryWorkflowPort {
     fun prepareDigest(
@@ -13,47 +17,14 @@ interface DigestDeliveryWorkflowPort {
         unsentOnly: Boolean?,
         sendToSlack: Boolean?,
         slackChannelId: String?,
-    ): PreparedDigestResult
+    ): PipelineDigestResult
 
     fun sendPreparedDigest(
         categoryId: String,
-        preparedDigest: PreparedDigestResult,
+        preparedDigest: PipelineDigestResult,
         slackChannelId: String,
         categoryNameOverride: String? = null,
-    ): PreparedDigestResult
+    ): PipelineDigestResult
 
-    fun finalizePreparedDigest(categoryId: String, preparedDigest: PreparedDigestResult): Int
+    fun finalizePreparedDigest(categoryId: String, preparedDigest: PipelineDigestResult): Int
 }
-
-/**
- * Prepared digest workflow 전용 DTO.
- *
- * PipelineDigestResult 와 필드 형태는 유사하지만, prepared digest retry/finalization 경계의 계약을
- * pipeline 실행 결과 DTO와 독립시키기 위해 별도로 유지한다.
- */
-data class PreparedDigestResult(
-    val categoryId: String,
-    val categoryName: String,
-    val unsentOnly: Boolean,
-    val totalCandidates: Int,
-    val selectedCount: Int,
-    val postedToSlack: Boolean,
-    val slackChannelId: String?,
-    val slackMessageTs: String?,
-    val markedSentCount: Int,
-    val digestText: String,
-    val items: List<PreparedDigestItemResult>,
-    val fallbackUsed: Boolean = false,
-)
-
-data class PreparedDigestItemResult(
-    val summaryId: String,
-    val title: String,
-    val summary: String,
-    val keywords: List<String>,
-    val importanceScore: Float,
-    val whyImportant: String,
-    val sourceLink: String,
-    val createdAt: String,
-    val isFallback: Boolean = false,
-)

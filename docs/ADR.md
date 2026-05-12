@@ -973,6 +973,8 @@ A narrow `setKeywordsAndExcludeEventTypes` method was added to `CategoryRuleStor
 
 **Update 2026-05-02-11**: 루트 앱 내부에서도 MVC 기준이 아니라 도메인 기준으로 알림 정책 서비스를 `service/notification/` 패키지로 이동했다. `OperationsNotificationService`와 `UserNotificationService`는 알림 도메인 패키지가 소유하고, 기존 호출 서비스는 명시 import로 이 도메인 서비스에 의존한다.
 
+**Update 2026-05-12**: `PreparedDigestResult`/`PreparedDigestItemResult` 를 삭제하고 `DigestDeliveryWorkflowPort` 가 엔진과 동일한 `PipelineDigestResult`/`PipelineDigestItemResult` 를 사용하도록 통합했다. Update -8 에서 분리한 prepared/pipeline DTO 가 11일간 한 번도 갈라지지 않은 채 1:1 매핑만 발생했고, `DigestDeliveryWorkflowMapper` 가 순수 forwarding 코드였다. 통합으로 다음 변화가 발생한다: (1) Pipeline DTO 6종(`PipelineCollect/Summarize/Digest*`)이 `core/api-models` 로 이동해 엔진 모듈(`modules/digest-policy`)과 app port 모듈(`ports/workflow`)이 공유한다. (2) `modules/digest-policy` 가 `core/api-models` 에 implementation 의존성을 추가한다. (3) `DigestDeliveryWorkflowMapper.kt` 를 삭제하고, `DigestDeliveryWorkflowAdapter` 와 `SlackDigestWorker` 가 기존 `ClippingPipelineResultMapper` 의 `toPipelineDigestResult/toDigestResult` 만 사용한다. (4) `PipelinePortBoundaryTest` 의 디지스트 워크플로 포트 어서션이 `PreparedDigestResult` 부재 + `PipelineDigestResult` 사용을 검증하도록 갱신됐다. 향후 prepared/pipeline DTO 가 실제로 갈라져야 하는 변경이 발생하면 그때 다시 분리한다.
+
 **Update 2026-05-02-12**: 루트 앱의 파이프라인 orchestration/실행/로그/분석 서비스를 `service/pipeline/` 도메인 패키지로 이동했다. public bean 타입과 메서드 계약은 유지하고 import만 새 도메인 패키지로 변경해 기존 API/스케줄러/이벤트 동작을 보존한다.
 
 **Update 2026-05-02-13**: `clipping-app-ports`에 섞여 있던 API 결과 DTO와 파이프라인 실행 이력 DTO를 각각 `clipping-api-models`, `clipping-pipeline-models`로 물리 분리했다. 패키지명(`service.dto.clipping`, `service.dto.pipeline`)은 유지해 기존 import와 직렬화 계약을 보존하고, 각 모듈에 Spring/JPA/store/app model import 차단 task를 추가했다.

@@ -25,6 +25,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core:api-models"))
+
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
     testImplementation("io.kotest:kotest-assertions-core:5.9.1")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.11.4")

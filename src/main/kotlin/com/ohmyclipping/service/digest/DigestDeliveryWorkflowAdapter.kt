@@ -1,8 +1,10 @@
 package com.ohmyclipping.service.digest
 
 import com.ohmyclipping.service.ClippingService
+import com.ohmyclipping.service.pipeline.toDigestResult
+import com.ohmyclipping.service.pipeline.toPipelineDigestResult
 import com.ohmyclipping.service.port.DigestDeliveryWorkflowPort
-import com.ohmyclipping.service.port.PreparedDigestResult
+import com.ohmyclipping.service.port.PipelineDigestResult
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,23 +18,23 @@ class DigestDeliveryWorkflowAdapter(
         unsentOnly: Boolean?,
         sendToSlack: Boolean?,
         slackChannelId: String?,
-    ): PreparedDigestResult =
+    ): PipelineDigestResult =
         clippingService.digest(categoryId, maxItems, unsentOnly, sendToSlack, slackChannelId)
-            .toPreparedDigestResult()
+            .toPipelineDigestResult()
 
     override fun sendPreparedDigest(
         categoryId: String,
-        preparedDigest: PreparedDigestResult,
+        preparedDigest: PipelineDigestResult,
         slackChannelId: String,
         categoryNameOverride: String?,
-    ): PreparedDigestResult =
+    ): PipelineDigestResult =
         clippingService.sendPreparedDigest(
             categoryId = categoryId,
             preparedDigest = preparedDigest.toDigestResult(),
             slackChannelId = slackChannelId,
             categoryNameOverride = categoryNameOverride,
-        ).toPreparedDigestResult()
+        ).toPipelineDigestResult()
 
-    override fun finalizePreparedDigest(categoryId: String, preparedDigest: PreparedDigestResult): Int =
+    override fun finalizePreparedDigest(categoryId: String, preparedDigest: PipelineDigestResult): Int =
         clippingService.finalizePreparedDigest(categoryId, preparedDigest.toDigestResult())
 }
