@@ -8,6 +8,11 @@ class TestResizeObserver implements ResizeObserver {
   }
 
   observe(target: Element) {
+    const observedBoxSize = {
+      inlineSize: 600,
+      blockSize: 240,
+    };
+
     this.callback(
       [
         {
@@ -23,9 +28,9 @@ class TestResizeObserver implements ResizeObserver {
             left: 0,
             toJSON: () => ({}),
           },
-          borderBoxSize: [],
-          contentBoxSize: [],
-          devicePixelContentBoxSize: [],
+          borderBoxSize: [observedBoxSize],
+          contentBoxSize: [observedBoxSize],
+          devicePixelContentBoxSize: [observedBoxSize],
         },
       ],
       this,
