@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BarChart,
@@ -225,6 +225,7 @@ function RefreshControl({ lastRefreshedAt, isFetching, cooldownActive, onRefresh
 export function DbHealthPage() {
   const queryClient = useQueryClient();
   const [cooldownActive, setCooldownActive] = useState(false);
+  const cooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data, isLoading, isError, isFetching, refetch } = useQuery({
     queryKey: dbMetricsKeys.snapshot(),
@@ -240,8 +241,19 @@ export function DbHealthPage() {
       queryClient.setQueryData(dbMetricsKeys.snapshot(), fresh);
     });
     setCooldownActive(true);
-    setTimeout(() => setCooldownActive(false), REFRESH_COOLDOWN_MS);
+    cooldownTimerRef.current = setTimeout(() => {
+      setCooldownActive(false);
+      cooldownTimerRef.current = null;
+    }, REFRESH_COOLDOWN_MS);
   }
+
+  useEffect(() => {
+    return () => {
+      if (cooldownTimerRef.current) {
+        clearTimeout(cooldownTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="p-4 sm:p-6 space-y-5">

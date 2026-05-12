@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { createQueryClientWrapper } from "@/test/queryClient";
@@ -73,6 +73,10 @@ function renderPage() {
 describe("DbHealthPage", () => {
   beforeEach(() => {
     vi.mocked(dbMetricsService.getSnapshot).mockReset();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("KPI 카드에 크기와 퍼센트를 렌더한다", async () => {
@@ -186,5 +190,24 @@ describe("DbHealthPage", () => {
 
     // 클릭 직후 비활성화 (30초 쿨다운 시작)
     expect(btn).toBeDisabled();
+  });
+
+  it("수동 새로고침 쿨다운이 지나면 버튼이 다시 활성화된다", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(dbMetricsService.getSnapshot).mockResolvedValue(BASE_SNAPSHOT);
+    renderPage();
+
+    const btn = await screen.findByRole("button", { name: /새로고침/i });
+
+    await act(async () => {
+      btn.click();
+    });
+    expect(btn).toBeDisabled();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(30_000);
+    });
+
+    expect(btn).not.toBeDisabled();
   });
 });
