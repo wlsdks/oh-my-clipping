@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactElement } from "react";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // V129 ProfileEditModal — 부서/팀 FK cascade 편집 플로우 검증.
 
@@ -35,11 +36,8 @@ vi.mock("sonner", () => ({
 import { ProfileEditModal } from "@/components/shared/ProfileEditModal";
 import { userService } from "@/services/userService";
 
-function renderWithQc(ui: React.ReactElement) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+function renderWithQc(ui: ReactElement) {
+  return render(ui, { wrapper: createQueryClientWrapper() });
 }
 
 describe("ProfileEditModal (V129 cascade)", () => {

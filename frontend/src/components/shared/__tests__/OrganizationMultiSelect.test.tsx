@@ -2,8 +2,8 @@ import { useState } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OrganizationMultiSelect } from "../OrganizationMultiSelect";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { Organization, OrganizationListResponse } from "@/types/organization";
 
 const listMock = vi.fn();
@@ -47,14 +47,9 @@ function Harness({ initialValue = [] }: HarnessProps) {
 }
 
 function renderSelect(initialValue: string[] = []) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+  return render(<Harness initialValue={initialValue} />, {
+    wrapper: createQueryClientWrapper(),
   });
-  return render(
-    <QueryClientProvider client={qc}>
-      <Harness initialValue={initialValue} />
-    </QueryClientProvider>,
-  );
 }
 
 describe("OrganizationMultiSelect", () => {

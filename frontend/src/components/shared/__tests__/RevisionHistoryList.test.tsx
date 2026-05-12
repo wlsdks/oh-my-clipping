@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 
 import { RevisionHistoryList } from "@/components/shared/RevisionHistoryList";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // historyService를 mock 해 UI 상호작용만 집중 검증한다.
 vi.mock("@/services/historyService", () => ({
@@ -19,11 +20,8 @@ vi.mock("sonner", () => ({
 
 import { historyService } from "@/services/historyService";
 
-function renderWithQueryClient(ui: React.ReactElement) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: 0 } }
-  });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+function renderWithQueryClient(ui: ReactElement) {
+  return render(ui, { wrapper: createQueryClientWrapper() });
 }
 
 const sampleRevisions = [

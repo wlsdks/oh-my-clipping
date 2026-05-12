@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 
 import { DataExportDialog } from "@/components/shared/DataExportDialog";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // userService 는 네트워크를 타므로 mock 한다.
 vi.mock("@/services/userService", () => ({
@@ -19,11 +20,8 @@ vi.mock("sonner", () => ({
 import { userService } from "@/services/userService";
 import { toast } from "sonner";
 
-function renderWithQueryClient(ui: React.ReactElement) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } }
-  });
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>);
+function renderWithQueryClient(ui: ReactElement) {
+  return render(ui, { wrapper: createQueryClientWrapper() });
 }
 
 describe("DataExportDialog", () => {
