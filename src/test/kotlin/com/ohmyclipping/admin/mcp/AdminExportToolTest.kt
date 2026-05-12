@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test
  *
  * 검증 포인트:
  *  - 레이트 리밋(5회/시간, categoryId 단위)이 호출 맨 앞에서 강제된다.
- *  - limit 파라미터가 서버 측에서 1..500 범위로 클램핑되어 서비스로 전달된다.
+ *  - limit 파라미터가 1..500 범위 밖이면 서비스 호출 없이 validation error 로 거부된다.
  *  - 레이트 리밋 초과 시 RateLimitExceededException 이 JSON-RPC 에러로 매핑된다.
  */
 class AdminExportToolTest {
@@ -65,33 +65,23 @@ class AdminExportToolTest {
         }
 
         @Test
-        fun `limit 이 500 을 초과하면 500 으로 클램핑된다`() {
-            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
-            val capturedLimit = slot<Int?>()
-            every {
-                clippingService.exportSummaries(any(), any(), any(), captureNullable(capturedLimit))
-            } returns emptyResult
+        fun `limit 이 500 을 초과하면 validation error 로 거부된다`() {
+            val json = tool.admin_export(categoryId = "c1", daysBack = null, includeOriginal = null, limit = 10_000)
 
-            tool.admin_export(categoryId = "c1", daysBack = null, includeOriginal = null, limit = 10_000)
-
-            assert(capturedLimit.captured == 500) {
-                "limit 10000 은 500 으로 클램핑되어야 하지만 ${capturedLimit.captured}"
-            }
+            json shouldContain "\"error\""
+            json shouldContain "limit must be between 1 and 500"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.exportSummaries(any(), any(), any(), any()) }
         }
 
         @Test
-        fun `limit 이 0 이하이면 1 로 클램핑된다`() {
-            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
-            val capturedLimit = slot<Int?>()
-            every {
-                clippingService.exportSummaries(any(), any(), any(), captureNullable(capturedLimit))
-            } returns emptyResult
+        fun `limit 이 0 이하이면 validation error 로 거부된다`() {
+            val json = tool.admin_export(categoryId = "c1", daysBack = null, includeOriginal = null, limit = 0)
 
-            tool.admin_export(categoryId = "c1", daysBack = null, includeOriginal = null, limit = 0)
-
-            assert(capturedLimit.captured == 1) {
-                "limit 0 은 1 로 클램핑되어야 하지만 ${capturedLimit.captured}"
-            }
+            json shouldContain "\"error\""
+            json shouldContain "limit must be between 1 and 500"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.exportSummaries(any(), any(), any(), any()) }
         }
 
         @Test

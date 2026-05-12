@@ -1,5 +1,6 @@
 package com.ohmyclipping.admin.mcp
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.service.port.ClippingQueryPort
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component
  * Admin 도구 — 카테고리 단위 요약 레코드 대량 내보내기.
  *
  * 벌크 덤프는 DB / 스토리지 부하가 크므로 카테고리 단위로 **최대 5회/시간** 까지만
- * 허용하고, limit 파라미터는 서버 측에서 1..500 범위로 클램핑한다.
+ * 허용하고, limit 파라미터는 1..500 범위 밖이면 명확한 입력 오류로 거부한다.
  */
 @Component
 class AdminExportTool(
@@ -25,7 +26,7 @@ class AdminExportTool(
             **언제 쓰나:** 분석이나 감사 목적으로 여러 건의 원본 레코드 덤프가 필요할 때.
             **쓰지 말 것:** 일반 사용자가 최근 요약을 보려고 할 때 — user_list_recent_summaries 를 사용.
             **파라미터:** categoryId 필수, daysBack 선택, includeOriginal 선택 (기본 false),
-              limit 선택 (기본 100, 서버에서 1..500 범위로 강제 클램핑).
+              limit 선택 (1~500, 기본 100).
             **Rate limit:** 카테고리 단위로 최대 5회/시간. 초과 시 Retry-After 헤더와 함께 거부된다.
             **반환:** 레코드 배열이 담긴 ExportResult.
         """,
@@ -39,11 +40,12 @@ class AdminExportTool(
         )
         includeOriginal: Boolean?,
         @ToolParam(
-            description = "내보낼 최대 레코드 수 (기본 100, 최대 500 으로 클램핑됨)",
+            description = "내보낼 최대 레코드 수 (1~500, 기본 100)",
             required = false,
         )
         limit: Int?,
     ): String = mcpToolCall {
+        val effectiveLimit = validateLimit(limit)
         // 호출 빈도 제한: 카테고리 단위로 최대 5회/시간. 벌크 덤프 남용을 막는다.
         rateLimiter.checkOrThrow(
             toolName = "admin_export",
@@ -51,9 +53,15 @@ class AdminExportTool(
             windowSeconds = WINDOW_SECONDS,
             dimension = categoryId,
         )
-        // limit 은 서버 측에서 클램핑해 악의/실수로 수백만 건을 요청하는 경로를 봉쇄한다.
-        val cappedLimit = limit?.coerceIn(MIN_LIMIT, MAX_LIMIT) ?: DEFAULT_LIMIT
-        clippingQueryPort.exportSummaries(categoryId, daysBack, includeOriginal, cappedLimit)
+        clippingQueryPort.exportSummaries(categoryId, daysBack, includeOriginal, effectiveLimit)
+    }
+
+    private fun validateLimit(limit: Int?): Int {
+        val effective = limit ?: DEFAULT_LIMIT
+        if (effective !in MIN_LIMIT..MAX_LIMIT) {
+            throw InvalidInputException("limit must be between $MIN_LIMIT and $MAX_LIMIT")
+        }
+        return effective
     }
 
     private companion object {
