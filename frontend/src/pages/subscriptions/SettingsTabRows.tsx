@@ -55,24 +55,39 @@ export function EditableTextRow({
   const [draft, setDraft] = useState("");
   const [saved, setSaved] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) {
       setDraft(rawValue ?? value);
       setSaved(false);
-      setTimeout(() => {
+      focusTimerRef.current = setTimeout(() => {
         inputRef.current?.focus();
         inputRef.current?.select();
+        focusTimerRef.current = null;
       }, 50);
     }
+    return () => {
+      if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
+    };
   }, [open, value, rawValue]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   function handleSave() {
     const trimmed = draft.trim();
     if (!trimmed && label === "이름") return;
     onSave(trimmed);
     setSaved(true);
-    setTimeout(() => setOpen(false), 800);
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(false);
+      closeTimerRef.current = null;
+    }, 800);
   }
 
   return (
@@ -143,6 +158,7 @@ interface EditablePillRowProps {
 export function EditablePillRow({ label, value, isWorking, onSave }: EditablePillRowProps) {
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function handleSelect(n: number) {
     if (n === value) {
@@ -151,12 +167,21 @@ export function EditablePillRow({ label, value, isWorking, onSave }: EditablePil
     }
     onSave(n);
     setSaved(true);
-    setTimeout(() => setOpen(false), 800);
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(false);
+      closeTimerRef.current = null;
+    }, 800);
   }
 
   useEffect(() => {
     if (open) setSaved(false);
   }, [open]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -226,6 +251,7 @@ interface EditablePurposeRowProps {
 export function EditablePurposeRow({ value, isWorking, onSave }: EditablePurposeRowProps) {
   const [open, setOpen] = useState(false);
   const [saved, setSaved] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) setSaved(false);
@@ -241,8 +267,17 @@ export function EditablePurposeRow({ value, isWorking, onSave }: EditablePurpose
     }
     onSave(next);
     setSaved(true);
-    setTimeout(() => setOpen(false), 800);
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(false);
+      closeTimerRef.current = null;
+    }, 800);
   }
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -333,21 +368,38 @@ export function EditableTextareaRow({
   const [draft, setDraft] = useState("");
   const [saved, setSaved] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) {
       setDraft(value);
       setSaved(false);
-      setTimeout(() => textareaRef.current?.focus(), 50);
+      focusTimerRef.current = setTimeout(() => {
+        textareaRef.current?.focus();
+        focusTimerRef.current = null;
+      }, 50);
     }
+    return () => {
+      if (focusTimerRef.current) clearTimeout(focusTimerRef.current);
+    };
   }, [open, value]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    };
+  }, []);
 
   function handleSave() {
     const trimmed = draft.trim();
     // 빈 문자열은 서비스 레이어에서 null 로 초기화로 해석된다.
     onSave(trimmed.length === 0 ? "" : trimmed);
     setSaved(true);
-    setTimeout(() => setOpen(false), 800);
+    closeTimerRef.current = setTimeout(() => {
+      setOpen(false);
+      closeTimerRef.current = null;
+    }, 800);
   }
 
   // 요약 표시값: 긴 문장은 앞 30자만 노출.
