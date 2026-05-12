@@ -1,5 +1,6 @@
 package com.ohmyclipping.admin.mcp
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.service.AdminClippingService
@@ -49,6 +50,10 @@ class AdminPipelineTool(
             required = false,
         ) _ralphLoopStopPhrase: String?,
     ): String = mcpToolCall {
+        validateCategoryId(categoryId)
+        validateHoursBack(hoursBack)
+        validateMaxItems(maxItems)
+
         // 호출 빈도 제한: 최대 5회/시간. 파이프라인은 비용이 크다.
         rateLimiter.checkOrThrow("admin_pipeline", maxRequests = 5, windowSeconds = 3600)
         adminClippingService.runPipeline(
@@ -62,5 +67,28 @@ class AdminPipelineTool(
             ralphLoopMaxIterationsOverride = _ralphLoopMaxIterations,
             ralphLoopStopPhraseOverride = _ralphLoopStopPhrase,
         )
+    }
+
+    private fun validateCategoryId(categoryId: String) {
+        if (categoryId.isBlank()) {
+            throw InvalidInputException("categoryId must not be blank")
+        }
+    }
+
+    private fun validateHoursBack(hoursBack: Int?) {
+        if (hoursBack != null && hoursBack <= 0) {
+            throw InvalidInputException("hoursBack must be greater than 0")
+        }
+    }
+
+    private fun validateMaxItems(maxItems: Int?) {
+        if (maxItems != null && maxItems !in MIN_MAX_ITEMS..MAX_MAX_ITEMS) {
+            throw InvalidInputException("maxItems must be between $MIN_MAX_ITEMS and $MAX_MAX_ITEMS")
+        }
+    }
+
+    companion object {
+        private const val MIN_MAX_ITEMS = 1
+        private const val MAX_MAX_ITEMS = 5
     }
 }
