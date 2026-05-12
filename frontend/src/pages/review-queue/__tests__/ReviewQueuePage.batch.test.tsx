@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 import { ReviewQueuePage } from "../ReviewQueuePage";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { ReviewQueueItem, BulkActionResponse } from "@/types/review";
 import type { RuntimeSettings } from "@/types/runtime";
 
@@ -96,19 +96,12 @@ function makeSettings(overrides: Partial<RuntimeSettings> = {}): RuntimeSettings
 }
 
 function renderPage() {
-  const qc = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, staleTime: 0 },
-      mutations: { retry: false },
-    },
-  });
   return render(
     <MemoryRouter>
-      <QueryClientProvider client={qc}>
-        <ReviewQueuePage />
-        <Toaster />
-      </QueryClientProvider>
-    </MemoryRouter>
+      <ReviewQueuePage />
+      <Toaster />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type {
   ReviewPolicyStatus,
   ReviewPolicyStatusResponse,
@@ -65,17 +65,11 @@ function buildDistribution(overrides: Partial<ScoreDistribution> = {}): ScoreDis
 }
 
 function renderDashboard(props: { onCategoryClick?: (id: string) => void } = {}) {
-  const qc = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, staleTime: 0 },
-    },
-  });
   return render(
     <MemoryRouter>
-      <QueryClientProvider client={qc}>
-        <ReviewPolicyDashboard onCategoryClick={props.onCategoryClick ?? (() => {})} />
-      </QueryClientProvider>
+      <ReviewPolicyDashboard onCategoryClick={props.onCategoryClick ?? (() => {})} />
     </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

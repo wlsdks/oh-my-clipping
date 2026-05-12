@@ -1,7 +1,7 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 import type { PipelineRunsPage } from "@/types/pipeline";
 import type { DeliveryLogsPage } from "@/types/delivery";
@@ -25,13 +25,11 @@ import { OpsMetricsSection } from "../OpsMetricsSection";
 const mockHook = vi.mocked(useOpsMetricsData);
 
 function renderSection() {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={qc}>
-      <MemoryRouter>
-        <OpsMetricsSection />
-      </MemoryRouter>
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <OpsMetricsSection />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

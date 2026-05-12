@@ -1,10 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { Toaster } from "sonner";
 import type { ReactNode } from "react";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // OrganizationMultiSelect — Radix Popover 없이 테스트하기 위한 간단한 대체 컴포넌트
 vi.mock("@/components/shared/OrganizationMultiSelect", () => ({
@@ -97,19 +97,12 @@ function makeDryRunResult(overrides: Partial<RuleDryRunResult> = {}): RuleDryRun
 }
 
 function renderWithProviders(ui: ReactNode) {
-  const qc = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, staleTime: 0 },
-      mutations: { retry: false },
-    },
-  });
   return render(
     <MemoryRouter>
-      <QueryClientProvider client={qc}>
-        <Toaster />
-        {ui}
-      </QueryClientProvider>
+      <Toaster />
+      {ui}
     </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 
