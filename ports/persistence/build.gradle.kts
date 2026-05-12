@@ -2,8 +2,17 @@ plugins {
     kotlin("jvm") version "2.3.0"
 }
 
-group = "com.ohmyclipping"
+// `:ports:persistence` 와 `:adapters:persistence` 가 default Gradle capability
+// (`{group}:{lastPathSegment}:{version}` = `com.ohmyclipping:persistence:2.0.0`) 를 공유하면
+// 의존성 substitution 으로 `:adapters:persistence` 가 자기 자신을 참조해 순환 task graph 가
+// 발생한다. group 을 distinct 하게 잡아 capability 충돌을 끊는다.
+// 운영 publishing 설정이 없으므로 group prefix 변경의 외부 영향은 없다.
+group = "com.ohmyclipping.ports"
 version = "2.0.0"
+
+base {
+    archivesName.set("store-spi")
+}
 
 java {
     toolchain {

@@ -1132,3 +1132,30 @@ A narrow `setKeywordsAndExcludeEventTypes` method was added to `CategoryRuleStor
 
 - 설계 문서: `docs/superpowers/specs/2026-05-11-module-restructure-design.md` (로컬 작업용)
 - 실행 계획: `docs/superpowers/plans/2026-05-11-module-restructure.md` (로컬 작업용)
+
+## ADR-043: `:ports:persistence` group 변경으로 capability 충돌 해소 (2026-05-12)
+
+**상태**: 채택
+
+**맥락**: 모듈 재구성(ADR-040 / commit `e510f27`) 이후 `:ports:persistence` 와 `:adapters:persistence` 가 같은 default Gradle capability 를 갖게 됐다:
+- 두 모듈 모두 `group = "com.ohmyclipping"`, `version = "2.0.0"`
+- Gradle 의 default capability 형식은 `{group}:{project.name}:{version}` 인데, `project.name` 은 경로의 마지막 segment 인 `persistence` 로 같음
+- 결과 capability `com.ohmyclipping:persistence:2.0.0` 가 두 모듈에 동시 존재
+
+이로 인해 `:adapters:persistence` 의 `implementation(project(":ports:persistence"))` 가 Gradle 의존성 해결에서 자기 자신으로 substitution (`:ports:persistence -> :adapters:persistence`) 됐다. `:adapters:persistence:compileKotlin` 이 자기 jar 에 의존하는 순환 task graph 가 발생해 root app 의 `./gradlew check` 가 빌드 실패로 직행했다.
+
+증거:
+- `./gradlew :adapters:persistence:dependencies --configuration runtimeClasspath` 출력에서 `project :ports:persistence -> project :adapters:persistence (*)` substitution 화살표가 보임.
+- `./gradlew :adapters:persistence:compileKotlin` 만 단독 실행해도 순환 task graph 에러로 실패.
+
+**결정**: `:ports:persistence/build.gradle.kts` 의 `group` 을 `com.ohmyclipping` → `com.ohmyclipping.ports` 로 변경한다. capability 가 `com.ohmyclipping.ports:persistence:2.0.0` 으로 분리되어 substitution 이 풀린다. `archivesName.set("store-spi")` 도 함께 설정해 산출물 jar 이름(`store-spi-2.0.0.jar`) 까지 distinct 하게 한다.
+
+`outgoing.capability(...)` 명시 방식, settings.gradle 의 project name 재정의 방식도 검토했으나 (a) 전자는 default capability 를 덮지 않고 추가만 됐고, (b) 후자는 project path 자체를 바꿔 9개 build 파일의 `project(":ports:persistence")` 참조를 모두 깨뜨렸다. group 변경이 가장 작은 surface.
+
+**결과**:
+- `./gradlew :compileKotlin`, `./gradlew :compileTestKotlin`, `./gradlew :test` 모두 진행 가능해진다.
+- ADR-040 의 모듈 재구성 의도는 보존된다(경로/이름 변경 없음).
+- 외부 publishing 설정이 없으므로 group prefix 변경의 외부 시스템 영향은 없다.
+- **부수 효과 — 656건의 사전 존재 테스트 실패가 드러났다.** 빌드가 `e510f27` 이후로 깨져 있어 `./gradlew :test` 가 한 번도 실행되지 못한 사이 누적된 잠재 결함이다. 대표 증상: `@SpringBootTest` 들이 Hibernate Schema-validation 실패(`missing table [admin_users]`) 로 ApplicationContext 로딩에 실패. Flyway 가 H2 스키마를 채우기 전에 Hibernate 가 검증한다. 이 ADR 범위 밖이며 별도 후속 작업으로 추적해야 한다.
+
+**향후 대안**: 모듈명을 path 와 일치시키고 싶다면 `project(":ports:persistence").name = "store-spi"` 로 rename + 9개 build 파일 참조를 함께 업데이트하는 방안이 더 의미적이지만, 본 ADR 의 범위에서는 group 변경만으로 충분하다.
