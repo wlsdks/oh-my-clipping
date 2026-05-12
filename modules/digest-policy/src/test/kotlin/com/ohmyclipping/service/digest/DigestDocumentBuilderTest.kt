@@ -98,6 +98,19 @@ class DigestDocumentBuilderTest {
     }
 
     @Test
+    fun `totalCandidates 가 선정 item 수보다 작으면 엔진 입력 오류로 거부한다`() {
+        shouldThrow<EngineInvalidInputException> {
+            DigestDocumentBuilder.build(
+                categoryName = "AI",
+                totalCandidates = 1,
+                requestedMaxItems = 2,
+                keywordLimit = 10,
+                items = listOf(item("a", listOf("AI")), item("b", listOf("Cloud"))),
+            )
+        }.message shouldBe "totalCandidates must be greater than or equal to selected item count"
+    }
+
+    @Test
     fun `비정상 item importanceScore 는 엔진 입력 오류로 거부한다`() {
         shouldThrow<EngineInvalidInputException> {
             DigestDocumentBuilder.build(

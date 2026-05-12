@@ -53,11 +53,17 @@ class AdminOrganizationTools(
     fun admin_category_organizations(
         @ToolParam(description = "카테고리 ID") categoryId: String,
     ): String = mcpToolCall {
-        if (categoryId.isBlank()) {
+        val normalizedCategoryId = categoryId.trim()
+        if (normalizedCategoryId.isBlank()) {
             throw InvalidInputException("categoryId is required")
         }
-        rateLimiter.checkOrThrow("admin_category_organizations", maxRequests = 60, windowSeconds = 3600)
-        organizationService.findByCategoryId(categoryId)
+        rateLimiter.checkOrThrow(
+            toolName = "admin_category_organizations",
+            maxRequests = 60,
+            windowSeconds = 3600,
+            dimension = normalizedCategoryId,
+        )
+        organizationService.findByCategoryId(normalizedCategoryId)
     }
 
     /** type 문자열을 OrganizationType enum 으로 변환하며, 허용 밖이면 InvalidInputException. */
