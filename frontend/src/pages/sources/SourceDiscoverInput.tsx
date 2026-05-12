@@ -16,7 +16,8 @@ export function SourceDiscoverInput({ onSelect }: SourceDiscoverInputProps) {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<DiscoverResult | null>(null);
   const [open, setOpen] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const requestSeqRef = useRef(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -26,12 +27,20 @@ export function SourceDiscoverInput({ onSelect }: SourceDiscoverInputProps) {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      requestSeqRef.current += 1;
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
   }, []);
 
   function handleChange(value: string) {
     setQuery(value);
     if (timerRef.current) clearTimeout(timerRef.current);
+    const requestSeq = requestSeqRef.current + 1;
+    requestSeqRef.current = requestSeq;
     if (value.trim().length < 2) {
       setResults(null);
       setOpen(false);
@@ -41,12 +50,16 @@ export function SourceDiscoverInput({ onSelect }: SourceDiscoverInputProps) {
       setLoading(true);
       try {
         const res = await sourceService.discoverSource(value.trim());
+        if (requestSeqRef.current !== requestSeq) return;
         setResults(res);
         setOpen(true);
       } catch {
+        if (requestSeqRef.current !== requestSeq) return;
         setResults(null);
       } finally {
-        setLoading(false);
+        if (requestSeqRef.current === requestSeq) {
+          setLoading(false);
+        }
       }
     }, 500);
   }
