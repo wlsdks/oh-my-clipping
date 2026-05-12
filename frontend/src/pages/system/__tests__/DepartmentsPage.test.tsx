@@ -72,7 +72,7 @@ vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
 }));
 
-import { DepartmentsPage } from "@/pages/system/DepartmentsPage";
+import { DepartmentsPage } from "../DepartmentsPage";
 import { departmentService } from "@/services/departmentService";
 import { toast } from "sonner";
 

@@ -32,6 +32,26 @@ export default tseslint.config(
     }
   },
   {
+    files: [
+      "src/pages/**/*.{ts,tsx}",
+      "src/features/**/*.{ts,tsx}",
+      "src/components/**/*.{ts,tsx}"
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/pages/*"],
+              message: "페이지/기능/컴포넌트 내부에서는 다른 page slice를 절대 경로로 import하지 마세요. 공유 UI는 features 또는 components/shared로 올리고, 같은 page 내부는 상대 경로를 쓰세요."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
     // Files that intentionally mix component and non-component exports (constants, utils)
     files: [
       "src/pages/dashboard/ui/QuickSetupStepPersona.tsx",
