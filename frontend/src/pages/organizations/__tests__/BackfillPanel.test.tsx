@@ -97,6 +97,7 @@ describe("BackfillPanel", () => {
   beforeEach(() => {
     previewMock.mockReset();
     applyMock.mockReset();
+    previewMock.mockResolvedValue(makePreviewResponse([]));
   });
 
   it("기본 confidence=high 필터로 preview 를 호출하고 결과 테이블을 렌더링한다", async () => {

@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { SystemStatusResponse } from "@/types/systemStatus";
 
 // Mock all Section-level hooks so we test page composition only
 vi.mock("../hooks/useActionRequiredData");
@@ -10,7 +11,7 @@ vi.mock("../hooks/useOpsMetricsData");
 vi.mock("../hooks/useOperatorFooterData");
 vi.mock("@/services/systemStatusService", () => ({
   systemStatusService: {
-    getStatus: vi.fn().mockResolvedValue(undefined),
+    getStatus: vi.fn(),
   },
 }));
 
@@ -19,11 +20,47 @@ import { usePendingTasksData } from "../hooks/usePendingTasksData";
 import { useOpsMetricsData } from "../hooks/useOpsMetricsData";
 import { useOperatorFooterData } from "../hooks/useOperatorFooterData";
 import { AdminDashboardPage } from "../AdminDashboardPage";
+import { systemStatusService } from "@/services/systemStatusService";
 
 const mockActionRequired = vi.mocked(useActionRequiredData);
 const mockPendingTasks = vi.mocked(usePendingTasksData);
 const mockOpsMetrics = vi.mocked(useOpsMetricsData);
 const mockOperatorFooter = vi.mocked(useOperatorFooterData);
+const mockSystemStatusService = vi.mocked(systemStatusService);
+
+const okSystemStatus: SystemStatusResponse = {
+  server: {
+    uptime: "1d",
+    javaVersion: "21.0.2",
+    activeProfiles: ["test"],
+    memoryUsedMb: 128,
+    memoryMaxMb: 512,
+  },
+  database: {
+    connected: true,
+    poolActive: 1,
+    poolIdle: 4,
+    poolTotal: 5,
+  },
+  slack: {
+    botTokenConfigured: true,
+    defaultChannelId: "C123",
+    healthy: true,
+    lastCheckTime: "2026-05-13T00:00:00Z",
+  },
+  ai: {
+    circuitBreakerState: "CLOSED",
+    canCall: true,
+    consecutiveOpenCount: 0,
+    totalOpenCount: 0,
+    lastOpenedAt: null,
+  },
+  jobQueue: {
+    pendingJobs: 0,
+    threshold: 100,
+  },
+  schedulers: [],
+};
 
 function makeEmptyActionRequired() {
   return { items: [], isLoading: false, error: null, refetch: vi.fn() };
@@ -81,6 +118,7 @@ describe("AdminDashboardPage", () => {
     mockPendingTasks.mockReturnValue(makeEmptyPendingTasks());
     mockOpsMetrics.mockReturnValue(makeEmptyOpsMetrics());
     mockOperatorFooter.mockReturnValue(makeEmptyOperatorFooter());
+    mockSystemStatusService.getStatus.mockResolvedValue(okSystemStatus);
   });
 
   it("홈은 4 Section 을 렌더링", async () => {
