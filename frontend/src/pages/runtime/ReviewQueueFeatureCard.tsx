@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CollapsibleSection } from "@/components/shared/CollapsibleSection";
-import { MAX_BULK_SELECT } from "@/pages/review-queue/model/constants";
+import { MAX_BULK_SELECT } from "@/features/review-queue/model/bulkLimits";
 import type { RuntimeSettings } from "@/types/runtime";
 import type { RuntimeSettingsUpdateRequest } from "@/services/runtimeService";
 
