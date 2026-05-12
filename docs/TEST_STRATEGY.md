@@ -65,6 +65,7 @@ src/test/kotlin/com/ohmyclipping/
 ./gradlew :ports:workflow:checkAppPortBoundaries
 ./gradlew :adapters:persistence:checkPersistenceBoundaries
 ./gradlew :adapters:notification:checkNotificationBoundaries
+./gradlew :modules:admin:checkAdminModelBoundaries
 ./gradlew :modules:digest-policy:checkEngineBoundaries
 ./gradlew :modules:collection:checkCollectionBoundaries
 ./gradlew :modules:source:checkSourceBoundaries
@@ -76,7 +77,7 @@ src/test/kotlin/com/ohmyclipping/
 `./gradlew check`는 위 경계 검사를 포함한다. `core/domain`은 Spring, JPA, store,
 entity, repository, service, adapter import를 허용하지 않는다. 엔진/API/app 계약
 모듈(`modules/digest-policy`, `core/api-models`, `ports/workflow`)은 Spring, JPA, store, entity, repository, root app model import를 허용하지 않는다.
-피처 모듈(`modules/collection`, `modules/source`, `modules/user`, `modules/analytics`, `modules/digest`, `adapters/notification`)은 Spring service bean은 허용하지만 root app 구현 패키지 역참조를 허용하지 않는다.
+피처 모듈(`modules/collection`, `modules/source`, `modules/user`, `modules/analytics`, `modules/digest`, `adapters/notification`)은 Spring service bean은 허용하지만 root app 구현 패키지 역참조를 허용하지 않는다. `modules/admin`은 현재 관리자 DTO 전용 모듈이며 구현 패키지 의존을 허용하지 않는다.
 `ports/persistence`는 Spring/JPA/entity/repository/adapter import를 허용하지 않고, `adapters/persistence`는
 app service/adapter/config import를 허용하지 않는다.
 

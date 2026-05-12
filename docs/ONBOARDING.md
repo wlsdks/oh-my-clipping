@@ -157,6 +157,7 @@ oh-my-clipping/
 `:ports:workflow:checkAppPortBoundaries`,
 `:adapters:persistence:checkPersistenceBoundaries`,
 `:adapters:notification:checkNotificationBoundaries`,
+`:modules:admin:checkAdminModelBoundaries`,
 `:modules:digest-policy:checkEngineBoundaries`,
 `:modules:collection:checkCollectionBoundaries`,
 `:modules:source:checkSourceBoundaries`,
