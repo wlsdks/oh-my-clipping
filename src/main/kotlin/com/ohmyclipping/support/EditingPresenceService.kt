@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.ohmyclipping.error.InvalidInputException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.redis.core.ScanOptions
@@ -81,9 +82,10 @@ class EditingPresenceService @Autowired constructor(
         displayName: String
     ) {
         // 입력 화이트리스트 검증 — Redis 키 오염/스캔 비용 폭주 방지.
-        require(resourceType in ALLOWED_RESOURCE_TYPES) { "unsupported resourceType: $resourceType" }
-        require(resourceId.isNotBlank()) { "resourceId must not be blank" }
-        require(userId.isNotBlank()) { "userId must not be blank" }
+        validateResourceKey(resourceType, resourceId)
+        if (userId.isBlank()) {
+            throw InvalidInputException("userId must not be blank")
+        }
 
         val safeDisplayName = displayName.ifBlank { "관리자" }
         val key = buildKey(resourceType, resourceId, userId)
@@ -111,9 +113,10 @@ class EditingPresenceService @Autowired constructor(
      * TTL 로도 자동 정리되지만, 즉시 presence 를 제거해 다른 편집자의 대기 시간을 줄여 준다.
      */
     fun release(resourceType: String, resourceId: String, userId: String) {
-        require(resourceType in ALLOWED_RESOURCE_TYPES) { "unsupported resourceType: $resourceType" }
-        require(resourceId.isNotBlank()) { "resourceId must not be blank" }
-        require(userId.isNotBlank()) { "userId must not be blank" }
+        validateResourceKey(resourceType, resourceId)
+        if (userId.isBlank()) {
+            throw InvalidInputException("userId must not be blank")
+        }
         val key = buildKey(resourceType, resourceId, userId)
         try {
             redisTemplate.delete(key)
@@ -131,8 +134,7 @@ class EditingPresenceService @Autowired constructor(
         resourceId: String,
         excludeUserId: String? = null
     ): List<EditingSession> {
-        require(resourceType in ALLOWED_RESOURCE_TYPES) { "unsupported resourceType: $resourceType" }
-        require(resourceId.isNotBlank()) { "resourceId must not be blank" }
+        validateResourceKey(resourceType, resourceId)
         val pattern = "$KEY_PREFIX:$resourceType:$resourceId:*"
         return try {
             scanSessions(pattern, excludeUserId)
@@ -170,6 +172,15 @@ class EditingPresenceService @Autowired constructor(
             // 값 포맷 변경/깨짐 대비 — 경고만 남기고 무시해 나머지 세션 조회에는 영향이 없게 한다.
             log.warn(e) { "EditingPresence JSON parse failed: raw=$raw" }
             null
+        }
+    }
+
+    private fun validateResourceKey(resourceType: String, resourceId: String) {
+        if (resourceType !in ALLOWED_RESOURCE_TYPES) {
+            throw InvalidInputException("unsupported resourceType: $resourceType")
+        }
+        if (resourceId.isBlank()) {
+            throw InvalidInputException("resourceId must not be blank")
         }
     }
 

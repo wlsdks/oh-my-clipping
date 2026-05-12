@@ -1,5 +1,6 @@
 package com.ohmyclipping.support
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.support.EditingPresenceService.Companion.defaultMapper
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldContainExactly
@@ -121,14 +122,14 @@ class EditingPresenceServiceTest {
 
         @Test
         fun `허용되지 않은 resourceType 은 즉시 거부된다`() {
-            assertThrows<IllegalArgumentException> {
+            assertThrows<InvalidInputException> {
                 createService().heartbeat("unknown", "p-1", "u-1", "A")
             }
         }
 
         @Test
         fun `resourceId 가 blank 면 거부된다`() {
-            assertThrows<IllegalArgumentException> {
+            assertThrows<InvalidInputException> {
                 createService().heartbeat("persona", "  ", "u-1", "A")
             }
         }
@@ -154,7 +155,7 @@ class EditingPresenceServiceTest {
 
         @Test
         fun `허용되지 않은 resourceType 은 거부된다`() {
-            assertThrows<IllegalArgumentException> {
+            assertThrows<InvalidInputException> {
                 createService().release("bogus", "s-1", "alice")
             }
         }
@@ -234,7 +235,7 @@ class EditingPresenceServiceTest {
 
         @Test
         fun `허용되지 않은 resourceType 은 거부된다`() {
-            assertThrows<IllegalArgumentException> {
+            assertThrows<InvalidInputException> {
                 createService().listActive("bogus", "p-1")
             }
         }
