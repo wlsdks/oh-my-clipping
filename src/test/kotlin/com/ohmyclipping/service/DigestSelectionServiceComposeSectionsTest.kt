@@ -1,10 +1,12 @@
 package com.ohmyclipping.service
 
 import com.ohmyclipping.service.digest.DigestArticle
+import com.ohmyclipping.service.digest.EngineInvalidInputException
 import com.ohmyclipping.service.digest.DigestMode
 import com.ohmyclipping.service.digest.composeSections
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.kotest.assertions.throwables.shouldThrow
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -122,6 +124,13 @@ class DigestSelectionServiceComposeSectionsTest {
             val sections = composeSections(DigestMode.TOPIC_ONLY, emptyList(), budget = 5)
             sections shouldHaveSize 1
             sections[0].articles shouldHaveSize 0
+        }
+
+        @Test
+        fun `budget 이 0 이하면 EngineInvalidInputException 으로 거부된다`() {
+            shouldThrow<EngineInvalidInputException> {
+                composeSections(DigestMode.TOPIC_ONLY, emptyList(), budget = 0)
+            }
         }
     }
 }
