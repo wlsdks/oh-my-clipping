@@ -50,7 +50,7 @@ class EnginePipelineRunner(
                 status = EnginePipelineStepStatus.SUCCEEDED,
                 startedAt = startedAt,
                 endedAt = Instant.now(clock),
-                detail = detailBuilder(result)
+                detail = safeDetail(result, detailBuilder)
             )
             result
         } catch (e: RuntimeException) {
@@ -59,14 +59,21 @@ class EnginePipelineRunner(
                 status = EnginePipelineStepStatus.FAILED,
                 startedAt = startedAt,
                 endedAt = Instant.now(clock),
-                detail = e.message?.take(MAX_FAILURE_DETAIL_LENGTH)
+                detail = e.message?.take(MAX_STEP_DETAIL_LENGTH)
             )
             throw e
         }
     }
 
+    private fun <T> safeDetail(result: T, detailBuilder: (T) -> String?): String? =
+        try {
+            detailBuilder(result)?.take(MAX_STEP_DETAIL_LENGTH)
+        } catch (e: RuntimeException) {
+            "detail unavailable: ${e::class.simpleName ?: "RuntimeException"}"
+        }
+
     private companion object {
-        const val MAX_FAILURE_DETAIL_LENGTH = 240
+        const val MAX_STEP_DETAIL_LENGTH = 240
     }
 }
 
