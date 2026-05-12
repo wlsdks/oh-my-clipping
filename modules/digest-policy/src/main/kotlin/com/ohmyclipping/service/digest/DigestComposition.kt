@@ -34,6 +34,10 @@ fun composeSections(
     articles: List<DigestArticle>,
     budget: Int
 ): List<DigestSectionResult> {
+    if (budget <= 0) {
+        throw EngineInvalidInputException("budget must be greater than 0")
+    }
+
     // budget=1 이면 DUAL 섹션 중 account 에 0건이 되어 무의미 — CROSSFILTER 로 downgrade
     val effectiveMode =
         if (budget == 1 && mode == DigestMode.DUAL_SECTION) DigestMode.CROSSFILTER else mode

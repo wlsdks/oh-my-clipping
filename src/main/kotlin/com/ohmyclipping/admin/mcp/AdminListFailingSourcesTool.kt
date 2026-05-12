@@ -1,6 +1,7 @@
 package com.ohmyclipping.admin.mcp
 
 import com.ohmyclipping.error.InvalidInputException
+import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.service.source.SourceHealthService
 import org.springframework.ai.tool.annotation.Tool
@@ -14,7 +15,10 @@ import org.springframework.stereotype.Component
  * 기본 24시간 임계값 대신 해당 시간을 초과해 미수신된 소스까지 포함한다.
  */
 @Component
-class AdminListFailingSourcesTool(private val sourceHealthService: SourceHealthService) {
+class AdminListFailingSourcesTool(
+    private val sourceHealthService: SourceHealthService,
+    private val rateLimiter: McpRateLimiter,
+) {
 
     companion object {
         /** 최소 허용 시간. 0 이하 값은 의미가 없고 서비스가 기본값으로 폴백하도록 거부한다. */
@@ -42,6 +46,12 @@ class AdminListFailingSourcesTool(private val sourceHealthService: SourceHealthS
                 throw InvalidInputException("hours must be between $MIN_HOURS and $MAX_HOURS")
             }
         }
+        rateLimiter.checkOrThrow(
+            toolName = "admin_list_failing_sources",
+            maxRequests = 60,
+            windowSeconds = 3600,
+            dimension = normalized?.toString(),
+        )
         sourceHealthService.getHealth(staleHours = normalized)
     }
 }
