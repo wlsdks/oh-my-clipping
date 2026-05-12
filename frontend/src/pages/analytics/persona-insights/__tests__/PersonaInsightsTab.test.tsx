@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { PersonaInsightsTab } from "../../PersonaInsightsTab";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type {
   LiveSnapshotResponse,
   SignalsResponse,
@@ -21,15 +21,11 @@ vi.mock("@/services/personaAnalyticsService", () => ({
 import { personaAnalyticsService } from "@/services/personaAnalyticsService";
 
 function renderTab() {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
-    <QueryClientProvider client={qc}>
-      <MemoryRouter>
-        <PersonaInsightsTab />
-      </MemoryRouter>
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <PersonaInsightsTab />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

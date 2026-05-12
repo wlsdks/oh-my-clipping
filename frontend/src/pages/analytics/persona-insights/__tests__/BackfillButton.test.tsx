@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BackfillButton } from "../BackfillButton";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // personaAnalyticsService 모킹
 vi.mock("@/services/personaAnalyticsService", () => ({
@@ -25,27 +25,18 @@ vi.mock("sonner", () => ({
 import { personaAnalyticsService } from "@/services/personaAnalyticsService";
 import { toast } from "sonner";
 
-function createWrapper() {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
-  });
-  return function Wrapper({ children }: { children: React.ReactNode }) {
-    return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
-  };
-}
-
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
 describe("BackfillButton", () => {
   it("기본 텍스트로 렌더링된다", () => {
-    render(<BackfillButton weeks={12} />, { wrapper: createWrapper() });
+    render(<BackfillButton weeks={12} />, { wrapper: createQueryClientWrapper() });
     expect(screen.getByRole("button")).toHaveTextContent("지난 12주 데이터 집계");
   });
 
   it("weeks prop 이 다르면 해당 값을 표시한다", () => {
-    render(<BackfillButton weeks={26} />, { wrapper: createWrapper() });
+    render(<BackfillButton weeks={26} />, { wrapper: createQueryClientWrapper() });
     expect(screen.getByRole("button")).toHaveTextContent("지난 26주 데이터 집계");
   });
 
@@ -58,7 +49,7 @@ describe("BackfillButton", () => {
       durationMs: 1200,
     });
 
-    render(<BackfillButton weeks={12} />, { wrapper: createWrapper() });
+    render(<BackfillButton weeks={12} />, { wrapper: createQueryClientWrapper() });
     await user.click(screen.getByRole("button"));
 
     await vi.waitFor(() => {
@@ -75,7 +66,7 @@ describe("BackfillButton", () => {
       durationMs: 1200,
     });
 
-    render(<BackfillButton weeks={12} />, { wrapper: createWrapper() });
+    render(<BackfillButton weeks={12} />, { wrapper: createQueryClientWrapper() });
     await user.click(screen.getByRole("button"));
 
     // mutation resolve 후 확인
@@ -92,7 +83,7 @@ describe("BackfillButton", () => {
       new Error("network error"),
     );
 
-    render(<BackfillButton weeks={12} />, { wrapper: createWrapper() });
+    render(<BackfillButton weeks={12} />, { wrapper: createQueryClientWrapper() });
     await user.click(screen.getByRole("button"));
 
     await vi.waitFor(() => {

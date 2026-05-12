@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { AtRiskPersonaCard } from "../AtRiskPersonaCard";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { RiskSignalItem } from "@/types/personaAnalytics";
 
 // react-router-dom 의 useNavigate 만 별도 spy — 나머지는 실제 모듈 유지.
@@ -15,15 +15,11 @@ vi.mock("react-router-dom", async () => {
 });
 
 function renderCard(item: RiskSignalItem) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
-    <QueryClientProvider client={qc}>
-      <MemoryRouter>
-        <AtRiskPersonaCard item={item} currentWeekIso="2026-W16" />
-      </MemoryRouter>
-    </QueryClientProvider>,
+    <MemoryRouter>
+      <AtRiskPersonaCard item={item} currentWeekIso="2026-W16" />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 
