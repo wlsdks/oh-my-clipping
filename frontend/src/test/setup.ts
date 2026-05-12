@@ -55,6 +55,13 @@ if (typeof HTMLElement !== "undefined" && typeof HTMLElement.prototype.scrollTo 
   });
 }
 
+if (typeof globalThis.scrollTo === "function") {
+  Object.defineProperty(globalThis, "scrollTo", {
+    value: () => {},
+    writable: true
+  });
+}
+
 /**
  * jsdom v26+ 의 localStorage 구현이 zustand persist 미들웨어가 기대하는
  * Storage 인터페이스(setItem/getItem/removeItem)를 함수로 제공하지 않는 경우가 있다.
