@@ -100,18 +100,19 @@ data class DigestCandidateSelectionPolicy(
 
     fun dedupeCandidates(candidates: List<DigestCandidate>): List<DigestCandidate> {
         if (candidates.isEmpty()) return emptyList()
-        val selected = mutableListOf<DigestCandidate>()
+        val selected = mutableListOf<DigestCandidateFingerprint>()
         candidates.forEach { candidate ->
+            val fingerprint = candidate.toFingerprint()
             val isDuplicate = selected.any { existing ->
-                isLikelyDuplicate(existing, candidate)
+                isLikelyDuplicate(existing, fingerprint)
             }
-            if (!isDuplicate) selected += candidate
+            if (!isDuplicate) selected += fingerprint
         }
-        return selected
+        return selected.map { it.candidate }
     }
 
-    private fun isLikelyDuplicate(a: DigestCandidate, b: DigestCandidate): Boolean {
-        val titleSimilarity = jaccardSimilarity(a.title.trim(), b.title.trim())
+    private fun isLikelyDuplicate(a: DigestCandidateFingerprint, b: DigestCandidateFingerprint): Boolean {
+        val titleSimilarity = jaccardSimilarity(a.titleTokens, b.titleTokens)
         if (titleSimilarity >= TITLE_DUPLICATE_THRESHOLD) return true
 
         val semanticSimilarity = semanticSimilarity(a, b)
@@ -119,9 +120,9 @@ data class DigestCandidateSelectionPolicy(
             titleSimilarity >= TITLE_WEAK_DUPLICATE_THRESHOLD
     }
 
-    private fun semanticSimilarity(a: DigestCandidate, b: DigestCandidate): Double {
-        val tokensA = semanticTokens(a)
-        val tokensB = semanticTokens(b)
+    private fun semanticSimilarity(a: DigestCandidateFingerprint, b: DigestCandidateFingerprint): Double {
+        val tokensA = a.semanticTokens
+        val tokensB = b.semanticTokens
         if (tokensA.isEmpty() || tokensB.isEmpty()) return 0.0
 
         val intersection = tokensA.intersect(tokensB).size.toDouble()
@@ -130,11 +131,18 @@ data class DigestCandidateSelectionPolicy(
         return intersection / union
     }
 
-    private fun semanticTokens(candidate: DigestCandidate): Set<String> =
+    private fun DigestCandidate.toFingerprint(): DigestCandidateFingerprint =
+        DigestCandidateFingerprint(
+            candidate = this,
+            titleTokens = tokenize(title.trim()),
+            semanticTokens = semanticTokens()
+        )
+
+    private fun DigestCandidate.semanticTokens(): Set<String> =
         buildString {
-            append(candidate.summary)
+            append(summary)
             append(' ')
-            append(candidate.keywords.joinToString(" "))
+            append(keywords.joinToString(" "))
         }
             .lowercase(Locale.ROOT)
             .replace(Regex("[^\\p{L}\\p{N}\\s]"), " ")
@@ -144,9 +152,13 @@ data class DigestCandidateSelectionPolicy(
             .filterNot { STOPWORDS.contains(it) }
             .toSet()
 
-    private fun jaccardSimilarity(text1: String, text2: String): Double {
-        val words1 = tokenize(text1)
-        val words2 = tokenize(text2)
+    private data class DigestCandidateFingerprint(
+        val candidate: DigestCandidate,
+        val titleTokens: Set<String>,
+        val semanticTokens: Set<String>,
+    )
+
+    private fun jaccardSimilarity(words1: Set<String>, words2: Set<String>): Double {
         if (words1.isEmpty() && words2.isEmpty()) return 1.0
         if (words1.isEmpty() || words2.isEmpty()) return 0.0
 
