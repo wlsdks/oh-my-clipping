@@ -23,9 +23,7 @@ type TokenHealthStatus = {
   ok: boolean;
 };
 
-function getStatusMock() {
-  return tokenHealthService.getStatus as unknown as ReturnType<typeof vi.fn>;
-}
+const mockGetStatus = vi.mocked(tokenHealthService.getStatus);
 
 function renderBanner() {
   const qc = createTestQueryClient();
@@ -36,7 +34,7 @@ function renderBanner() {
 }
 
 function mockStatus(status: TokenHealthStatus) {
-  getStatusMock().mockResolvedValue(status);
+  mockGetStatus.mockResolvedValue(status);
 }
 
 async function advancePollingClock(ms: number) {
@@ -69,7 +67,7 @@ describe("TokenHealthBanner", () => {
 
       // React Query 가 해결될 때까지 대기한 뒤에도 DOM 이 비어있어야 한다.
       await waitFor(() => {
-        expect(getStatusMock()).toHaveBeenCalled();
+        expect(mockGetStatus).toHaveBeenCalled();
       });
       expect(container).toBeEmptyDOMElement();
       // role=alert 인 요소가 하나도 없어야 한다.
@@ -84,7 +82,7 @@ describe("TokenHealthBanner", () => {
 
       // 짧게 대기하지만 enabled=false 이므로 호출되면 안 된다.
       await new Promise((resolve) => setTimeout(resolve, 10));
-      expect(getStatusMock()).not.toHaveBeenCalled();
+      expect(mockGetStatus).not.toHaveBeenCalled();
       expect(container).toBeEmptyDOMElement();
     });
   });
@@ -165,7 +163,7 @@ describe("TokenHealthBanner", () => {
       // 실시간 대기 없이 폴링 주기를 검증하기 위해 fake timer 를 사용한다.
       // getStatus 를 동기적으로 resolve 되도록 stub 해서 Promise flush 비용을 최소화한다.
       vi.useFakeTimers({ shouldAdvanceTime: true });
-      getStatusMock().mockImplementation(() =>
+      mockGetStatus.mockImplementation(() =>
         Promise.resolve({ slackBot: "ok", gemini: "ok", ok: true })
       );
 
@@ -173,19 +171,19 @@ describe("TokenHealthBanner", () => {
 
       // 초기 페치가 완료될 때까지 타이머/마이크로태스크를 진행시킨다.
       await advancePollingClock(10);
-      expect(getStatusMock()).toHaveBeenCalledTimes(1);
+      expect(mockGetStatus).toHaveBeenCalledTimes(1);
 
       // 59초 시점에는 두 번째 호출이 발생하지 않아야 한다.
       await advancePollingClock(59_000);
-      expect(getStatusMock()).toHaveBeenCalledTimes(1);
+      expect(mockGetStatus).toHaveBeenCalledTimes(1);
 
       // 60초 경계(총 약 60.01초)에서 두 번째 호출이 발생해야 한다.
       await advancePollingClock(1_000);
-      expect(getStatusMock()).toHaveBeenCalledTimes(2);
+      expect(mockGetStatus).toHaveBeenCalledTimes(2);
 
       // 한 번 더 주기가 돌면 세 번째 호출까지 쌓여야 한다.
       await advancePollingClock(60_000);
-      expect(getStatusMock()).toHaveBeenCalledTimes(3);
+      expect(mockGetStatus).toHaveBeenCalledTimes(3);
     });
   });
 });

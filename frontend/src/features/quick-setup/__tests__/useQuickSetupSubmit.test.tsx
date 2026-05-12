@@ -24,6 +24,9 @@ import { createQuickSetupForm } from "../model/quickSetupTypes";
 import type { QuickSetupForm } from "../model/quickSetupTypes";
 import type { SubmitWithEntriesResponse } from "@/types/adminDto";
 
+const mockToastWarning = vi.mocked(toast.warning);
+const mockToastError = vi.mocked(toast.error);
+
 const SUBMITTED_OK: SubmitWithEntriesResponse = {
   requestId: "req-1",
   status: "submitted",
@@ -113,9 +116,10 @@ describe("useQuickSetupSubmit", () => {
       await waitFor(() => {
         expect(toast.warning).toHaveBeenCalled();
       });
-      const [title, opts] = (toast.warning as ReturnType<typeof vi.fn>).mock.calls[0];
+      const [title, opts] = mockToastWarning.mock.calls[0];
+      expect(opts).toBeDefined();
       expect(title).toContain("4개 항목이 제외");
-      expect(opts.description).toContain("외 1건");
+      expect(opts?.description).toContain("외 1건");
     });
 
     it("3건 이하면 '외 N건' 접미사 없음", async () => {
@@ -131,8 +135,9 @@ describe("useQuickSetupSubmit", () => {
       });
 
       await waitFor(() => expect(toast.warning).toHaveBeenCalled());
-      const [, opts] = (toast.warning as ReturnType<typeof vi.fn>).mock.calls[0];
-      expect(opts.description).not.toContain("외");
+      const [, opts] = mockToastWarning.mock.calls[0];
+      expect(opts).toBeDefined();
+      expect(opts?.description).not.toContain("외");
     });
 
     it("partial 응답 시 toast.error는 호출되지 않는다", async () => {
@@ -165,7 +170,7 @@ describe("useQuickSetupSubmit", () => {
       });
 
       await waitFor(() => expect(toast.error).toHaveBeenCalled());
-      const [title] = (toast.error as ReturnType<typeof vi.fn>).mock.calls[0];
+      const [title] = mockToastError.mock.calls[0];
       expect(title).toContain("반려");
     });
 
