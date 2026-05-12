@@ -76,6 +76,55 @@ class EnginePipelineRunnerTest {
         calls shouldContainExactly listOf("collect")
     }
 
+    @Test
+    fun `run should not fail when success detail builder fails`() {
+        val calls = mutableListOf<String>()
+        val runner = EnginePipelineRunner(fixedClock())
+
+        val result = runner.run(
+            EnginePipelineActions(
+                collect = {
+                    calls += "collect"
+                    Collect(newItems = 2, duplicateSkipped = 1)
+                },
+                summarize = {
+                    calls += "summarize"
+                    Summarize(totalSummarized = 2)
+                },
+                digest = {
+                    calls += "digest"
+                    Digest(selectedCount = 1, postedToSlack = false)
+                },
+                collectDetail = { throw IllegalStateException("detail failed") },
+                summarizeDetail = { "totalSummarized=${it.totalSummarized}" },
+                digestDetail = { "selectedCount=${it.selectedCount}, postedToSlack=${it.postedToSlack}" }
+            )
+        )
+
+        calls shouldContainExactly listOf("collect", "summarize", "digest")
+        result.traces.map { it.status }.toSet() shouldBe setOf(EnginePipelineStepStatus.SUCCEEDED)
+        result.traces.first().detail shouldBe "detail unavailable: IllegalStateException"
+    }
+
+    @Test
+    fun `run should cap success detail length`() {
+        val runner = EnginePipelineRunner(fixedClock())
+        val longDetail = "x".repeat(300)
+
+        val result = runner.run(
+            EnginePipelineActions(
+                collect = { Collect(newItems = 2, duplicateSkipped = 1) },
+                summarize = { Summarize(totalSummarized = 2) },
+                digest = { Digest(selectedCount = 1, postedToSlack = false) },
+                collectDetail = { longDetail },
+                summarizeDetail = { "ok" },
+                digestDetail = { "ok" }
+            )
+        )
+
+        result.traces.first().detail?.length shouldBe 240
+    }
+
     private fun fixedClock(): Clock =
         Clock.fixed(Instant.parse("2026-05-02T00:00:00Z"), ZoneOffset.UTC)
 
