@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor, cleanup } from "@testing-library/react";
+import { act, render, screen, waitFor, cleanup } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { TokenHealthBanner } from "@/components/shared/TokenHealthBanner";
@@ -46,6 +46,12 @@ function renderBanner() {
 
 function mockStatus(status: TokenHealthStatus) {
   getStatusMock().mockResolvedValue(status);
+}
+
+async function advancePollingClock(ms: number) {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ms);
+  });
 }
 
 describe("TokenHealthBanner", () => {
@@ -175,19 +181,19 @@ describe("TokenHealthBanner", () => {
       renderBanner();
 
       // 초기 페치가 완료될 때까지 타이머/마이크로태스크를 진행시킨다.
-      await vi.advanceTimersByTimeAsync(10);
+      await advancePollingClock(10);
       expect(getStatusMock()).toHaveBeenCalledTimes(1);
 
       // 59초 시점에는 두 번째 호출이 발생하지 않아야 한다.
-      await vi.advanceTimersByTimeAsync(59_000);
+      await advancePollingClock(59_000);
       expect(getStatusMock()).toHaveBeenCalledTimes(1);
 
       // 60초 경계(총 약 60.01초)에서 두 번째 호출이 발생해야 한다.
-      await vi.advanceTimersByTimeAsync(1_000);
+      await advancePollingClock(1_000);
       expect(getStatusMock()).toHaveBeenCalledTimes(2);
 
       // 한 번 더 주기가 돌면 세 번째 호출까지 쌓여야 한다.
-      await vi.advanceTimersByTimeAsync(60_000);
+      await advancePollingClock(60_000);
       expect(getStatusMock()).toHaveBeenCalledTimes(3);
     });
   });
