@@ -121,6 +121,10 @@ val skipFrontendBuild = providers.gradleProperty("skipFrontendBuild")
 fun pnpmCommand(): String =
     if (System.getProperty("os.name").startsWith("Windows", ignoreCase = true)) "pnpm.cmd" else "pnpm"
 
+fun mainKotlinSourceRoots(): List<File> =
+    listOf(layout.projectDirectory.dir("src/main/kotlin").asFile) +
+        subprojects.map { it.layout.projectDirectory.dir("src/main/kotlin").asFile }
+
 val installFrontend by tasks.registering(Exec::class) {
     group = "frontend"
     description = "Install dependencies for admin SPA."
@@ -224,19 +228,7 @@ tasks.register<Test>("stressTest") {
 tasks.register("checkPostgresSpecificSql") {
     group = "verification"
     description = "Kotlin 소스에서 H2 가 지원하지 않는 PostgreSQL 전용 SQL 패턴을 스캔한다."
-    val sourceRoots = listOf(
-        layout.projectDirectory.dir("src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/api-models/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/domain/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/error-types/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("ports/workflow/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("ports/persistence/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("adapters/notification/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("adapters/persistence/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("modules/collection/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("modules/digest-policy/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("modules/source/src/main/kotlin").asFile,
-    )
+    val sourceRoots = mainKotlinSourceRoots()
     inputs.files(sourceRoots)
     outputs.upToDateWhen { false } // 항상 실행 (매우 가벼움)
 
@@ -310,16 +302,7 @@ tasks.register("checkPostgresSpecificSql") {
 tasks.register("checkBroadExceptionBaseline") {
     group = "verification"
     description = "Kotlin 소스의 catch (Exception) 사용량이 baseline보다 늘지 않았는지 검사한다."
-    val sourceRoots = listOf(
-        layout.projectDirectory.dir("src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/api-models/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/domain/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("core/error-types/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("ports/workflow/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("ports/persistence/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("adapters/persistence/src/main/kotlin").asFile,
-        layout.projectDirectory.dir("modules/digest-policy/src/main/kotlin").asFile,
-    )
+    val sourceRoots = mainKotlinSourceRoots()
     val baselineFile = layout.projectDirectory.file("config/quality/broad-exception-baseline.txt").asFile
     inputs.files(sourceRoots)
     inputs.file(baselineFile)

@@ -23,6 +23,7 @@ import com.ohmyclipping.store.TrendSnapshotStore
 import com.ohmyclipping.store.TrendVisualCardStore
 import org.springframework.stereotype.Service
 import java.net.URI
+import java.net.URISyntaxException
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -534,7 +535,7 @@ class AdminTrendSnapshotService(
 
     private fun parseHost(url: String): String? = try {
         URI(url).host?.lowercase(Locale.ROOT)
-    } catch (_: Exception) {
+    } catch (_: URISyntaxException) {
         null
     }
 
