@@ -1,16 +1,7 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { DataRetentionCard } from "../DataRetentionCard";
 import type { RuntimeSettings } from "@/types/runtime";
-
-// CollapsibleSection 내부 Radix Collapsible 이 pointer event를 사용한다
-beforeAll(() => {
-  Element.prototype.hasPointerCapture = Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture = Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture = Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView = Element.prototype.scrollIntoView || (() => {});
-  window.HTMLElement.prototype.scrollTo = window.HTMLElement.prototype.scrollTo || (() => {});
-});
 
 /** 테스트용 기본 RuntimeSettings. 필수 필드만 채우고 나머지는 최소값. */
 function makeSettings(overrides: Partial<RuntimeSettings> = {}): RuntimeSettings {

@@ -3,14 +3,6 @@ import { act, render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { QuickSetupForm } from "../model/quickSetupTypes";
 
-// jsdom은 Element.prototype.scrollTo를 구현하지 않아서 wizard의 requestAnimationFrame 내부에서
-// TypeError가 발생한다. 테스트 환경에서만 no-op으로 대체한다.
-if (typeof Element.prototype.scrollTo !== "function") {
-  Element.prototype.scrollTo = function scrollToNoop() {
-    // no-op for jsdom
-  } as unknown as Element["scrollTo"];
-}
-
 // ── 서비스/의존성 mock (import 순서 중요: vi.mock hoist) ─────────────────
 vi.mock("@/services/personaService", () => ({
   personaService: {

@@ -1,25 +1,7 @@
-import { describe, expect, it, vi, beforeEach, beforeAll } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
-
-/* jsdom + Radix 호환 폴리필 (AGENTS.md §5.1.2) */
-beforeAll(() => {
-  Element.prototype.hasPointerCapture = Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture = Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture = Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView = Element.prototype.scrollIntoView || (() => {});
-  window.HTMLElement.prototype.scrollTo = window.HTMLElement.prototype.scrollTo || (() => {});
-});
-
-/* recharts ResizeObserver 폴리필 */
-beforeAll(() => {
-  global.ResizeObserver = global.ResizeObserver || class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-});
 
 /* dbMetricsService 모킹 */
 vi.mock("@/services/dbMetricsService", () => ({

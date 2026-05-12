@@ -1,18 +1,7 @@
-import { describe, expect, it, vi, beforeEach, beforeAll } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-/* ── 모킹 ── */
-
-// Radix Select / Dialog 가 jsdom 에서 쓰는 pointer API 누락 이슈 회피.
-beforeAll(() => {
-  Element.prototype.hasPointerCapture = Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture = Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture = Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView = Element.prototype.scrollIntoView || (() => {});
-  window.HTMLElement.prototype.scrollTo = window.HTMLElement.prototype.scrollTo || (() => {});
-});
 
 vi.mock("@/services/categoryRuleService", () => ({
   categoryRuleService: {
