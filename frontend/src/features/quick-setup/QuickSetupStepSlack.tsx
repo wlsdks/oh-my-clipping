@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle, Hash, MessageCircle, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ export function QuickSetupStepSlack({
   const [connectSubmitting, setConnectSubmitting] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [refreshCooldown, setRefreshCooldown] = useState(false);
+  const refreshCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Slack DM 연동 상태를 반응적으로 구독
   const hasSlackDm = useAuthStore((s) => s.user?.hasSlackDm ?? false);
@@ -143,8 +144,19 @@ export function QuickSetupStepSlack({
       queryFn: () => runtimeService.listUserSetupSlackChannels(channelType, true),
     });
     await queryClient.invalidateQueries({ queryKey: runtimeKeys.slackChannels(channelType) });
-    setTimeout(() => setRefreshCooldown(false), 10_000);
+    refreshCooldownTimerRef.current = setTimeout(() => {
+      setRefreshCooldown(false);
+      refreshCooldownTimerRef.current = null;
+    }, 10_000);
   }
+
+  useEffect(() => {
+    return () => {
+      if (refreshCooldownTimerRef.current) {
+        clearTimeout(refreshCooldownTimerRef.current);
+      }
+    };
+  }, []);
 
   // Slack 멤버 ID 연동 처리
   async function handleSlackConnect(slackMemberId: string) {
