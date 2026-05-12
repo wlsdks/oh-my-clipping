@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { QuickSetupForm } from "../model/quickSetupTypes";
 
@@ -122,7 +122,7 @@ import { sourceService } from "@/services/sourceService";
 import { userService } from "@/services/userService";
 
 /** QueryClientProvider로 감싸 렌더 */
-function renderWizard(props: Partial<React.ComponentProps<typeof QuickSetupWizard>> = {}) {
+async function renderWizard(props: Partial<React.ComponentProps<typeof QuickSetupWizard>> = {}) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } }
   });
@@ -133,6 +133,7 @@ function renderWizard(props: Partial<React.ComponentProps<typeof QuickSetupWizar
       <QuickSetupWizard open={props.open ?? true} onClose={onClose} onComplete={onComplete} {...props} />
     </QueryClientProvider>
   );
+  await act(async () => {});
   return { ...utils, onClose, onComplete };
 }
 
@@ -153,18 +154,18 @@ beforeEach(() => {
 });
 
 describe("QuickSetupWizard — 렌더 & 기본 구조", () => {
-  it("open=true 일 때 다이얼로그 타이틀 '빠른 세팅'이 표시된다", () => {
-    renderWizard({ open: true });
+  it("open=true 일 때 다이얼로그 타이틀 '빠른 세팅'이 표시된다", async () => {
+    await renderWizard({ open: true });
     expect(screen.getByText("빠른 세팅")).toBeInTheDocument();
   });
 
-  it("open=false 일 때 다이얼로그는 표시되지 않는다", () => {
-    renderWizard({ open: false });
+  it("open=false 일 때 다이얼로그는 표시되지 않는다", async () => {
+    await renderWizard({ open: false });
     expect(screen.queryByText("빠른 세팅")).not.toBeInTheDocument();
   });
 
-  it("editRequestId가 있는 initialForm에서는 '구독 설정 변경' 타이틀을 표시한다", () => {
-    renderWizard({
+  it("editRequestId가 있는 initialForm에서는 '구독 설정 변경' 타이틀을 표시한다", async () => {
+    await renderWizard({
       open: true,
       initialForm: { editRequestId: "req-1" } as Partial<QuickSetupForm>,
     });
@@ -173,20 +174,20 @@ describe("QuickSetupWizard — 렌더 & 기본 구조", () => {
 });
 
 describe("QuickSetupWizard — Step 네비게이션", () => {
-  it("최초 진입 시 Step 1 (사이트 필터)이 표시된다", () => {
-    renderWizard({ open: true });
+  it("최초 진입 시 Step 1 (사이트 필터)이 표시된다", async () => {
+    await renderWizard({ open: true });
     // Step 1 = QuickSetupStepSiteFilter → 국내/해외 라디오가 있음
     expect(screen.getByText("국내 뉴스")).toBeInTheDocument();
   });
 
-  it("Step 1 은 이전(←) 버튼이 없고 다음(→) 버튼만 있다", () => {
-    renderWizard({ open: true });
+  it("Step 1 은 이전(←) 버튼이 없고 다음(→) 버튼만 있다", async () => {
+    await renderWizard({ open: true });
     expect(screen.queryByRole("button", { name: /← 이전/ })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /다음/ })).toBeInTheDocument();
   });
 
   it("Step 1 → '다음' 클릭 시 Step 2 (뉴스 선택)로 이동한다", async () => {
-    renderWizard({ open: true });
+    await renderWizard({ open: true });
     fireEvent.click(screen.getByRole("button", { name: /다음/ }));
     await waitFor(() => {
       expect(screen.getByText("어떤 뉴스를 받고 싶으세요?")).toBeInTheDocument();
@@ -194,7 +195,7 @@ describe("QuickSetupWizard — Step 네비게이션", () => {
   });
 
   it("Step 2 에서 키워드 없이 '다음' 클릭 시 validation 에러 표시", async () => {
-    renderWizard({ open: true });
+    await renderWizard({ open: true });
     // Step1 → Step2
     fireEvent.click(screen.getByRole("button", { name: /다음/ }));
     await waitFor(() => screen.getByText("어떤 뉴스를 받고 싶으세요?"));
@@ -209,7 +210,7 @@ describe("QuickSetupWizard — Step 네비게이션", () => {
   });
 
   it("Step 2 에서 키워드 추가 후 '다음' 클릭하면 Step 3으로 진행", async () => {
-    renderWizard({ open: true });
+    await renderWizard({ open: true });
     fireEvent.click(screen.getByRole("button", { name: /다음/ }));
     await waitFor(() => screen.getByText("어떤 뉴스를 받고 싶으세요?"));
 
@@ -228,7 +229,7 @@ describe("QuickSetupWizard — Step 네비게이션", () => {
   });
 
   it("Step 2 이상에서 '← 이전' 버튼을 누르면 전 스텝으로 돌아간다", async () => {
-    renderWizard({ open: true });
+    await renderWizard({ open: true });
     // Step 1 → Step 2
     fireEvent.click(screen.getByRole("button", { name: /다음/ }));
     await waitFor(() => screen.getByText("어떤 뉴스를 받고 싶으세요?"));
@@ -244,7 +245,7 @@ describe("QuickSetupWizard — Step 네비게이션", () => {
 
 describe("QuickSetupWizard — Submit 버튼 라벨", () => {
   it("생성 모드에서는 마지막 스텝에 '세팅 시작' 버튼이 있다 (initialForm 없이)", async () => {
-    renderWizard({
+    await renderWizard({
       open: true,
       initialForm: {
         entries: [{ value: "AI", type: "keyword" }],
@@ -265,7 +266,7 @@ describe("QuickSetupWizard — Submit 버튼 라벨", () => {
   });
 
   it("Edit 모드(editRequestId 있음)에서는 마지막 스텝에 '변경 요청' 버튼이 있다", async () => {
-    renderWizard({
+    await renderWizard({
       open: true,
       initialForm: {
         editRequestId: "req-1",
@@ -294,7 +295,7 @@ describe("QuickSetupWizard — 제출 흐름 (Step 5 → done)", () => {
       errors: [],
     } as never);
 
-    renderWizard({
+    await renderWizard({
       open: true,
       isUserMode: true,
       // initialForm에는 editRequestId만 넘기고, 실제 폼 값은 별도로 두어서
@@ -342,7 +343,7 @@ describe("QuickSetupWizard — 제출 흐름 (Step 5 → done)", () => {
   });
 
   it("Step 5 에서 slackDeliveryMode='channel'인데 slackChannelId 빈 값이면 validation 에러 + toast", async () => {
-    renderWizard({
+    await renderWizard({
       open: true,
       isUserMode: true,
       initialForm: {
@@ -371,8 +372,8 @@ describe("QuickSetupWizard — 제출 흐름 (Step 5 → done)", () => {
 });
 
 describe("QuickSetupWizard — 스테퍼 표시", () => {
-  it("5개의 스텝 progress 바가 렌더링된다 (Dialog portal 내)", () => {
-    renderWizard({ open: true });
+  it("5개의 스텝 progress 바가 렌더링된다 (Dialog portal 내)", async () => {
+    await renderWizard({ open: true });
     // Dialog는 portal로 document.body 에 렌더됨
     const progressBars = document.body.querySelectorAll(".h-1\\.5.rounded-full");
     expect(progressBars.length).toBeGreaterThanOrEqual(5);
@@ -381,7 +382,7 @@ describe("QuickSetupWizard — 스테퍼 표시", () => {
 
 describe("QuickSetupWizard — initialForm pre-fill", () => {
   it("initialForm의 entries가 Step 2에 반영된다", async () => {
-    renderWizard({
+    await renderWizard({
       open: true,
       initialForm: {
         entries: [{ value: "테스트키워드", type: "keyword" }],
