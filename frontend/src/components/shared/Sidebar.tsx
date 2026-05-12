@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { LogOut, ChevronDown, Key } from "lucide-react";
@@ -189,21 +189,36 @@ export function Sidebar({ onNavigate }: SidebarProps) {
   const groups: AdminRouteGroup[] = ["home", "content", "ops", "analysis", "system"];
   const badgeCounts = useSidebarBadges();
   const logoClickCount = useRef(0);
-  const logoClickTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const logoClickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const logoSwingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [swinging, setSwinging] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   function handleLogoClick() {
     logoClickCount.current += 1;
-    clearTimeout(logoClickTimer.current);
+    if (logoClickTimer.current) clearTimeout(logoClickTimer.current);
     if (logoClickCount.current >= 5) {
       logoClickCount.current = 0;
       setSwinging(true);
-      setTimeout(() => setSwinging(false), 1200);
+      if (logoSwingTimer.current) clearTimeout(logoSwingTimer.current);
+      logoSwingTimer.current = setTimeout(() => {
+        setSwinging(false);
+        logoSwingTimer.current = null;
+      }, 1200);
     } else {
-      logoClickTimer.current = setTimeout(() => { logoClickCount.current = 0; }, 1500);
+      logoClickTimer.current = setTimeout(() => {
+        logoClickCount.current = 0;
+        logoClickTimer.current = null;
+      }, 1500);
     }
   }
+
+  useEffect(() => {
+    return () => {
+      if (logoClickTimer.current) clearTimeout(logoClickTimer.current);
+      if (logoSwingTimer.current) clearTimeout(logoSwingTimer.current);
+    };
+  }, []);
 
   const { mutate: logout } = useMutation({
     mutationFn: authService.logout,
