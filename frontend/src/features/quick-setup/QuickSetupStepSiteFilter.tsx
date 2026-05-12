@@ -52,7 +52,7 @@ export function QuickSetupStepSiteFilter({ form, onChange, disabled, isUserMode 
   const [searching, setSearching] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 커스텀 도메인 검증 상태 (검색 결과에 없는 사이트)
   const [validating, setValidating] = useState(false);
@@ -66,7 +66,12 @@ export function QuickSetupStepSiteFilter({ form, onChange, disabled, isUserMode 
       }
     }
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
   }, []);
 
   function handleSearchChange(value: string) {
