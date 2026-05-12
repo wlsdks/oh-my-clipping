@@ -1,6 +1,7 @@
 package com.ohmyclipping.admin.mcp
 
 import com.ohmyclipping.error.InvalidInputException
+import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.model.UserClippingRequestStatus
 import com.ohmyclipping.service.UserClippingRequestService
@@ -14,7 +15,10 @@ import org.springframework.stereotype.Component
  * 승인/반려 액션 자체는 안전을 위해 웹 어드민에서만 수행한다.
  */
 @Component
-class AdminListPendingRequestsTool(private val userClippingRequestService: UserClippingRequestService) {
+class AdminListPendingRequestsTool(
+    private val userClippingRequestService: UserClippingRequestService,
+    private val rateLimiter: McpRateLimiter,
+) {
 
     private companion object {
         const val DEFAULT_LIMIT = 20
@@ -28,6 +32,7 @@ class AdminListPendingRequestsTool(private val userClippingRequestService: UserC
             **언제 쓰나:** 운영자가 "pending requests", "뭐 승인 대기 중이야", "대기 중인 신청" 을 물어볼 때.
             **쓰지 말 것:** 승인/반려 액션이 필요할 때 — 해당 액션은 안전을 위해 웹 어드민에서만 가능.
             **파라미터:** limit 선택 (1~50, 기본 20).
+            **rate limit:** 60회/시간.
             **반환:** PENDING 상태인 UserClippingRequest 리스트.
         """,
     )
@@ -35,6 +40,7 @@ class AdminListPendingRequestsTool(private val userClippingRequestService: UserC
         @ToolParam(description = "최대 결과 수 (1~50, 기본 20)", required = false) limit: Int?,
     ): String = mcpToolCall {
         val effectiveLimit = validateLimit(limit)
+        rateLimiter.checkOrThrow("admin_list_pending_requests", maxRequests = 60, windowSeconds = 3600)
         userClippingRequestService.listRecentRequests(UserClippingRequestStatus.PENDING, effectiveLimit)
     }
 
