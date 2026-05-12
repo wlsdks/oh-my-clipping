@@ -13,42 +13,42 @@ if (typeof globalThis.ResizeObserver === "undefined") {
   });
 }
 
-if (typeof Element.prototype.hasPointerCapture !== "function") {
+if (typeof Element !== "undefined" && typeof Element.prototype.hasPointerCapture !== "function") {
   Object.defineProperty(Element.prototype, "hasPointerCapture", {
     value: () => false,
     writable: true
   });
 }
 
-if (typeof Element.prototype.setPointerCapture !== "function") {
+if (typeof Element !== "undefined" && typeof Element.prototype.setPointerCapture !== "function") {
   Object.defineProperty(Element.prototype, "setPointerCapture", {
     value: () => {},
     writable: true
   });
 }
 
-if (typeof Element.prototype.releasePointerCapture !== "function") {
+if (typeof Element !== "undefined" && typeof Element.prototype.releasePointerCapture !== "function") {
   Object.defineProperty(Element.prototype, "releasePointerCapture", {
     value: () => {},
     writable: true
   });
 }
 
-if (typeof Element.prototype.scrollIntoView !== "function") {
+if (typeof Element !== "undefined" && typeof Element.prototype.scrollIntoView !== "function") {
   Object.defineProperty(Element.prototype, "scrollIntoView", {
     value: () => {},
     writable: true
   });
 }
 
-if (typeof Element.prototype.scrollTo !== "function") {
+if (typeof Element !== "undefined" && typeof Element.prototype.scrollTo !== "function") {
   Object.defineProperty(Element.prototype, "scrollTo", {
     value: () => {},
     writable: true
   });
 }
 
-if (typeof HTMLElement.prototype.scrollTo !== "function") {
+if (typeof HTMLElement !== "undefined" && typeof HTMLElement.prototype.scrollTo !== "function") {
   Object.defineProperty(HTMLElement.prototype, "scrollTo", {
     value: () => {},
     writable: true
