@@ -5,11 +5,11 @@ import { Link } from "react-router-dom";
 import { InfoTooltip } from "@/components/shared/InfoTooltip";
 import { analyticsKeys } from "@/queries/analyticsKeys";
 import { analyticsService } from "@/services/analyticsService";
-import { ArticleRankingList } from "./components/ArticleRankingList";
-import { CategoryCtrDonut } from "./components/CategoryCtrDonut";
-import { HotFeedbackList } from "./components/HotFeedbackList";
-import { WizardFunnel } from "./components/WizardFunnel";
 import { Button } from "@/components/ui/button";
+import { ArticleRankingList } from "./ui/ArticleRankingList";
+import { CategoryCtrDonut } from "./ui/CategoryCtrDonut";
+import { HotFeedbackList } from "./ui/HotFeedbackList";
+import { WizardFunnel } from "./ui/WizardFunnel";
 
 interface UserEngagementTabProps {
   categoryId?: string;

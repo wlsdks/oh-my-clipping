@@ -12,7 +12,7 @@ import { categoryKeys } from "@/queries/categoryKeys";
 import { categoryService } from "@/services/categoryService";
 import type { PeriodKey } from "@/utils/periodUtils";
 import { getPeriodRange, periodToDays } from "@/utils/periodUtils";
-import { UserEngagementTab } from "@/pages/analytics/UserEngagementTab";
+import { UserEngagementTab } from "@/features/engagement/UserEngagementTab";
 
 const PERIODS: { key: PeriodKey; label: string }[] = [
   { key: "this-week", label: "이번 주" },
