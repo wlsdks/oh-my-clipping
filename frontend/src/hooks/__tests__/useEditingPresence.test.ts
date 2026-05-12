@@ -23,6 +23,12 @@ function withQueryClient(children: React.ReactNode) {
   return React.createElement(QueryClientProvider, { client: qc }, children);
 }
 
+async function advancePresenceClock(ms: number) {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ms);
+  });
+}
+
 describe("useEditingPresence", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -65,9 +71,7 @@ describe("useEditingPresence", () => {
       expect(editingPresenceService.heartbeat).toHaveBeenCalledTimes(1);
     });
 
-    await act(async () => {
-      vi.advanceTimersByTime(30_000);
-    });
+    await advancePresenceClock(30_000);
 
     await vi.waitFor(() => {
       expect(editingPresenceService.heartbeat).toHaveBeenCalledTimes(2);
