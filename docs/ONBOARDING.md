@@ -169,7 +169,7 @@ oh-my-clipping/
 | 문서 | 내용 |
 |------|------|
 | `AGENTS.md` | 코딩 가이드 (필독!) |
-| `AGENTS.md` | 아키텍처 규칙 |
+| `docs/ARCHITECTURE.md` | 아키텍처 규칙 |
 | `docs/DESIGN_STRATEGY.md` | 디자인 철학 |
 | `docs/API_REFERENCE.md` | API 전체 목록 |
 
