@@ -14,10 +14,8 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler
-import org.springframework.scheduling.support.CronExpression
 import org.springframework.stereotype.Component
 import com.ohmyclipping.model.Category
-import com.ohmyclipping.model.CategoryRule
 import com.ohmyclipping.model.UserClippingRequest
 import com.ohmyclipping.support.InterruptibleSleep
 import com.ohmyclipping.store.AdminUserStore
@@ -176,14 +174,29 @@ class SlackDigestWorker(
             currentHour = currentHour
         )
         // 글로벌 cron 매칭도 카테고리마다 다시 파싱하지 않도록 한 번만 계산한다.
-        val globalCronDue = matchesGlobalCron(runtime.slackDigestCron, currentHour)
+        if (runtime.slackDigestCron.isNotBlank() &&
+            runtime.slackDigestCron.trim() != "-" &&
+            !DeliveryScheduleMatcher.isValidCronExpression(runtime.slackDigestCron)
+        ) {
+            log.warn { "Invalid Slack digest cron expression: ${runtime.slackDigestCron}" }
+        }
+        val globalCronDue = DeliveryScheduleMatcher.matchesGlobalCron(runtime.slackDigestCron, now)
         val categories = categoryStore.findOperational()
 
         val details = mutableListOf<String>()
         val digestFailures = mutableListOf<com.ohmyclipping.service.port.DigestFailure>()
 
         for (category in categories) {
-            if (!shouldDeliverNow(category, dayOfWeek, currentHour, deliveryContext.dueCategoryIds, globalCronDue)) {
+            val categoryRule = categoryRuleStore.findByCategoryId(category.id)
+            val due = DeliveryScheduleMatcher.isDeliveryDue(
+                categoryId = category.id,
+                categoryRule = categoryRule,
+                dayOfWeek = dayOfWeek,
+                currentHour = currentHour,
+                dueCategoryIds = deliveryContext.dueCategoryIds,
+                globalCronDue = globalCronDue,
+            )
+            if (!due) {
                 continue
             }
 
@@ -584,68 +597,8 @@ class SlackDigestWorker(
             normalized.uppercase().let { it.startsWith("D") || it.startsWith("U") }
     }
 
-    /**
-     * 카테고리의 발송 시점을 판단한다.
-     * 1순위: 카테고리별 개별 스케줄(delivery_preset 설정)
-     * 2순위: 개인 스케줄에 구독된 카테고리인 경우
-     * 3순위: 글로벌 cron 매칭
-     */
-    private fun shouldDeliverNow(
-        category: Category,
-        dayOfWeek: String,
-        currentHour: Int,
-        dueCategoryIds: Set<String>,
-        globalCronDue: Boolean
-    ): Boolean {
-        // 1. 카테고리별 개별 스케줄 확인
-        val rule = categoryRuleStore.findByCategoryId(category.id)
-        if (rule?.deliveryPreset != null) {
-            return matchesCategoryRule(rule, dayOfWeek, currentHour)
-        }
-
-        // 2. 개인 스케줄과 승인 요청을 미리 조합해 둔 카테고리 집합을 재사용한다.
-        if (dueCategoryIds.contains(category.id)) {
-            return true
-        }
-
-        // 3. 글로벌 cron 매칭 폴백
-        return globalCronDue
-    }
-
-    /** 카테고리별 개별 스케줄(deliveryDays, deliveryHour)과 현재 시각을 비교한다. */
-    private fun matchesCategoryRule(
-        rule: CategoryRule,
-        dayOfWeek: String,
-        currentHour: Int
-    ): Boolean {
-        val ruleDays = rule.deliveryDays ?: return false
-        val ruleHour = rule.deliveryHour ?: return false
-        return dayOfWeek in ruleDays && currentHour == ruleHour
-    }
-
-    /**
-     * 글로벌 cron 표현식이 현재 시각(시 단위)에 매칭되는지 확인한다.
-     * Spring CronExpression.next()로 다음 실행 시각을 구해, 현재 시와 같은지 비교한다.
-     */
-    private fun matchesGlobalCron(cronExpression: String, currentHour: Int): Boolean {
-        val trimmed = cronExpression.trim()
-        if (trimmed.isBlank() || trimmed == "-") return false
-
-        val expr = try {
-            CronExpression.parse(trimmed)
-        } catch (_: IllegalArgumentException) {
-            log.warn { "Invalid Slack digest cron expression: $trimmed" }
-            return false
-        }
-
-        // 오늘 00:00(KST)부터 다음 실행 시각을 구해 현재 시와 비교한다.
-        val kst = ZoneId.of("Asia/Seoul")
-        val now = ZonedDateTime.now(kst)
-        val startOfHour = now.withMinute(0).withSecond(0).withNano(0)
-        val nextRun = expr.next(startOfHour.minusSeconds(1)) ?: return false
-        return nextRun.hour == currentHour &&
-            nextRun.toLocalDate() == now.toLocalDate()
-    }
+    // 스케줄 매칭 로직(shouldDeliverNow / matchesCategoryRule / matchesGlobalCron) 은
+    // [DeliveryScheduleMatcher] 로 추출돼 modules/digest 의 순수 객체에서 H2 없이 표 기반 테스트로 검증된다.
 
     /** FINALIZATION_FAILED 로그를 즉시 회복시키기 위해 후처리 재시도 이벤트를 발행한다. */
     private fun requestDigestFinalizationRecovery(

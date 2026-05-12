@@ -1236,3 +1236,29 @@ A narrow `setKeywordsAndExcludeEventTypes` method was added to `CategoryRuleStor
 **Update 2026-05-12 (ddl-auto)**: H2 2.3 + MODE=PostgreSQL + DATABASE_TO_UPPER=false 조합에서 Flyway 가 schema 를 생성해도 Hibernate `validate` 가 missing table 을 던지는 사례를 추가 조사. `spring.jpa.properties.hibernate.default_schema=PUBLIC`, `spring.jpa.database-platform=org.hibernate.dialect.H2Dialect` 모두 시도했으나 동일하게 실패. 운영(PostgreSQL) 은 application.yml 의 `validate` 를 유지하고, 테스트만 application-test.yml 에서 `ddl-auto: none` 으로 두는 우회를 공식 결정. H2 INFORMATION_SCHEMA metadata 와 Hibernate validator 의 정합성 문제로 추정되며 근본 원인은 후속 작업으로 남긴다.
 
 **최종 테스트 통과율**: 657 → 3 (-99.5%, 99.91% pass rate).
+
+## ADR-045: `DeliveryScheduleMatcher` 추출 (2026-05-12)
+
+**상태**: 채택
+
+**맥락**: `SlackDigestWorker`(766줄) 안에 카테고리별 발송 시점 판단(`shouldDeliverNow`, `matchesCategoryRule`, `matchesGlobalCron`) 이 store 호출/상태머신/I/O 와 한 클래스에 묶여 있었다. "왜 오늘 안 보냈지?" 디버깅을 하려면 워커 전체와 4 개 이상의 store(`CategoryRuleStore`, `UserDeliveryScheduleStore`, `UserClippingRequestStore`, `CategoryStore`) 를 함께 봐야 했고, 단위 테스트는 H2 + Spring 컨텍스트가 필요했다.
+
+`improve-codebase-architecture` 리뷰의 #5 후보 ("SlackDigestWorker — 766-line orchestrator mixing scheduling + retry + state + I/O").
+
+**결정**: 발송 시점 판단을 `modules/digest` 의 `DeliveryScheduleMatcher` 순수 객체로 추출한다.
+- `isDeliveryDue(categoryId, categoryRule, dayOfWeek, currentHour, dueCategoryIds, globalCronDue)` — 발송 우선순위(preset → 개인 스케줄 사전계산 → 글로벌 cron) 결정.
+- `matchesCategoryRule(rule, dayOfWeek, currentHour)` — 카테고리 preset 매칭.
+- `matchesGlobalCron(cronExpression, now)` — Spring `CronExpression` 매칭. `Instant.now()` 가 아니라 `now: ZonedDateTime` 을 파라미터로 받아 순수 함수로 유지.
+- `isValidCronExpression(cronExpression)` — 파싱 가능 여부만 별도 노출. 잘못된 cron 한 번만 로깅하는 데 사용.
+
+`SlackDigestWorker` 의 `shouldDeliverNow` / `matchesCategoryRule` / `matchesGlobalCron` 메서드는 삭제하고, `categoryRuleStore.findByCategoryId` 결과를 matcher 로 전달하는 호출만 남긴다.
+
+**Why `modules/digest`**: 엔진 모듈(`modules/digest-policy`) 은 Spring-free 라 `CronExpression` 을 가져올 수 없다. `modules/digest` 는 이미 spring-context 의존이 있고 digest application 코드의 자연스러운 위치다.
+
+**결과**:
+- `modules/digest/src/test/.../DeliveryScheduleMatcherTest.kt` 가 H2 / Spring 컨텍스트 없이 7개 `isDeliveryDue` 분기 + 8개 `matchesCategoryRule` 분기 + 6개 cron 분기를 표 기반으로 검증한다.
+- 워커는 시각 결정 책임을 매처에 위임해 766줄에서 약 60줄 감소. 남은 책임은 store 조회 + 발송 retry + 이벤트 발행으로 좁아진다.
+- "왜 오늘 안 보냈지?" 디버깅이 한 함수(`DeliveryScheduleMatcher.isDeliveryDue`) 와 한 테스트 파일로 집중된다. 운영 인시던트에서 cron / preset / 개인 스케줄 우선순위 의문이 생기면 매트릭스 테스트만 보면 된다.
+- 기존 `SlackDigestWorkerTest` (44개) 와 전체 통합 테스트(2 잔여 외 통과) 모두 회귀 없음.
+
+**참고**: ADR-044 (테스트 인프라 정상화) 가 통합 테스트를 다시 동작하게 만든 직후, 본 추출이 회귀 보호 안에서 안전하게 진행됐다.
