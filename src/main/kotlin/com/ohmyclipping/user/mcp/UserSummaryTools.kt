@@ -28,6 +28,7 @@ import java.time.temporal.ChronoUnit
 class UserSummaryTools(
     private val categoryService: CategoryService,
     private val clippingQueryPort: ClippingQueryPort,
+    private val rateLimiter: McpRateLimiter,
     private val sanitizer: DtoSanitizer,
 ) {
 
@@ -42,6 +43,7 @@ class UserSummaryTools(
         **결정 규칙:** 키워드도 중요도 필터도 없으면 이 도구. 카테고리는 선택이고,
         "오늘 뉴스" / "최근에 뭐 있어" 처럼 카테고리가 없으면 전체 카테고리에서 최신순으로 끌어온다.
         **파라미터:** category (선택, 카테고리 ID 또는 이름 — 생략 시 전체), limit (1~30, 기본 10), sinceDays (1~30, 기본 7).
+        **rate limit:** 60회/시간.
         **반환:** 생성 시각 내림차순으로 정렬된 SummaryView 리스트.
 
         <examples>
@@ -76,6 +78,7 @@ class UserSummaryTools(
     ): String = mcpToolCall {
         validateLimit(limit)
         validateSinceDays(sinceDays)
+        rateLimiter.checkOrThrow("user_list_recent_summaries", maxRequests = 60, windowSeconds = 3600)
 
         val resolvedCategory = category?.takeIf { it.isNotBlank() }
         if (resolvedCategory == null) {
@@ -101,6 +104,7 @@ class UserSummaryTools(
         "중요한/핵심/top" 표현이면 user_list_top_summaries.
         **파라미터:** query 필수, category 선택 (생략 시 전체 카테고리 검색),
         fromDate / toDate 선택 (ISO yyyy-MM-dd), limit (1~30, 기본 10).
+        **rate limit:** 60회/시간.
         **반환:** 키워드에 매치되는 SummaryView 리스트.
 
         <examples>
@@ -125,12 +129,13 @@ class UserSummaryTools(
         @ToolParam(description = "최대 결과 수 (1~30, 기본 10)", required = false) limit: Int = 10,
     ): String = mcpToolCall {
         validateLimit(limit)
+        val from = parseLocalDate(fromDate)
+        val to = parseLocalDate(toDate)
+        rateLimiter.checkOrThrow("user_search_summaries", maxRequests = 60, windowSeconds = 3600)
         // 카테고리 지정이 있으면 해석하고, 없으면 전체 카테고리 검색으로 위임한다.
         val resolvedCategoryId = category
             ?.takeIf { it.isNotBlank() }
             ?.let { categoryService.resolveCategory(it).id }
-        val from = parseLocalDate(fromDate)
-        val to = parseLocalDate(toDate)
         val result = clippingQueryPort.searchSummaries(
             categoryId = resolvedCategoryId,
             query = query,
@@ -154,6 +159,7 @@ class UserSummaryTools(
         키워드가 있으면 user_search_summaries, 단순 최근 목록이면 user_list_recent_summaries.
         **파라미터:** category (ID 또는 이름), days (1~30, 기본 7),
         minScore (0.0~1.0, 기본 0.7), limit (1~30, 기본 10).
+        **rate limit:** 60회/시간.
         **반환:** 중요도 내림차순으로 정렬된 SummaryView 리스트.
 
         <examples>
@@ -179,6 +185,7 @@ class UserSummaryTools(
         validateLimit(limit)
         validateSinceDays(days)
         validateScore(minScore)
+        rateLimiter.checkOrThrow("user_list_top_summaries", maxRequests = 60, windowSeconds = 3600)
         val cat = categoryService.resolveCategory(category)
         val result = clippingQueryPort.listTopSummaries(
             categoryId = cat.id,
