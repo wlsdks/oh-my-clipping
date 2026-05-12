@@ -44,6 +44,15 @@ class DigestSummaryFormattingPolicyTest {
             result shouldNotContain "💡"
             result shouldContain "이번 개편으로"
         }
+
+        @Test
+        fun `표시용 정리에서도 제로폭 문자와 유니코드 줄구분자를 정규화한다`() {
+            val result = DigestSummaryFormattingPolicy.sanitizeSummaryForDisplay(
+                "📌 배경:\u200B첫 문장\u2028\u3000둘째 문장"
+            )
+
+            result shouldBe "📌 첫 문장\n둘째 문장"
+        }
     }
 
     @Nested

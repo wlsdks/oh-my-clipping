@@ -67,4 +67,20 @@ class McpToolResponseTest {
             (error.containsKey("retryAt")) shouldBe false
         }
     }
+
+    @Nested
+    inner class `내부 오류 메시지 보호` {
+
+        @Test
+        fun `알 수 없는 내부 예외 메시지는 MCP 응답에 그대로 노출하지 않는다`() {
+            val result = mcpToolCall {
+                throw IllegalStateException("jdbc://internal-db.example/token=secret")
+            }
+
+            val parsed: Map<String, Any> = mapper.readValue(result)
+            val error = parsed["error"] as Map<*, *>
+            error["code"] shouldBe McpErrorCode.INTERNAL_ERROR.code
+            error["message"] shouldBe "Internal error"
+        }
+    }
 }

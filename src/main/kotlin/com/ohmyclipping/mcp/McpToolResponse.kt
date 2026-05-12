@@ -34,7 +34,7 @@ inline fun <T : Any> mcpToolCall(block: () -> T): String = try {
     val code = McpErrorCode.from(e)
     val errorMap = mutableMapOf<String, Any>(
         "code" to code.code,
-        "message" to (e.message ?: "Internal error"),
+        "message" to safeMcpErrorMessage(code, e),
     )
     // RateLimit 예외는 클라이언트가 재시도 간격을 계산할 수 있도록 retryAfterSeconds와
     // 절대 재시도 시각(retryAt, ISO-8601 UTC)을 노출한다. LLM 이 `Retry-After` 해석 없이
@@ -45,3 +45,10 @@ inline fun <T : Any> mcpToolCall(block: () -> T): String = try {
     }
     mapper.writeValueAsString(mapOf("error" to errorMap))
 }
+
+@PublishedApi
+internal fun safeMcpErrorMessage(code: McpErrorCode, e: Exception): String =
+    when (code) {
+        McpErrorCode.INTERNAL_ERROR -> "Internal error"
+        else -> e.message ?: "Internal error"
+    }
