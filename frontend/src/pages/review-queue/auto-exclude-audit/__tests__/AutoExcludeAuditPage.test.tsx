@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 vi.mock("@/services/categoryRuleService", () => ({
   categoryRuleService: {
@@ -87,14 +87,7 @@ const mockCategories: Category[] = [
 ];
 
 function renderPage() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } }
-  });
-  return render(
-    <QueryClientProvider client={client}>
-      <AutoExcludeAuditPage />
-    </QueryClientProvider>
-  );
+  return render(<AutoExcludeAuditPage />, { wrapper: createQueryClientWrapper() });
 }
 
 /* ── 테스트 ── */

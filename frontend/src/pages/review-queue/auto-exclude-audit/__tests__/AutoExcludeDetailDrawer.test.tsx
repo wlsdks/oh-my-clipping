@@ -1,7 +1,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 /* ── 서비스 모킹 ── */
 
@@ -58,20 +58,15 @@ function makeRule(overrides: Partial<CategoryRule> = {}): CategoryRule {
 }
 
 function renderDrawer(props: Partial<React.ComponentProps<typeof AutoExcludeDetailDrawer>> = {}) {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } }
-  });
   const defaultProps: React.ComponentProps<typeof AutoExcludeDetailDrawer> = {
     item: makeItem(),
     onClose: vi.fn(),
     onRestoreClick: vi.fn(),
     isRestoring: false
   };
-  return render(
-    <QueryClientProvider client={client}>
-      <AutoExcludeDetailDrawer {...defaultProps} {...props} />
-    </QueryClientProvider>
-  );
+  return render(<AutoExcludeDetailDrawer {...defaultProps} {...props} />, {
+    wrapper: createQueryClientWrapper()
+  });
 }
 
 /* ── 테스트 ── */
