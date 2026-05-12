@@ -10,9 +10,10 @@ fun summarizeOrgs(orgs: List<DigestOrganization>): String = summarize(orgs.map {
 fun summarizeKeywords(keywords: List<String>): String = summarize(keywords)
 
 private fun summarize(items: List<String>): String {
-    if (items.isEmpty()) return ""
-    val visible = items.take(MAX_VISIBLE).joinToString(SEPARATOR)
-    val remaining = items.size - MAX_VISIBLE
+    val normalized = items.map { it.trim() }.filter { it.isNotBlank() }
+    if (normalized.isEmpty()) return ""
+    val visible = normalized.take(MAX_VISIBLE).joinToString(SEPARATOR)
+    val remaining = normalized.size - MAX_VISIBLE
     return if (remaining > 0) "$visible 외 ${remaining}개" else visible
 }
 
@@ -30,22 +31,27 @@ fun resolveSectionLabel(
     keywords: List<String>,
     orgs: List<DigestOrganization>,
     dualSection: String?
-): String = when (mode) {
-    DigestMode.CROSSFILTER -> when {
-        keywords.size == 1 && orgs.size == 1 ->
-            "📰 ${orgs[0].name}의 ${keywords[0]}"
-        keywords.size == 1 ->
-            "📰 ${keywords[0]} × ${summarizeOrgs(orgs)}"
-        orgs.size == 1 ->
-            "📰 ${orgs[0].name} × ${summarizeKeywords(keywords)}"
-        else ->
-            "📰 ${summarizeKeywords(keywords)} × ${summarizeOrgs(orgs)}"
-    }
-    DigestMode.TOPIC_ONLY -> "📰 ${summarizeKeywords(keywords)}"
-    DigestMode.ACCOUNT_ONLY -> "🏢 내 기업 동향"
-    DigestMode.DUAL_SECTION -> when (dualSection) {
-        "topic" -> "📰 주제 동향"
-        "account" -> "🏢 내 기업"
-        else -> throw EngineInvalidInputException("DUAL_SECTION requires dualSection = topic|account")
+): String {
+    val normalizedKeywords = keywords.map { it.trim() }.filter { it.isNotBlank() }
+    val normalizedOrgs = orgs.map { it.copy(name = it.name.trim()) }.filter { it.name.isNotBlank() }
+
+    return when (mode) {
+        DigestMode.CROSSFILTER -> when {
+            normalizedKeywords.size == 1 && normalizedOrgs.size == 1 ->
+                "📰 ${normalizedOrgs[0].name}의 ${normalizedKeywords[0]}"
+            normalizedKeywords.size == 1 ->
+                "📰 ${normalizedKeywords[0]} × ${summarizeOrgs(normalizedOrgs)}"
+            normalizedOrgs.size == 1 ->
+                "📰 ${normalizedOrgs[0].name} × ${summarizeKeywords(normalizedKeywords)}"
+            else ->
+                "📰 ${summarizeKeywords(normalizedKeywords)} × ${summarizeOrgs(normalizedOrgs)}"
+        }
+        DigestMode.TOPIC_ONLY -> "📰 ${summarizeKeywords(normalizedKeywords)}"
+        DigestMode.ACCOUNT_ONLY -> "🏢 내 기업 동향"
+        DigestMode.DUAL_SECTION -> when (dualSection) {
+            "topic" -> "📰 주제 동향"
+            "account" -> "🏢 내 기업"
+            else -> throw EngineInvalidInputException("DUAL_SECTION requires dualSection = topic|account")
+        }
     }
 }
