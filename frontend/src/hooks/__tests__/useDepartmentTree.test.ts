@@ -1,7 +1,6 @@
-import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 vi.mock("@/services/departmentService", () => ({
   departmentService: {
@@ -12,13 +11,6 @@ vi.mock("@/services/departmentService", () => ({
 
 import { useDepartmentTree } from "@/hooks/useDepartmentTree";
 import { departmentService } from "@/services/departmentService";
-
-function withQueryClient(children: React.ReactNode) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: 0 } },
-  });
-  return React.createElement(QueryClientProvider, { client: qc }, children);
-}
 
 describe("useDepartmentTree", () => {
   beforeEach(() => {
@@ -33,7 +25,7 @@ describe("useDepartmentTree", () => {
     });
 
     const { result } = renderHook(() => useDepartmentTree(), {
-      wrapper: ({ children }) => withQueryClient(children),
+      wrapper: createQueryClientWrapper(),
     });
 
     await waitFor(() => {
@@ -63,7 +55,7 @@ describe("useDepartmentTree", () => {
     });
 
     const { result } = renderHook(() => useDepartmentTree({ admin: true }), {
-      wrapper: ({ children }) => withQueryClient(children),
+      wrapper: createQueryClientWrapper(),
     });
 
     await waitFor(() => {
@@ -80,7 +72,7 @@ describe("useDepartmentTree", () => {
     );
 
     const { result } = renderHook(() => useDepartmentTree(), {
-      wrapper: ({ children }) => withQueryClient(children),
+      wrapper: createQueryClientWrapper(),
     });
 
     await waitFor(() => {
@@ -91,7 +83,7 @@ describe("useDepartmentTree", () => {
 
   it("enabled=false 이면 서비스를 호출하지 않는다", async () => {
     renderHook(() => useDepartmentTree({ enabled: false }), {
-      wrapper: ({ children }) => withQueryClient(children),
+      wrapper: createQueryClientWrapper(),
     });
     // 마이크로태스크 드레인 후에도 호출되면 안 된다.
     await Promise.resolve();

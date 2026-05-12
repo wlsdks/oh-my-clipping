@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React from "react";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // useEditingPresence 가 참조하는 서비스 싱글톤을 mocking.
 vi.mock("@/services/editingPresenceService", () => ({
@@ -15,13 +14,6 @@ vi.mock("@/services/editingPresenceService", () => ({
 // import 는 mock 선언 뒤에 수행한다 (vi.mock 은 hoist 되지만 참조는 이후 시점).
 import { useEditingPresence } from "@/hooks/useEditingPresence";
 import { editingPresenceService } from "@/services/editingPresenceService";
-
-function withQueryClient(children: React.ReactNode) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: 0 } }
-  });
-  return React.createElement(QueryClientProvider, { client: qc }, children);
-}
 
 async function advancePresenceClock(ms: number) {
   await act(async () => {
@@ -46,7 +38,7 @@ describe("useEditingPresence", () => {
           resourceId: "p-1",
           enabled: true
         }),
-      { wrapper: ({ children }) => withQueryClient(children) }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => {
@@ -63,7 +55,7 @@ describe("useEditingPresence", () => {
           resourceId: "p-1",
           enabled: true
         }),
-      { wrapper: ({ children }) => withQueryClient(children) }
+      { wrapper: createQueryClientWrapper() }
     );
 
     // 즉시 호출 1회
@@ -86,7 +78,7 @@ describe("useEditingPresence", () => {
           resourceId: "p-1",
           enabled: false
         }),
-      { wrapper: ({ children }) => withQueryClient(children) }
+      { wrapper: createQueryClientWrapper() }
     );
 
     expect(editingPresenceService.heartbeat).not.toHaveBeenCalled();
@@ -101,7 +93,7 @@ describe("useEditingPresence", () => {
           resourceId: null,
           enabled: true
         }),
-      { wrapper: ({ children }) => withQueryClient(children) }
+      { wrapper: createQueryClientWrapper() }
     );
 
     expect(editingPresenceService.heartbeat).not.toHaveBeenCalled();
@@ -116,7 +108,7 @@ describe("useEditingPresence", () => {
           resourceId: "p-1",
           enabled: true
         }),
-      { wrapper: ({ children }) => withQueryClient(children) }
+      { wrapper: createQueryClientWrapper() }
     );
 
     await waitFor(() => {

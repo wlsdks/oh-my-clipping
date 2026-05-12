@@ -1,7 +1,6 @@
-import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 vi.mock("@/services/runtimeService", () => ({
   runtimeService: {
@@ -11,13 +10,6 @@ vi.mock("@/services/runtimeService", () => ({
 
 import { useSlackChannelMap } from "@/hooks/useSlackChannelMap";
 import { runtimeService } from "@/services/runtimeService";
-
-function withQueryClient(children: React.ReactNode) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, gcTime: 0 } },
-  });
-  return React.createElement(QueryClientProvider, { client: qc }, children);
-}
 
 describe("useSlackChannelMap.formatChannel", () => {
   beforeEach(() => {
@@ -38,7 +30,7 @@ describe("useSlackChannelMap.formatChannel", () => {
 
   async function loadHook() {
     const hook = renderHook(() => useSlackChannelMap(), {
-      wrapper: ({ children }) => withQueryClient(children),
+      wrapper: createQueryClientWrapper(),
     });
     await waitFor(() => {
       expect(hook.result.current.hasLoaded).toBe(true);
