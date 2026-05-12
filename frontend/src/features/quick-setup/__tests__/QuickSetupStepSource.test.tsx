@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 
 // ── 의존 서비스 mock (hoisted) ──
 vi.mock("@/services/companyService", () => ({
@@ -42,6 +42,14 @@ import { userService } from "@/services/userService";
 /** 기본 QuickSetupForm을 만든다 */
 function makeForm(overrides: Partial<QuickSetupForm> = {}): QuickSetupForm {
   return { ...createQuickSetupForm(), ...overrides };
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
 }
 
 beforeEach(() => {
@@ -186,6 +194,53 @@ describe("QuickSetupStepSource — 기업 검색 탭", () => {
       () => expect(companyService.searchUserCompanies).toHaveBeenCalledWith("TestCorp"),
       { timeout: 1000 }
     );
+  });
+
+  it("늦게 도착한 이전 기업 검색 결과가 최신 추천을 덮지 않는다", async () => {
+    vi.useFakeTimers();
+    const first = deferred<Awaited<ReturnType<typeof companyService.searchAdminCompanies>>>();
+    const second = deferred<Awaited<ReturnType<typeof companyService.searchAdminCompanies>>>();
+    vi.mocked(companyService.searchAdminCompanies)
+      .mockReturnValueOnce(first.promise)
+      .mockReturnValueOnce(second.promise);
+
+    try {
+      render(<QuickSetupStepSource form={makeForm()} onChange={vi.fn()} />);
+      fireEvent.click(screen.getByRole("button", { name: /기업 검색/ }));
+      const input = screen.getByPlaceholderText(/기업명을 입력하세요/);
+
+      fireEvent.change(input, { target: { value: "OldCorp" } });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+
+      fireEvent.change(input, { target: { value: "NewCorp" } });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(300);
+      });
+
+      await act(async () => {
+        second.resolve([
+          { corpCode: "NEW", corpName: "NewCorp", stockCode: "000002" }
+        ]);
+        await second.promise;
+        await Promise.resolve();
+      });
+      expect(screen.getByText("NewCorp")).toBeInTheDocument();
+
+      await act(async () => {
+        first.resolve([
+          { corpCode: "OLD", corpName: "OldCorp", stockCode: "000001" }
+        ]);
+        await first.promise;
+        await Promise.resolve();
+      });
+
+      expect(screen.getByText("NewCorp")).toBeInTheDocument();
+      expect(screen.queryByText("OldCorp")).not.toBeInTheDocument();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

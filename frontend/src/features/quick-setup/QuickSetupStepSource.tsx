@@ -47,6 +47,7 @@ export function QuickSetupStepSource({
   const [, setShowDropdown] = useState(false);
   const [highlightIdx, setHighlightIdx] = useState(-1);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const suggestionRequestSeqRef = useRef(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownListRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +70,8 @@ export function QuickSetupStepSource({
 
   function fetchSuggestions(query: string) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    const requestSeq = suggestionRequestSeqRef.current + 1;
+    suggestionRequestSeqRef.current = requestSeq;
     if (query.trim().length < 1) {
       setSuggestions([]);
       setShowDropdown(false);
@@ -78,10 +81,12 @@ export function QuickSetupStepSource({
       try {
         const searchFn = isUserMode ? companyService.searchUserCompanies : companyService.searchAdminCompanies;
         const results = await searchFn(query.trim());
+        if (suggestionRequestSeqRef.current !== requestSeq) return;
         setSuggestions(results);
         setShowDropdown(true);
         setHighlightIdx(-1);
       } catch {
+        if (suggestionRequestSeqRef.current !== requestSeq) return;
         setSuggestions([]);
         setShowDropdown(false);
       }
@@ -97,6 +102,7 @@ export function QuickSetupStepSource({
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
+      suggestionRequestSeqRef.current += 1;
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
@@ -104,6 +110,10 @@ export function QuickSetupStepSource({
   }, []);
 
   function handleTabChange(newTab: InputTab) {
+    suggestionRequestSeqRef.current += 1;
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
     setTab(newTab);
     setInput("");
     setSuggestions([]);
