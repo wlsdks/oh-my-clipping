@@ -9,8 +9,13 @@ class DigestModeResolverTest {
 
     @Nested
     inner class `resolveDigestMode 경계` {
-        @Test fun `0,0 → IllegalState`() {
-            shouldThrow<IllegalStateException> { resolveDigestMode(0, 0) }
+        @Test fun `0,0 은 엔진 입력 오류로 거부한다`() {
+            shouldThrow<EngineInvalidInputException> { resolveDigestMode(0, 0) }
+                .message shouldBe "digest requires at least one keyword or org"
+        }
+        @Test fun `음수 count 는 엔진 입력 오류로 거부한다`() {
+            shouldThrow<EngineInvalidInputException> { resolveDigestMode(-1, 1) }
+                .message shouldBe "keywordCount and orgCount must be non-negative"
         }
         @Test fun `1,0 → TOPIC_ONLY`() { resolveDigestMode(1, 0) shouldBe DigestMode.TOPIC_ONLY }
         @Test fun `N,0 → TOPIC_ONLY`() { resolveDigestMode(5, 0) shouldBe DigestMode.TOPIC_ONLY }
@@ -30,5 +35,9 @@ class DigestModeResolverTest {
         @Test fun `budget 1 → 1,0`() { splitBudget(1) shouldBe (1 to 0) }
         @Test fun `budget 7 fallback → 4,3`() { splitBudget(7) shouldBe (4 to 3) }
         @Test fun `budget 10 fallback → 5,5`() { splitBudget(10) shouldBe (5 to 5) }
+        @Test fun `0 이하 budget 은 엔진 입력 오류로 거부한다`() {
+            shouldThrow<EngineInvalidInputException> { splitBudget(0) }
+                .message shouldBe "budget must be greater than 0"
+        }
     }
 }
