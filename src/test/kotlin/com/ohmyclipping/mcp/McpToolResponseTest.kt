@@ -34,6 +34,8 @@ class McpToolResponseTest {
 
             val parsed: Map<String, Any> = mapper.readValue(result)
             val error = parsed["error"] as Map<*, *>
+            error["type"] shouldBe "RATE_LIMITED"
+            error["retryable"] shouldBe true
             error["retryAfterSeconds"] shouldBe 60
             (error.containsKey("retryAt")) shouldBe false
         }
@@ -51,6 +53,8 @@ class McpToolResponseTest {
 
             val parsed: Map<String, Any> = mapper.readValue(result)
             val error = parsed["error"] as Map<*, *>
+            error["type"] shouldBe "RATE_LIMITED"
+            error["retryable"] shouldBe true
             error["retryAfterSeconds"] shouldBe 3600
             (error["retryAt"] as String) shouldContain "2026-04-21T10:00:00"
         }
@@ -80,7 +84,27 @@ class McpToolResponseTest {
             val parsed: Map<String, Any> = mapper.readValue(result)
             val error = parsed["error"] as Map<*, *>
             error["code"] shouldBe McpErrorCode.INTERNAL_ERROR.code
+            error["type"] shouldBe "INTERNAL_ERROR"
+            error["retryable"] shouldBe false
             error["message"] shouldBe "Internal error"
+        }
+    }
+
+    @Nested
+    inner class `복구 힌트` {
+
+        @Test
+        fun `에러 payload 는 stable type 과 retryable 힌트를 포함한다`() {
+            val result = mcpToolCall {
+                throw IllegalArgumentException("limit must be positive")
+            }
+
+            val parsed: Map<String, Any> = mapper.readValue(result)
+            val error = parsed["error"] as Map<*, *>
+            error["code"] shouldBe McpErrorCode.INVALID_PARAMS.code
+            error["type"] shouldBe "INVALID_PARAMS"
+            error["retryable"] shouldBe false
+            error["message"] shouldBe "limit must be positive"
         }
     }
 }

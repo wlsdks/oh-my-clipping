@@ -12,6 +12,12 @@ object DigestSummaryFormattingPolicy {
     private val fullWidthSpace = Regex("\\u3000")
     private val sectionEmoji = "(📌|💡|👉|📰|🎓|🔍|📊|📈|🔮|🎯|✅|▸)"
     private val sectionEmojiNonCapturing = "(?:📌|💡|👉|📰|🎓|🔍|📊|📈|🔮|🎯|✅|▸)"
+    private val repeatedSectionEmoji = Regex("$sectionEmoji(?:\\s*\\1)+")
+    private val adjacentSectionEmoji = Regex("$sectionEmoji[ \\t]*$sectionEmojiNonCapturing")
+    private val sectionEmojiBoundary = Regex("(?<=\\S)[ \\t]*(?=$sectionEmojiNonCapturing)")
+    private val inlineWhitespace = Regex("[ \\t]+")
+    private val paragraphBreak = Regex("\\n\\s*\\n+")
+    private val sentenceBreak = Regex("(?<=[.!?])\\s+|(?<=다\\.)\\s+")
     private val sectionLabelPattern = Regex(
         "(?im)^\\s*($sectionEmoji\\s*)?(?:\\*+\\s*)?" +
             "(?:요약\\s*\\d*|핵심\\s*내용|맥락|실무\\s*시사점|" +
@@ -24,9 +30,9 @@ object DigestSummaryFormattingPolicy {
     fun sanitizeSummaryForDisplay(text: String): String {
         val normalized = normalizeText(text)
             .replace(crOrCrLf, "\n")
-            .replace(Regex("$sectionEmoji(?:\\s*\\1)+"), "$1")
-            .replace(Regex("$sectionEmoji[ \\t]*$sectionEmojiNonCapturing"), "$1")
-            .replace(Regex("(?<=\\S)[ \\t]*(?=$sectionEmojiNonCapturing)"), "\n\n")
+            .replace(repeatedSectionEmoji, "$1")
+            .replace(adjacentSectionEmoji, "$1")
+            .replace(sectionEmojiBoundary, "\n\n")
 
         return normalized
             .trim()
@@ -69,8 +75,8 @@ object DigestSummaryFormattingPolicy {
 
         val safeLimit = maxChars.coerceAtLeast(120)
         val sourceParagraphs = normalized
-            .split(Regex("\\n\\s*\\n+"))
-            .map { it.replace(Regex("[ \\t]+"), " ").trim() }
+            .split(paragraphBreak)
+            .map { it.replace(inlineWhitespace, " ").trim() }
             .filter { it.isNotBlank() }
 
         val clippedParagraphs = mutableListOf<String>()
@@ -100,7 +106,7 @@ object DigestSummaryFormattingPolicy {
         }
 
         val sentences = clippedParagraphs.first()
-            .split(Regex("(?<=[.!?])\\s+|(?<=다\\.)\\s+"))
+            .split(sentenceBreak)
             .map { it.trim() }
             .filter { it.isNotBlank() }
 
