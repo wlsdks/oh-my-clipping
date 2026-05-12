@@ -1,5 +1,6 @@
 package com.ohmyclipping.admin.mcp
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.service.AsyncClipJobService
 import org.springframework.ai.tool.annotation.Tool
@@ -24,6 +25,14 @@ class AdminJobStatusTool(private val asyncClipJobService: AsyncClipJobService) {
     fun admin_job_status(
         @ToolParam(description = "비동기 도구에서 반환된 작업 ID") jobId: String,
     ): String = mcpToolCall {
-        asyncClipJobService.getJobStatus(jobId)
+        asyncClipJobService.getJobStatus(validateJobId(jobId))
+    }
+
+    private fun validateJobId(jobId: String): String {
+        val normalized = jobId.trim()
+        if (normalized.isBlank()) {
+            throw InvalidInputException("jobId is required")
+        }
+        return normalized
     }
 }
