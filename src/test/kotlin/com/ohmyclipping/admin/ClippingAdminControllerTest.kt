@@ -453,7 +453,17 @@ class ClippingAdminControllerTest {
     private fun disableAutoReviewGate() {
         adminClient().put().uri("/api/admin/category-rules/$categoryId")
             .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("""{"uncertainToReview":false,"autoExcludeEnabled":false,"updatedBy":"test-admin"}""")
+            .bodyValue(
+                """
+                {
+                  "includeThreshold":0.1,
+                  "reviewThreshold":0.0,
+                  "uncertainToReview":false,
+                  "autoExcludeEnabled":false,
+                  "updatedBy":"test-admin"
+                }
+                """.trimIndent()
+            )
             .exchange()
             .expectStatus().isOk
     }
