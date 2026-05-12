@@ -30,8 +30,10 @@ class AdminSummarizeAsyncTool(
     fun admin_summarize_async(
         @ToolParam(description = "요약 대상 카테고리 ID (생략 시 전체)", required = false) categoryId: String?,
     ): String = mcpToolCall {
+        val normalizedCategoryId = categoryId?.trim()?.takeIf { it.isNotBlank() }
+
         // 호출 빈도 제한: 최대 10회/시간 (전역).
         rateLimiter.checkOrThrow("admin_summarize_async", maxRequests = 10, windowSeconds = 3600)
-        asyncClipJobService.enqueueSummarize(categoryId)
+        asyncClipJobService.enqueueSummarize(normalizedCategoryId)
     }
 }
