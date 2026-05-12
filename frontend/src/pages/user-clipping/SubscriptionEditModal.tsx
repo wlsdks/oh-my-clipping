@@ -399,15 +399,22 @@ function SubscriptionNameEditor({
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(name);
   const inputRef = useRef<HTMLInputElement>(null);
+  const focusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (open) {
       setDraft(name);
-      setTimeout(() => {
+      focusTimerRef.current = setTimeout(() => {
         inputRef.current?.focus();
         inputRef.current?.select();
+        focusTimerRef.current = null;
       }, 50);
     }
+    return () => {
+      if (focusTimerRef.current) {
+        clearTimeout(focusTimerRef.current);
+      }
+    };
   }, [open, name]);
 
   function handleConfirm() {
