@@ -1,5 +1,6 @@
 package com.ohmyclipping.resilience
 
+import com.ohmyclipping.support.TestSleeper
 import io.kotest.matchers.longs.shouldBeLessThan
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.Nested
@@ -114,7 +115,7 @@ class TokenBucketRateLimiterTest {
                 limiter.acquire()
             }
             thread.start()
-            Thread.sleep(100)
+            TestSleeper.sleep(100, "wait for rate limiter waiter")
             limiter.currentWaitCount shouldBe 1
             thread.interrupt()
         }

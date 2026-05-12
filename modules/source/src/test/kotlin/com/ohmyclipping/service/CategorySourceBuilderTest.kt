@@ -257,7 +257,7 @@ class CategorySourceBuilderTest {
 
             // thread2 가 lock 대기 상태에 들어갈 시간을 준다.
             thread2Started.await(2, TimeUnit.SECONDS)
-            Thread.sleep(30)
+            sleepInterruptibly(30, "wait for category source lock contention")
 
             // 이 시점에서 thread1 의 InTx 는 아직 시작도 안 됐음 (release 대기 중).
             // thread2 도 lock 을 못 잡은 상태. getObject() 호출 횟수는 1 이어야 한다.
@@ -272,5 +272,15 @@ class CategorySourceBuilderTest {
             // thread1 + thread2 모두 완료 → getObject() 총 2회 호출.
             verify(exactly = 2) { slowSelfProvider.getObject() }
         }
+    }
+}
+
+private fun sleepInterruptibly(delayMs: Long, context: String) {
+    if (delayMs <= 0) return
+    try {
+        TimeUnit.MILLISECONDS.sleep(delayMs)
+    } catch (exception: InterruptedException) {
+        Thread.currentThread().interrupt()
+        throw AssertionError("Test sleep interrupted: $context", exception)
     }
 }

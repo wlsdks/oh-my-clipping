@@ -15,6 +15,7 @@ import com.ohmyclipping.store.LlmRunStore
 import com.ohmyclipping.store.RssItemStore
 import com.ohmyclipping.store.SummaryCacheStore
 import com.ohmyclipping.store.SummaryEnrichmentStore
+import com.ohmyclipping.support.TestSleeper
 import io.kotest.matchers.doubles.shouldBeGreaterThanOrEqual
 import io.kotest.matchers.ints.shouldBeGreaterThan
 import io.kotest.matchers.shouldBe
@@ -227,7 +228,7 @@ class PipelineStressTest {
         )
         every { summarizer.summarizeArticle(any(), any(), any(), any()) } answers {
             val callNum = callCounter.incrementAndGet()
-            Thread.sleep(delayRange.random())
+            TestSleeper.sleep(delayRange.random(), "stress summarizer latency")
             if (Math.random() < errorRate) {
                 throw RuntimeException("Simulated Gemini failure #$callNum")
             }
@@ -322,7 +323,7 @@ class PipelineStressTest {
             durationMs = 50
         )
         every { summarizer.summarizeArticle(any(), any(), any(), any()) } answers {
-            Thread.sleep(delayRange.random())
+            TestSleeper.sleep(delayRange.random(), "stress recovery summarizer latency")
             if (shouldFail.get()) {
                 throw RuntimeException("Simulated Gemini failure (recovery scenario)")
             }

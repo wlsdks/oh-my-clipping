@@ -306,7 +306,7 @@ class IdempotencyKeyServiceTest {
                         resultClass = Payload::class.java
                     ) {
                         supplierCalls.incrementAndGet()
-                        Thread.sleep(50)
+                        TestSleeper.sleep(50, "hold idempotency supplier lock")
                         Payload("1", "only-once")
                     }
                 }
