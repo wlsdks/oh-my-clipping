@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createTestQueryClient, createQueryClientWrapper } from "@/test/queryClient";
 import type { UserClippingRequest, UserSubscriptionPreference } from "@/types/user";
 
 vi.mock("@/services/userService", () => ({
@@ -75,22 +75,16 @@ function renderModal(
   props: Partial<React.ComponentProps<typeof SubscriptionEditModal>> = {}
 ) {
   const onClose = vi.fn();
-  const qc = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, staleTime: 0 },
-      mutations: { retry: false },
-    },
-  });
+  const qc = createTestQueryClient();
   const utils = render(
-    <QueryClientProvider client={qc}>
-      <SubscriptionEditModal
-        open
-        request={baseRequest}
-        preference={makePref()}
-        onClose={onClose}
-        {...props}
-      />
-    </QueryClientProvider>
+    <SubscriptionEditModal
+      open
+      request={baseRequest}
+      preference={makePref()}
+      onClose={onClose}
+      {...props}
+    />,
+    { wrapper: createQueryClientWrapper(qc) },
   );
   return { ...utils, onClose, qc };
 }

@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReportTab } from "../ReportTab";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { UserMonthlyStatRow } from "@/types/insight";
 
 vi.mock("@/services/userHistoryService", () => ({
@@ -20,17 +20,9 @@ import { userHistoryService } from "@/services/userHistoryService";
 import { newsIntelligenceService } from "@/services/newsIntelligenceService";
 
 function renderTab(approvedCategoryIds: string[] = ["cat-A"]) {
-  const qc = new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, staleTime: 0 },
-      mutations: { retry: false },
-    },
+  return render(<ReportTab approvedCategoryIds={approvedCategoryIds} />, {
+    wrapper: createQueryClientWrapper(),
   });
-  return render(
-    <QueryClientProvider client={qc}>
-      <ReportTab approvedCategoryIds={approvedCategoryIds} />
-    </QueryClientProvider>
-  );
 }
 
 const baseStatRow = (overrides: Partial<UserMonthlyStatRow> = {}): UserMonthlyStatRow => ({
