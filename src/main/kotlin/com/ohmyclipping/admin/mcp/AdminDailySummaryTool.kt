@@ -29,7 +29,8 @@ class AdminDailySummaryTool(
     fun admin_daily_summary(
         @ToolParam(description = "일간 요약을 생성할 카테고리 ID") categoryId: String,
     ): String = mcpToolCall {
-        if (categoryId.isBlank()) {
+        val normalizedCategoryId = categoryId.trim()
+        if (normalizedCategoryId.isBlank()) {
             throw InvalidInputException("categoryId must not be blank")
         }
 
@@ -38,8 +39,8 @@ class AdminDailySummaryTool(
             toolName = "admin_daily_summary",
             maxRequests = 10,
             windowSeconds = 86400,
-            dimension = categoryId
+            dimension = normalizedCategoryId
         )
-        clippingQueryPort.generateDailySummary(categoryId)
+        clippingQueryPort.generateDailySummary(normalizedCategoryId)
     }
 }
