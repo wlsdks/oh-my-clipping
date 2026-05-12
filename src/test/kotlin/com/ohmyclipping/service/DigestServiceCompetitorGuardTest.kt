@@ -40,9 +40,7 @@ class DigestServiceCompetitorGuardTest {
         summarizer = mockk<LlmSummarizationPort>(),
         environment = mockk<Environment>(),
         featureFlagsService = mockk<FeatureFlagsService>(relaxed = true),
-        digestPreviewService = mockk<DigestPreviewService>(relaxed = true),
-        categoryDigestStateService = mockk<CategoryDigestStateService>(relaxed = true),
-        digestDiffLogStore = mockk<com.ohmyclipping.store.DigestDiffLogStore>(relaxed = true),
+        accountBasedDigestService = mockk<com.ohmyclipping.service.digest.AccountBasedDigestService>(relaxed = true),
     )
 
     @Test

@@ -9,7 +9,6 @@ import com.ohmyclipping.error.ensureValid
 import com.ohmyclipping.model.BatchSummary
 import com.ohmyclipping.model.Category
 import com.ohmyclipping.service.AdminReviewQueueService
-import com.ohmyclipping.service.CategoryDigestStateService
 import com.ohmyclipping.service.FeatureFlagsService
 import com.ohmyclipping.service.RuntimeSettingService
 import com.ohmyclipping.service.SlackBlockKitTemplateService
@@ -23,14 +22,11 @@ import com.ohmyclipping.service.port.SlackDeliveryPort
 import com.ohmyclipping.store.BatchSummaryStore
 import com.ohmyclipping.store.CategoryStore
 import com.ohmyclipping.store.DigestCandidateStore
-import com.ohmyclipping.store.DigestDiffLogStore
 import com.ohmyclipping.store.SlackChannelDailySendCountStore
 import com.ohmyclipping.store.SummaryDeliveryStore
 import com.ohmyclipping.store.SummaryFeedbackStore
 import com.ohmyclipping.support.GraphemeTruncator
 import com.ohmyclipping.support.SlackChannelIdNormalizer
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.core.env.Environment
@@ -46,10 +42,11 @@ private val log = KotlinLogging.logger {}
 /**
  * 다이제스트 생성 및 Slack 전송 오케스트레이션 서비스.
  *
- * 이 클래스는 세 가지 책임을 조합한다:
+ * 이 클래스는 네 가지 책임을 조합한다:
  * - **선정**: `DigestSelectionService` 에 위임 (후보 조회/필터링/랭킹/중복제거)
  * - **렌더링**: `DigestRenderer` 에 위임 (Block Kit / fallback 텍스트 / 이모지 정규화)
  * - **전송 & 후처리**: Slack 전송, 쿼터 예약/반환, sent 마킹 재시도, 통계 적재, 이벤트 퍼블리시
+ * - **account-based 전략**: `AccountBasedDigestService` 에 위임 (feature flag 가 켜진 카테고리의 dry-run preview 발송 경로)
  *
  * 공개 API (`digest` / `sendPreparedDigest` / `finalizePreparedDigest`) 와 테스트에서 직접 호출하는
  * 렌더링/선정 유틸(`buildDigestText`, `buildTrackingUrl`, `sanitizeSummaryForDisplay`,
@@ -75,9 +72,7 @@ class DigestService(
     private val summarizer: LlmSummarizationPort,
     private val environment: Environment,
     private val featureFlagsService: FeatureFlagsService,
-    private val digestPreviewService: DigestPreviewService,
-    private val categoryDigestStateService: CategoryDigestStateService,
-    private val digestDiffLogStore: DigestDiffLogStore,
+    private val accountBasedDigestService: AccountBasedDigestService,
 ) {
 
     /**
@@ -119,7 +114,7 @@ class DigestService(
         val isAccountBased = featureFlagsService.isAccountBasedDigestEnabled(categoryId)
         if (isAccountBased) {
             val accountResult = runCatching {
-                generateAccountBasedDigest(categoryId, sendToSlack, slackChannelId)
+                accountBasedDigestService.generate(categoryId, sendToSlack, slackChannelId)
             }.onFailure { e ->
                 log.error(e) { "[account-based] category=$categoryId — account-based digest failed; falling back to legacy" }
             }.getOrNull()
@@ -586,168 +581,6 @@ class DigestService(
                     "categoryId=$categoryId, summaryCount=${summaryIds.size}"
             }
         }
-    }
-
-    // -- account-based digest path --
-
-    /**
-     * Account-based 다이제스트를 생성한다. shadow 모드면 Slack 미발송 후 diff 기록, 아니면 실제 전송.
-     *
-     * dry-run 결과가 EMPTY 거나 채널이 없는 경우 null 을 반환해 호출자가 legacy 로 폴백하게 한다.
-     *
-     * @param categoryId 대상 카테고리 ID
-     * @param sendToSlack 호출자가 넘긴 전송 여부 파라미터 (false 면 preview-only 반환)
-     * @param slackChannelId 채널 오버라이드 (null 이면 카테고리 기본 채널)
-     * @return [DigestResult] 또는 null (legacy 폴백 신호)
-     */
-    private fun generateAccountBasedDigest(
-        categoryId: String,
-        sendToSlack: Boolean?,
-        slackChannelId: String?,
-    ): DigestResult? {
-        val category = categoryStore.findById(categoryId)
-            ?: throw NotFoundException("Category not found: $categoryId")
-
-        // dry-run 으로 account-based 렌더링 결과를 먼저 확인한다
-        val preview = digestPreviewService.dryRunForCategory(categoryId)
-        if (preview.mode == "EMPTY") {
-            log.info { "[account-based] $categoryId — EMPTY dry-run result; falling through to legacy" }
-            return null
-        }
-
-        val isShadow = featureFlagsService.isShadowModeEnabled(categoryId)
-        val channelId = slackChannelId ?: category.slackChannelId
-        if (channelId.isNullOrBlank()) {
-            log.warn { "[account-based] $categoryId — no slack channel configured; skipping" }
-            return null
-        }
-
-        // Block Kit JSON 문자열을 List<Map> 으로 파싱한다
-        val blocks: List<Map<String, Any?>> = try {
-            jacksonObjectMapper().readValue(
-                preview.blocks,
-                object : TypeReference<List<Map<String, Any?>>>() {}
-            )
-        } catch (e: Exception) {
-            log.warn(e) { "[account-based] $categoryId — blocks JSON parse failed; falling back to legacy" }
-            return null
-        }
-
-        if (isShadow) {
-            // shadow 모드: Slack 전송 없이 diff row 를 기록한다
-            digestDiffLogStore.insertIfAbsent(
-                categoryId = categoryId,
-                digestDate = ZonedDateTime.now(KST).toLocalDate(),
-                legacySummary = null,
-                newSummary = preview.blocks,
-                newMode = preview.mode,
-                sectionsCount = preview.sectionState.size,
-                articlesCount = preview.sectionState.sumOf { it.articlesCount },
-                crossMatchCount = preview.sectionState.sumOf { it.badgedCount },
-            )
-            log.info { "[account-based] $categoryId — shadow mode; Slack skipped, diff row recorded" }
-            return DigestResult(
-                categoryId = category.id,
-                categoryName = category.name,
-                unsentOnly = true,
-                totalCandidates = 0,
-                selectedCount = 0,
-                postedToSlack = false,
-                slackChannelId = channelId,
-                slackMessageTs = null,
-                markedSentCount = 0,
-                digestText = preview.blocks,
-                items = emptyList(),
-            )
-        }
-
-        // sendToSlack=false 이면 preview-only 반환 (no Slack send)
-        if (sendToSlack == false) {
-            log.info { "[account-based] $categoryId — sendToSlack=false; preview-only" }
-            return DigestResult(
-                categoryId = category.id,
-                categoryName = category.name,
-                unsentOnly = true,
-                totalCandidates = 0,
-                selectedCount = 0,
-                postedToSlack = false,
-                slackChannelId = channelId,
-                slackMessageTs = null,
-                markedSentCount = 0,
-                digestText = preview.blocks,
-                items = emptyList(),
-            )
-        }
-
-        // 일별 발송 쿼터를 예약한다 — legacy 경로와 동일한 KST 자정 경계 기준
-        val sendDate = ZonedDateTime.now(KST).toLocalDate()
-        val runtime = runtimeSettingService.current()
-        val reservation = slackChannelDailySendCountStore.reserveSlot(
-            channelId = channelId,
-            sendDate = sendDate,
-            dailyLimit = runtime.slackDailyChannelMessageLimit
-        )
-        if (!reservation.allowed) {
-            log.info { "[account-based] $categoryId — daily Slack quota exhausted for $channelId; skipping" }
-            return DigestResult(
-                categoryId = category.id,
-                categoryName = category.name,
-                unsentOnly = true,
-                totalCandidates = 0,
-                selectedCount = 0,
-                postedToSlack = false,
-                slackChannelId = channelId,
-                slackMessageTs = null,
-                markedSentCount = 0,
-                digestText = preview.blocks,
-                items = emptyList(),
-            )
-        }
-
-        // 실제 Slack 전송
-        val fallbackText = "${category.name} account-based digest"
-        val sendResult = try {
-            slackMessageSender.sendMessage(
-                channelId = channelId,
-                text = fallbackText,
-                blocks = blocks,
-                botToken = runtime.slackBotToken,
-            )
-        } catch (e: Exception) {
-            // 전송 예외 시 쿼터를 반환하고 예외를 다시 던진다
-            slackChannelDailySendCountStore.releaseSlot(channelId, sendDate)
-            throw e
-        }
-
-        // Slack 전송이 실패(ok=false)면 쿼터를 반환한다
-        if (!sendResult.ok) {
-            slackChannelDailySendCountStore.releaseSlot(channelId, sendDate)
-        }
-
-        // DUAL_SECTION 인 경우 실제 전송 성공 시에만 legend 노출 카운트를 증가시킨다
-        if (preview.mode == "DUAL_SECTION" && sendResult.ok) {
-            categoryDigestStateService.incrementLegendDisplayCount(categoryId)
-        }
-
-        val result = DigestResult(
-            categoryId = category.id,
-            categoryName = category.name,
-            unsentOnly = true,
-            totalCandidates = 0,
-            selectedCount = 0,
-            postedToSlack = sendResult.ok,
-            slackChannelId = channelId,
-            slackMessageTs = sendResult.ts.ifEmpty { null },
-            markedSentCount = 0,
-            digestText = preview.blocks,
-            items = emptyList(),
-            fallbackUsed = sendResult.fallbackUsed,
-        )
-
-        // 후처리 (sent 마킹/통계 등) — account-based 경로는 items 가 없으므로 idempotent
-        finalizePreparedDigest(categoryId, result)
-
-        return result
     }
 
     // -- Slack channel resolution --

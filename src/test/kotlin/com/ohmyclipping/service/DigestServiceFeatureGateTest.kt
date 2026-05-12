@@ -93,11 +93,25 @@ class DigestServiceFeatureGateTest {
             digestCandidateStore.findDigestCandidatesWithSource(any(), any<Instant>(), any())
         } returns (emptyList<BatchSummary>() to emptyMap<String, String?>())
 
+        val runtime = mockk<RuntimeSettingService>(relaxed = true)
+        val finalizer = mockk<DigestDeliveryFinalizationService>(relaxed = true)
+        val accountBased = AccountBasedDigestService(
+            categoryStore = categoryStore,
+            digestPreviewService = digestPreviewService,
+            featureFlagsService = flags,
+            digestDiffLogStore = digestDiffLogStore,
+            slackChannelDailySendCountStore = slackChannelDailySendCountStore,
+            runtimeSettingService = runtime,
+            slackMessageSender = slackMessageSender,
+            categoryDigestStateService = categoryDigestStateService,
+            digestDeliveryFinalizationService = finalizer,
+        )
+
         return DigestService(
             categoryStore = categoryStore,
             summaryStore = summaryStore,
             digestCandidateStore = digestCandidateStore,
-            runtimeSettingService = mockk<RuntimeSettingService>(relaxed = true),
+            runtimeSettingService = runtime,
             appProperties = AppProperties(),
             applicationEventPublisher = mockk<ApplicationEventPublisher>(relaxed = true),
             slackMessageSender = slackMessageSender,
@@ -105,14 +119,12 @@ class DigestServiceFeatureGateTest {
             adminReviewQueueService = mockk<AdminReviewQueueService>(relaxed = true),
             summaryFeedbackStore = mockk<SummaryFeedbackStore>(relaxed = true),
             slackBlockKitTemplateService = mockk<SlackBlockKitTemplateService>(relaxed = true),
-            digestDeliveryFinalizationService = mockk<DigestDeliveryFinalizationService>(relaxed = true),
+            digestDeliveryFinalizationService = finalizer,
             statsService = mockk<StatsService>(relaxed = true),
             summarizer = mockk<LlmSummarizationPort>(relaxed = true),
             environment = env,
             featureFlagsService = flags,
-            digestPreviewService = digestPreviewService,
-            categoryDigestStateService = categoryDigestStateService,
-            digestDiffLogStore = digestDiffLogStore,
+            accountBasedDigestService = accountBased,
         )
     }
 
