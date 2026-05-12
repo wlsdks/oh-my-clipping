@@ -22,12 +22,12 @@ import { pipelineService } from "@/services/pipelineService";
 import { sourceKeys } from "@/queries/sourceKeys";
 import { sourceService } from "@/services/sourceService";
 import { SidebarBadgeWithTooltip } from "./SidebarBadgeWithTooltip";
-import { formatBadgeTooltip } from "@/pages/dashboard/model/sidebarTooltips";
+import { formatBadgeTooltip } from "./sidebarTooltips";
 import {
   oldestIsoDate,
   isBadgeKind,
   type SidebarBadges,
-} from "@/pages/dashboard/model/sidebarBadges";
+} from "./sidebarBadges";
 
 const GROUP_LABELS: Record<AdminRouteGroup, string> = {
   home: "",
