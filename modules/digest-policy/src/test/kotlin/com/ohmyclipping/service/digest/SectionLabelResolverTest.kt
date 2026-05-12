@@ -22,6 +22,9 @@ class SectionLabelResolverTest {
         @Test fun `빈 리스트 → 빈 문자열`() {
             summarizeOrgs(emptyList()) shouldBe ""
         }
+        @Test fun `공백 조직명은 제외하고 나머지는 trim 한다`() {
+            summarizeOrgs(listOf(org(" MegaCorp "), org(" "), org("현대차"))) shouldBe "MegaCorp·현대차"
+        }
     }
 
     @Nested
@@ -30,6 +33,9 @@ class SectionLabelResolverTest {
         @Test fun `5개 overflow`() {
             summarizeKeywords(listOf("A","B","C","D","E")) shouldBe "A·B·C 외 2개"
         }
+        @Test fun `공백 키워드는 제외하고 나머지는 trim 한다`() {
+            summarizeKeywords(listOf(" AI ", " ", "L&D")) shouldBe "AI·L&D"
+        }
     }
 
     @Nested
@@ -37,6 +43,10 @@ class SectionLabelResolverTest {
         @Test fun `CROSSFILTER 1x1 자연어`() {
             resolveSectionLabel(DigestMode.CROSSFILTER, listOf("리스킬링"), listOf(org("MegaCorp")),
                                dualSection = null) shouldBe "📰 MegaCorp의 리스킬링"
+        }
+        @Test fun `CROSSFILTER 라벨은 공백 입력을 제외하고 trim 한다`() {
+            resolveSectionLabel(DigestMode.CROSSFILTER, listOf(" AI ", " "), listOf(org(" MegaCorp ")),
+                               dualSection = null) shouldBe "📰 MegaCorp의 AI"
         }
         @Test fun `CROSSFILTER 1xN`() {
             resolveSectionLabel(DigestMode.CROSSFILTER, listOf("리스킬링"),
