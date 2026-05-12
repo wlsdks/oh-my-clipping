@@ -60,6 +60,31 @@ class AdminSlackChannelDiagnoseToolTest {
         }
 
         @Test
+        fun `categoryId 는 trim 해서 rate limit dimension 과 조회에 사용한다`() {
+            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
+            every { categoryService.findById("cat-1") } returns category
+            every {
+                slackMessageSender.getChannelInfo(botToken = null, channelId = "C0123ABC")
+            } returns SlackMessageSender.SlackChannel(
+                id = "C0123ABC", name = "tech-news", isPrivate = false,
+            )
+
+            val json = tool.admin_slack_channel_diagnose(categoryId = " cat-1 ")
+
+            json shouldContain "\"categoryId\":\"cat-1\""
+            verify(exactly = 1) {
+                rateLimiter.checkOrThrow(
+                    toolName = "admin_slack_channel_diagnose",
+                    maxRequests = 30,
+                    windowSeconds = 3600,
+                    dimension = "cat-1",
+                    actor = null,
+                )
+            }
+            verify(exactly = 1) { categoryService.findById("cat-1") }
+        }
+
+        @Test
         fun `채널이 설정되지 않은 카테고리는 canPost false 와 안내 메시지`() {
             every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
             every {

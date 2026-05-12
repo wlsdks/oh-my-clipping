@@ -54,7 +54,8 @@ class AdminSlackChannelDiagnoseTool(
     fun admin_slack_channel_diagnose(
         @ToolParam(description = "진단할 카테고리 ID") categoryId: String,
     ): String = mcpToolCall {
-        if (categoryId.isBlank()) {
+        val normalizedCategoryId = categoryId.trim()
+        if (normalizedCategoryId.isBlank()) {
             throw InvalidInputException("categoryId is required")
         }
 
@@ -63,18 +64,18 @@ class AdminSlackChannelDiagnoseTool(
             toolName = "admin_slack_channel_diagnose",
             maxRequests = 30,
             windowSeconds = 3600,
-            dimension = categoryId,
+            dimension = normalizedCategoryId,
         )
 
-        val category = categoryService.findById(categoryId)
-            ?: throw NotFoundException("Category not found: $categoryId")
+        val category = categoryService.findById(normalizedCategoryId)
+            ?: throw NotFoundException("Category not found: $normalizedCategoryId")
 
         val issues = mutableListOf<String>()
         val storedChannelId = category.slackChannelId?.trim()?.ifBlank { null }
         if (storedChannelId == null) {
             issues += "카테고리에 Slack 채널이 설정되지 않았습니다"
             return@mcpToolCall SlackChannelDiagnosis(
-                categoryId = categoryId,
+                categoryId = normalizedCategoryId,
                 channelId = null,
                 channelName = null,
                 isPrivate = null,
@@ -102,7 +103,7 @@ class AdminSlackChannelDiagnoseTool(
 
         val canPost = botJoined && issues.isEmpty()
         SlackChannelDiagnosis(
-            categoryId = categoryId,
+            categoryId = normalizedCategoryId,
             channelId = storedChannelId,
             channelName = channelName,
             isPrivate = isPrivate,
