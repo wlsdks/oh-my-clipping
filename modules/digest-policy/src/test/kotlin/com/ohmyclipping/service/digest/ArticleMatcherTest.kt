@@ -35,6 +35,12 @@ class ArticleMatcherTest {
         @Test fun `빈 텍스트는 unmatch`() {
             matchesKeyword("", "AI") shouldBe false
         }
+        @Test fun `빈 키워드는 전체 텍스트에 match 하지 않는다`() {
+            matchesKeyword("AI 교육 확대", " ") shouldBe false
+        }
+        @Test fun `키워드 앞뒤 공백은 제거하고 매칭한다`() {
+            matchesKeyword("AI 교육 확대", " AI ") shouldBe true
+        }
     }
 
     @Nested
@@ -58,6 +64,14 @@ class ArticleMatcherTest {
         @Test fun `빈 aliases`() {
             val org = stubOrg(name = "ConglomerateCo", aliases = emptyList())
             matchesOrganization("ConglomerateCo 실적", org) shouldBe true
+        }
+        @Test fun `공백 name 과 alias 는 전체 텍스트에 match 하지 않는다`() {
+            val org = stubOrg(name = " ", aliases = listOf("  "))
+            matchesOrganization("아무 기사", org) shouldBe false
+        }
+        @Test fun `alias 앞뒤 공백은 제거하고 매칭한다`() {
+            val org = stubOrg(name = "MegaCorp", aliases = listOf(" SEC "))
+            matchesOrganization("SEC 주식 급등", org) shouldBe true
         }
     }
 }

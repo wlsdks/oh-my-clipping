@@ -10,17 +10,22 @@ import java.util.concurrent.ConcurrentHashMap
 private val BOUNDARY_CACHE = ConcurrentHashMap<String, Regex>()
 
 private fun boundaryRegex(term: String): Regex =
-    BOUNDARY_CACHE.computeIfAbsent(term.lowercase()) {
+    BOUNDARY_CACHE.computeIfAbsent(term.trim().lowercase()) {
         Regex(
-            "(?<![\\p{IsHangul}A-Za-z0-9])${Regex.escape(term)}(?![\\p{IsHangul}A-Za-z0-9])",
+            "(?<![\\p{IsHangul}A-Za-z0-9])${Regex.escape(term.trim())}(?![\\p{IsHangul}A-Za-z0-9])",
             RegexOption.IGNORE_CASE
         )
     }
 
 fun matchesKeyword(text: String, keyword: String): Boolean =
-    boundaryRegex(keyword).containsMatchIn(text)
+    keyword.trim().takeIf { it.isNotBlank() }
+        ?.let { boundaryRegex(it).containsMatchIn(text) }
+        ?: false
 
 fun matchesOrganization(text: String, org: DigestOrganization): Boolean {
-    if (boundaryRegex(org.name).containsMatchIn(text)) return true
-    return org.aliases.any { alias -> boundaryRegex(alias).containsMatchIn(text) }
+    return sequenceOf(org.name)
+        .plus(org.aliases.asSequence())
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .any { term -> boundaryRegex(term).containsMatchIn(text) }
 }
