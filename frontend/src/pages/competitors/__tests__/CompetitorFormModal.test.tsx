@@ -1,18 +1,9 @@
-import { describe, it, expect, vi, beforeAll } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CompetitorFormModal } from "../CompetitorFormModal";
 import type { Competitor } from "@/types/competitor";
-
-// ResizeObserver polyfill for jsdom (Radix Dialog needs it)
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-});
 
 // Mock competitorService
 vi.mock("@/services/competitorService", () => ({

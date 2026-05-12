@@ -1,25 +1,11 @@
 import React from "react";
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { OrganizationsPage } from "../OrganizationsPage";
 import type { Organization, OrganizationListResponse } from "@/types/organization";
-
-// Radix Dialog / Select 는 jsdom 에서 ResizeObserver 를 요구한다.
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-  // PointerEvents for Radix select in jsdom
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).hasPointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).scrollIntoView = vi.fn();
-});
 
 // 서비스 mock — 테스트별로 구현체를 갈아끼운다.
 const listMock = vi.fn();

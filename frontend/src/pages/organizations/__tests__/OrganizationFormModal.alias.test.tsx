@@ -1,26 +1,9 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OrganizationFormModal } from "../OrganizationFormModal";
 import type { Organization } from "@/types/organization";
-
-// Radix Dialog 는 jsdom 에서 ResizeObserver + PointerEvents 를 요구한다.
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).hasPointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).setPointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).releasePointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).scrollIntoView = vi.fn();
-});
 
 // 서비스 mock — updateMock 을 통해 전달 인자를 검증한다.
 const updateMock = vi.fn();

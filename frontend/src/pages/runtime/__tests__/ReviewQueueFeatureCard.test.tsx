@@ -1,16 +1,7 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { ReviewQueueFeatureCard } from "../ReviewQueueFeatureCard";
 import type { RuntimeSettings } from "@/types/runtime";
-
-// Radix Switch는 ResizeObserver를 참조 (jsdom 미지원)
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  } as unknown as typeof ResizeObserver;
-});
 
 /** 테스트용 기본 RuntimeSettings. 필수 필드만 채우고 나머지는 최소값. */
 function makeSettings(overrides: Partial<RuntimeSettings> = {}): RuntimeSettings {

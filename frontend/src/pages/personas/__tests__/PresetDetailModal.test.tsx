@@ -1,17 +1,8 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PresetDetailModal } from "../PresetDetailModal";
 import type { Persona } from "@/types/persona";
-
-// ResizeObserver polyfill for jsdom
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-});
 
 // mock personaService to prevent actual API calls
 vi.mock("@/services/personaService", () => ({
