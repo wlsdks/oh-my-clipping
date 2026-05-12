@@ -171,14 +171,17 @@ class McpArgsRedactor(private val objectMapper: ObjectMapper) {
 
         /**
          * 문자열 값 안의 key-value 형태 secret 유출 패턴.
-         * 예: `password=abc`, `api_key: xyz`, `token="bar"`, `authorization bearer xxx`.
+         * 예: `password=abc`, `api_key: xyz`, `token="bar"`, `authorization bearer xxx`,
+         * `Authorization: Bearer xxx`.
          *
          * 캡처 그룹 1 = 키 이름 (마스킹 시 `$1=***REDACTED***` 로 교체).
+         * 캡처 그룹 2 = 구분자. authorization 값 앞의 Bearer scheme 은 값 일부로 함께 소비한다.
          * 값 부분은 공백/따옴표/쉼표/개행 직전까지 greedy 매칭.
          */
         val VALUE_SECRET_PATTERN: Regex = Regex(
             "(password|passwd|secret|token|apikey|api_key|authorization|bearer|credential|credentials|privatekey|private_key)" +
-                "[\"':= ]+" +
+                "([\"':= ]+)" +
+                "(?:bearer\\s+)?" +
                 "[^\"',\\s]+",
             RegexOption.IGNORE_CASE,
         )
