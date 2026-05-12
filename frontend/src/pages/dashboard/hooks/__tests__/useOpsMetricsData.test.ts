@@ -1,24 +1,12 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import React from "react";
 import { describe, expect, test } from "vitest";
 
+import { createQueryClientWrapper, createTestQueryClient } from "@/test/queryClient";
 import { dashboardKeys } from "@/queries/dashboardKeys";
 import { deliveryKeys } from "@/queries/deliveryKeys";
 import { pipelineKeys } from "@/queries/pipelineKeys";
 
 import { useOpsMetricsData } from "../useOpsMetricsData";
-
-function makeWrapper(queryClient: QueryClient) {
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-}
-
-function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-}
 
 const MOCK_FORECAST = {
   expectedRunCount: 5,
@@ -55,7 +43,7 @@ const MOCK_OPS_SUMMARY = {
 
 describe("useOpsMetricsData", () => {
   test("모든 쿼리가 채워지면 각 데이터를 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
 
     queryClient.setQueryData(dashboardKeys.forecast(), MOCK_FORECAST);
     queryClient.setQueryData(
@@ -73,7 +61,7 @@ describe("useOpsMetricsData", () => {
     queryClient.setQueryData(dashboardKeys.opsSummary(), MOCK_OPS_SUMMARY);
 
     const { result } = renderHook(() => useOpsMetricsData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -87,7 +75,7 @@ describe("useOpsMetricsData", () => {
   });
 
   test("데이터가 없으면 각 필드가 undefined를 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
 
     // 캐시에 아무것도 없으면 isLoading=true 이므로
     // 빈 값으로 초기화해 pending 없이 테스트
@@ -98,7 +86,7 @@ describe("useOpsMetricsData", () => {
     queryClient.setQueryData(dashboardKeys.opsSummary(), undefined);
 
     const { result } = renderHook(() => useOpsMetricsData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     // undefined 로 설정해도 로딩은 계속 될 수 있으므로 별도 확인
@@ -110,7 +98,7 @@ describe("useOpsMetricsData", () => {
   });
 
   test("isLoading은 모든 쿼리가 완료될 때 false가 된다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
 
     queryClient.setQueryData(dashboardKeys.forecast(), MOCK_FORECAST);
     queryClient.setQueryData(
@@ -128,7 +116,7 @@ describe("useOpsMetricsData", () => {
     queryClient.setQueryData(dashboardKeys.opsSummary(), MOCK_OPS_SUMMARY);
 
     const { result } = renderHook(() => useOpsMetricsData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));

@@ -1,25 +1,14 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import React from "react";
 import { describe, expect, test } from "vitest";
 
+import { createQueryClientWrapper, createTestQueryClient } from "@/test/queryClient";
 import { categoryKeys } from "@/queries/categoryKeys";
 import { dashboardKeys } from "@/queries/dashboardKeys";
 import { personaKeys } from "@/queries/personaKeys";
 import { runtimeKeys } from "@/queries/runtimeKeys";
 
 import { useOperatorFooterData } from "../useOperatorFooterData";
-
-function makeWrapper(queryClient: QueryClient) {
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-}
-
-function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-}
 
 const MOCK_ACTIVE_SUBS = {
   activeCount: 12,
@@ -46,12 +35,12 @@ function seedSetupIncomplete(queryClient: QueryClient) {
 
 describe("useOperatorFooterData", () => {
   test("세팅 완료 상태이면 showGettingStarted가 false를 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
     queryClient.setQueryData(dashboardKeys.activeSubscriptionsSummary(), MOCK_ACTIVE_SUBS);
     seedSetupComplete(queryClient);
 
     const { result } = renderHook(() => useOperatorFooterData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -62,12 +51,12 @@ describe("useOperatorFooterData", () => {
   });
 
   test("세팅 미완료 상태이면 showGettingStarted가 true를 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
     queryClient.setQueryData(dashboardKeys.activeSubscriptionsSummary(), MOCK_ACTIVE_SUBS);
     seedSetupIncomplete(queryClient);
 
     const { result } = renderHook(() => useOperatorFooterData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -76,7 +65,7 @@ describe("useOperatorFooterData", () => {
   });
 
   test("카테고리가 있어도 slackChannelId 없으면 showGettingStarted가 true를 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
     queryClient.setQueryData(dashboardKeys.activeSubscriptionsSummary(), MOCK_ACTIVE_SUBS);
     // slackChannelId 없는 카테고리 → isSetupComplete → false
     queryClient.setQueryData(categoryKeys.lists(), [{ id: "c1", slackChannelId: null }]);
@@ -85,7 +74,7 @@ describe("useOperatorFooterData", () => {
     queryClient.setQueryData(runtimeKeys.configs(), { someKey: "v" });
 
     const { result } = renderHook(() => useOperatorFooterData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -94,12 +83,12 @@ describe("useOperatorFooterData", () => {
   });
 
   test("activeSubscriptions 미조회 시 undefined를 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
     // activeSubscriptions 미설정
     seedSetupComplete(queryClient);
 
     const { result } = renderHook(() => useOperatorFooterData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     // loading 중에도 activeSubscriptions는 undefined

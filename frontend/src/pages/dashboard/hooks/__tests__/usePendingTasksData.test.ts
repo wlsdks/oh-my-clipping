@@ -1,30 +1,18 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
-import React from "react";
 import { describe, expect, test } from "vitest";
 
+import { createQueryClientWrapper, createTestQueryClient } from "@/test/queryClient";
 import { reviewKeys } from "@/queries/reviewKeys";
 import { userKeys } from "@/queries/userKeys";
 
 import { usePendingTasksData } from "../usePendingTasksData";
-
-function makeWrapper(queryClient: QueryClient) {
-  return ({ children }: { children: React.ReactNode }) =>
-    React.createElement(QueryClientProvider, { client: queryClient }, children);
-}
-
-function makeQueryClient() {
-  return new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-}
 
 const YESTERDAY_ISO = new Date(Date.now() - 86_400_000).toISOString();
 const TWO_DAYS_AGO_ISO = new Date(Date.now() - 2 * 86_400_000).toISOString();
 
 describe("usePendingTasksData", () => {
   test("세 큐 모두 정상 데이터일 때 건수와 urgencyPreview를 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
 
     queryClient.setQueryData(userKeys.accounts({ status: "PENDING" }), [
       { id: "a1", createdAt: TWO_DAYS_AGO_ISO },
@@ -36,7 +24,7 @@ describe("usePendingTasksData", () => {
     queryClient.setQueryData(reviewKeys.queue({ status: "REVIEW" }), []);
 
     const { result } = renderHook(() => usePendingTasksData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -53,14 +41,14 @@ describe("usePendingTasksData", () => {
   });
 
   test("모든 큐가 비면 건수 0, urgencyPreview 빈 문자열을 반환한다", async () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
 
     queryClient.setQueryData(userKeys.accounts({ status: "PENDING" }), []);
     queryClient.setQueryData(userKeys.requests({ status: "PENDING" }), []);
     queryClient.setQueryData(reviewKeys.queue({ status: "REVIEW" }), []);
 
     const { result } = renderHook(() => usePendingTasksData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -73,11 +61,11 @@ describe("usePendingTasksData", () => {
   });
 
   test("데이터 미설정 시 isLoading true를 유지한다", () => {
-    const queryClient = makeQueryClient();
+    const queryClient = createTestQueryClient();
     // 데이터를 캐시에 설정하지 않음 → 실제 fetch 시도 → loading=true
 
     const { result } = renderHook(() => usePendingTasksData(), {
-      wrapper: makeWrapper(queryClient),
+      wrapper: createQueryClientWrapper(queryClient),
     });
 
     expect(result.current.isLoading).toBe(true);
