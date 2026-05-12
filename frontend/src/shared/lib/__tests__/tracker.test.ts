@@ -79,6 +79,16 @@ describe("EventTracker SDK", () => {
 
       expect(document.addEventListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
     });
+
+    it("반복 init 시 visibilitychange 이벤트 리스너를 중복 등록하지 않는다", async () => {
+      const tracker = await loadTracker();
+
+      tracker.init("user-abc");
+      tracker.init("user-abc");
+
+      expect(document.addEventListener).toHaveBeenCalledTimes(1);
+      expect(document.addEventListener).toHaveBeenCalledWith("visibilitychange", expect.any(Function));
+    });
   });
 
   describe("track()", () => {

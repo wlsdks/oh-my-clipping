@@ -52,6 +52,7 @@ function createTracker(): EventTracker {
   let sessionId: string | null = null;
   const queue: TrackerEvent[] = [];
   let flushTimer: ReturnType<typeof setInterval> | null = null;
+  let visibilityListenerRegistered = false;
 
   /** 비콘 API로 이벤트를 전송한다 (탭 닫힘 시 사용). */
   function sendBeacon(): void {
@@ -93,7 +94,10 @@ function createTracker(): EventTracker {
       }, FLUSH_INTERVAL_MS);
 
       // 탭 닫힘 시 비콘 전송
-      document.addEventListener("visibilitychange", handleVisibilityChange);
+      if (!visibilityListenerRegistered) {
+        document.addEventListener("visibilitychange", handleVisibilityChange);
+        visibilityListenerRegistered = true;
+      }
     },
 
     track(eventType: string, data?: Record<string, unknown>): void {
