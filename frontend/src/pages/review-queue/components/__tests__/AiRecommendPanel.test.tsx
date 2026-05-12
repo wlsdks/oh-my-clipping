@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("sonner", () => ({
   toast: {
@@ -13,20 +13,6 @@ vi.mock("sonner", () => ({
 
 import { AiRecommendPanel } from "../AiRecommendPanel";
 import type { ReviewItemSummary } from "../types";
-
-// Radix Dialog 는 jsdom 환경에서 PointerEvents / scroll API 를 요구한다 (AGENTS.md §5.1.2)
-beforeAll(() => {
-  Element.prototype.hasPointerCapture =
-    Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture =
-    Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture =
-    Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView =
-    Element.prototype.scrollIntoView || (() => {});
-  window.HTMLElement.prototype.scrollTo =
-    window.HTMLElement.prototype.scrollTo || (() => {});
-});
 
 function makeItems(count: number): ReviewItemSummary[] {
   return Array.from({ length: count }, (_, i) => ({

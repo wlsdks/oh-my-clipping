@@ -1,22 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi, beforeAll } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { SpotCheckDialog } from "../SpotCheckDialog";
 import type { ReviewItemSummary } from "../types";
-
-// Radix Dialog 는 jsdom 환경에서 PointerEvents / scroll API 를 요구한다 (AGENTS.md §5.1.2)
-beforeAll(() => {
-  Element.prototype.hasPointerCapture =
-    Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture =
-    Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture =
-    Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView =
-    Element.prototype.scrollIntoView || (() => {});
-  window.HTMLElement.prototype.scrollTo =
-    window.HTMLElement.prototype.scrollTo || (() => {});
-});
 
 function makeItem(overrides: Partial<ReviewItemSummary> = {}): ReviewItemSummary {
   return {
