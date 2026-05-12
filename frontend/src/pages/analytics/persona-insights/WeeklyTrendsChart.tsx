@@ -290,7 +290,11 @@ export function WeeklyTrendsChart() {
           data-testid="trends-chart-container"
           className="h-72"
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            initialDimension={{ width: 600, height: 288 }}
+          >
             <LineChart
               data={chartData}
               margin={{ top: 5, right: 20, bottom: 5, left: 0 }}

@@ -105,7 +105,11 @@ export function ScoreDistributionChart({
       )}
 
       <div className="h-[200px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+          initialDimension={{ width: 600, height: 200 }}
+        >
           <BarChart data={distribution.buckets} margin={{ top: 8, right: 16, bottom: 4, left: 0 }}>
             <CartesianGrid {...GRID_PROPS} />
             <XAxis dataKey="range" {...AXIS_PROPS} />

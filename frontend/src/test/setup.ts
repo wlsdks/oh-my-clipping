@@ -1,7 +1,37 @@
 import "@testing-library/jest-dom";
 
 class TestResizeObserver implements ResizeObserver {
-  observe() {}
+  private readonly callback: ResizeObserverCallback;
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+  }
+
+  observe(target: Element) {
+    this.callback(
+      [
+        {
+          target,
+          contentRect: {
+            x: 0,
+            y: 0,
+            width: 600,
+            height: 240,
+            top: 0,
+            right: 600,
+            bottom: 240,
+            left: 0,
+            toJSON: () => ({}),
+          },
+          borderBoxSize: [],
+          contentBoxSize: [],
+          devicePixelContentBoxSize: [],
+        },
+      ],
+      this,
+    );
+  }
+
   unobserve() {}
   disconnect() {}
 }
@@ -45,6 +75,35 @@ if (typeof Element !== "undefined" && typeof Element.prototype.scrollTo !== "fun
   Object.defineProperty(Element.prototype, "scrollTo", {
     value: () => {},
     writable: true
+  });
+}
+
+if (typeof HTMLElement !== "undefined") {
+  Object.defineProperties(HTMLElement.prototype, {
+    clientWidth: {
+      configurable: true,
+      get() {
+        return 600;
+      },
+    },
+    clientHeight: {
+      configurable: true,
+      get() {
+        return 240;
+      },
+    },
+    offsetWidth: {
+      configurable: true,
+      get() {
+        return 600;
+      },
+    },
+    offsetHeight: {
+      configurable: true,
+      get() {
+        return 240;
+      },
+    },
   });
 }
 
