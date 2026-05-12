@@ -1,22 +1,10 @@
 import { useState } from "react";
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OrganizationMultiSelect } from "../OrganizationMultiSelect";
 import type { Organization, OrganizationListResponse } from "@/types/organization";
-
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).hasPointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).scrollIntoView = vi.fn();
-});
 
 const listMock = vi.fn();
 vi.mock("@/services/organizationService", () => ({

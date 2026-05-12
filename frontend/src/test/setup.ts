@@ -119,6 +119,16 @@ if (typeof HTMLElement !== "undefined" && typeof HTMLElement.prototype.scrollTo 
   });
 }
 
+if (
+  typeof SVGElement !== "undefined" &&
+  typeof (SVGElement.prototype as { getBBox?: unknown }).getBBox !== "function"
+) {
+  Object.defineProperty(SVGElement.prototype, "getBBox", {
+    value: () => ({ x: 0, y: 0, width: 0, height: 0 }),
+    writable: true
+  });
+}
+
 if (typeof globalThis.scrollTo === "function") {
   Object.defineProperty(globalThis, "scrollTo", {
     value: () => {},

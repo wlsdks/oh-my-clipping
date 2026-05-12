@@ -1,30 +1,10 @@
-import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { BackfillPanel } from "../BackfillPanel";
 import type { BackfillPreviewResponse, BackfillApplyResponse } from "@/services/backfillService";
-
-// Radix Select / Checkbox 는 jsdom 에서 ResizeObserver + PointerEvents 를 요구한다.
-beforeAll(() => {
-  global.ResizeObserver = class {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).hasPointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).setPointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).releasePointerCapture = vi.fn();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).scrollIntoView = vi.fn();
-  // framer-motion 이 ref 에 scrollTo 를 사용한다.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (HTMLElement.prototype as any).scrollTo = vi.fn();
-});
 
 // 서비스 mock — 테스트별로 구현체를 갈아끼운다.
 const previewMock = vi.fn();

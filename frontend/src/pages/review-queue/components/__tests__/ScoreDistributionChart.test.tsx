@@ -1,31 +1,7 @@
 import { render, screen } from "@testing-library/react";
-import { describe, it, expect, beforeAll, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import type { ScoreDistribution } from "@/types/reviewPolicy";
 import { ScoreDistributionChart } from "../ScoreDistributionChart";
-
-// recharts 는 ResponsiveContainer 내부에서 부모 크기를 측정한다.
-// jsdom 에서 layout 이 0 이면 BarChart 가 렌더되지 않으므로 ResizeObserver/크기 측정을 스텁한다.
-beforeAll(() => {
-  class RO {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  }
-  global.ResizeObserver = (global.ResizeObserver ?? RO) as typeof ResizeObserver;
-
-  // ResponsiveContainer 가 부모의 clientWidth/Height 를 참조한다.
-  Object.defineProperty(HTMLElement.prototype, "offsetWidth", {
-    configurable: true,
-    value: 600,
-  });
-  Object.defineProperty(HTMLElement.prototype, "offsetHeight", {
-    configurable: true,
-    value: 200,
-  });
-  // SVG text measurement
-  // @ts-expect-error — SVGElement getBBox 가 jsdom 에 없다.
-  window.SVGElement.prototype.getBBox = vi.fn(() => ({ x: 0, y: 0, width: 0, height: 0 }));
-});
 
 function buildBuckets(counts: number[]): ScoreDistribution["buckets"] {
   return counts.map((count, i) => {
