@@ -1,5 +1,6 @@
 package com.ohmyclipping.admin.mcp
 
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.service.port.ClippingQueryPort
@@ -28,6 +29,10 @@ class AdminDailySummaryTool(
     fun admin_daily_summary(
         @ToolParam(description = "일간 요약을 생성할 카테고리 ID") categoryId: String,
     ): String = mcpToolCall {
+        if (categoryId.isBlank()) {
+            throw InvalidInputException("categoryId must not be blank")
+        }
+
         // 호출 빈도 제한: 카테고리 단위로 최대 10회/일.
         rateLimiter.checkOrThrow(
             toolName = "admin_daily_summary",

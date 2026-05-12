@@ -62,12 +62,11 @@ class AdminOrganizationToolsTest {
 
         @Test
         fun `잘못된 type 은 validation error 로 거부된다`() {
-            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
-
             val json = tool.admin_list_organizations(type = "BOGUS")
 
             json shouldContain "\"error\""
             json shouldContain "-32024"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { service.findAll(any()) }
         }
 
@@ -107,12 +106,11 @@ class AdminOrganizationToolsTest {
 
         @Test
         fun `빈 categoryId 는 InvalidInputException 으로 거부된다`() {
-            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
-
             val json = tool.admin_category_organizations(categoryId = "")
 
             json shouldContain "\"error\""
             json shouldContain "-32024"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { service.findByCategoryId(any()) }
         }
 

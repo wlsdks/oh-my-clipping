@@ -36,8 +36,8 @@ class AdminOrganizationTools(
             required = false,
         ) type: String?,
     ): String = mcpToolCall {
-        rateLimiter.checkOrThrow("admin_list_organizations", maxRequests = 60, windowSeconds = 3600)
         val typeFilter = type?.takeIf { it.isNotBlank() }?.let(::parseType)
+        rateLimiter.checkOrThrow("admin_list_organizations", maxRequests = 60, windowSeconds = 3600)
         organizationService.findAll(typeFilter)
     }
 
@@ -53,10 +53,10 @@ class AdminOrganizationTools(
     fun admin_category_organizations(
         @ToolParam(description = "카테고리 ID") categoryId: String,
     ): String = mcpToolCall {
-        rateLimiter.checkOrThrow("admin_category_organizations", maxRequests = 60, windowSeconds = 3600)
         if (categoryId.isBlank()) {
             throw InvalidInputException("categoryId is required")
         }
+        rateLimiter.checkOrThrow("admin_category_organizations", maxRequests = 60, windowSeconds = 3600)
         organizationService.findByCategoryId(categoryId)
     }
 

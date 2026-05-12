@@ -1,0 +1,31 @@
+package com.ohmyclipping.admin.mcp
+
+import com.ohmyclipping.mcp.McpRateLimiter
+import com.ohmyclipping.service.port.ClippingQueryPort
+import io.kotest.matchers.string.shouldContain
+import io.mockk.mockk
+import io.mockk.verify
+import org.junit.jupiter.api.Test
+
+/**
+ * admin_daily_summary 입력 가드레일 테스트.
+ *
+ * 일간 요약 생성은 비멱등 MCP 도구이므로 명백한 입력 오류는
+ * rate limit 차감과 서비스 호출 전에 거부한다.
+ */
+class AdminDailySummaryToolTest {
+
+    private val clippingQueryPort = mockk<ClippingQueryPort>()
+    private val rateLimiter = mockk<McpRateLimiter>()
+    private val tool = AdminDailySummaryTool(clippingQueryPort, rateLimiter)
+
+    @Test
+    fun `빈 categoryId 는 rate limit 차감 없이 validation error 로 거부된다`() {
+        val json = tool.admin_daily_summary(categoryId = " ")
+
+        json shouldContain "\"error\""
+        json shouldContain "categoryId must not be blank"
+        verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { clippingQueryPort.generateDailySummary(any()) }
+    }
+}
