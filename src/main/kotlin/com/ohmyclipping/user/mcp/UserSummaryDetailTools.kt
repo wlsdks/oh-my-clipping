@@ -33,12 +33,14 @@ class UserSummaryDetailTools(
             **쓰지 말 것:** 사용자가 목록을 원할 때 — user_list_recent_summaries 또는 user_search_summaries 를 사용.
                              사용자가 원문 본문을 원할 때 — user_get_original_preview 를 사용.
             **파라미터:** summaryId = BatchSummary ID (이전 목록 도구가 반환한 값).
+            **rate limit:** 60회/시간.
             **반환:** title, summary, keywords, preview, 저작권 안내가 담긴 SummaryDetailView.
         """,
     )
     fun user_get_summary_detail(
         @ToolParam(description = "BatchSummary ID") summaryId: String,
     ): String = mcpToolCall {
+        rateLimiter.checkOrThrow("user_get_summary_detail", maxRequests = 60, windowSeconds = 3600)
         // 서비스에서 상세 결과를 가져와 DTO로 변환한다.
         val detail = clippingQueryPort.getSummaryDetail(summaryId)
         val sourceName = DomainExtractor.extract(detail.sourceLink) ?: ""
