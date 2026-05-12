@@ -54,6 +54,10 @@ class AdminSlackChannelDiagnoseTool(
     fun admin_slack_channel_diagnose(
         @ToolParam(description = "진단할 카테고리 ID") categoryId: String,
     ): String = mcpToolCall {
+        if (categoryId.isBlank()) {
+            throw InvalidInputException("categoryId is required")
+        }
+
         // 빈도 제한: 카테고리 단위로 30회/시간. 채널당 과도한 Slack API 호출을 막는다.
         rateLimiter.checkOrThrow(
             toolName = "admin_slack_channel_diagnose",
@@ -61,9 +65,6 @@ class AdminSlackChannelDiagnoseTool(
             windowSeconds = 3600,
             dimension = categoryId,
         )
-        if (categoryId.isBlank()) {
-            throw InvalidInputException("categoryId is required")
-        }
 
         val category = categoryService.findById(categoryId)
             ?: throw NotFoundException("Category not found: $categoryId")

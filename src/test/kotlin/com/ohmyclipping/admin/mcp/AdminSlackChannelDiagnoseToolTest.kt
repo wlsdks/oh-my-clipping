@@ -103,5 +103,16 @@ class AdminSlackChannelDiagnoseToolTest {
             json shouldContain "\"canPost\":false"
             json shouldContain "Slack 채널을 찾을 수 없습니다"
         }
+
+        @Test
+        fun `빈 categoryId 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_slack_channel_diagnose(categoryId = " ")
+
+            json shouldContain "\"error\""
+            json shouldContain "categoryId is required"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { categoryService.findById(any()) }
+            verify(exactly = 0) { slackMessageSender.getChannelInfo(any(), any()) }
+        }
     }
 }
