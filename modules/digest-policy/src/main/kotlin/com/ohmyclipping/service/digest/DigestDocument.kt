@@ -80,6 +80,9 @@ object DigestDocumentBuilder {
         if (requestedMaxItems < 0) {
             throw EngineInvalidInputException("requestedMaxItems must be non-negative")
         }
+        if (totalCandidates < items.size) {
+            throw EngineInvalidInputException("totalCandidates must be greater than or equal to selected item count")
+        }
         items.forEach { item ->
             if (!item.importanceScore.isFinite()) {
                 throw EngineInvalidInputException("document item importanceScore must be finite: ${item.id}")
