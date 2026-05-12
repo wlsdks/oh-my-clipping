@@ -12,7 +12,7 @@ import { categoryKeys } from "@/queries/categoryKeys";
 import { categoryService } from "@/services/categoryService";
 import type { PeriodKey } from "@/utils/periodUtils";
 import { getPeriodRange, periodToDays } from "@/utils/periodUtils";
-import { CostTab } from "@/pages/analytics/CostTab";
+import { CostTab } from "@/features/cost/CostTab";
 
 const PERIODS: { key: PeriodKey; label: string }[] = [
   { key: "this-week", label: "이번 주" },

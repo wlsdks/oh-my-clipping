@@ -4,11 +4,11 @@ import { toast } from "sonner";
 import { costKeys } from "@/queries/costKeys";
 import { costService } from "@/services/costService";
 import type { CostDetail, LlmCostSummary } from "@/types/cost";
-import { KpiCard, type KpiCardStatus } from "./components/KpiCard";
-import { ChannelCostTable } from "./components/ChannelCostTable";
-import { CostBudgetBar } from "./components/CostBudgetBar";
+import { KpiCard, type KpiCardStatus } from "@/components/shared/KpiCard";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Button } from "@/components/ui/button";
+import { ChannelCostTable } from "./ui/ChannelCostTable";
+import { CostBudgetBar } from "./ui/CostBudgetBar";
 
 interface CostTabProps {
   categoryId?: string;

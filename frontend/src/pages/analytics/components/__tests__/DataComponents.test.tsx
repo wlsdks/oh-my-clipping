@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { DailyKpiTable } from "../DailyKpiTable";
-import { ChannelCostTable } from "../ChannelCostTable";
+import { ChannelCostTable } from "@/features/cost/ui/ChannelCostTable";
 import { ArticleRankingList } from "../ArticleRankingList";
 import type { DailyOperationalKpiRow } from "@/types/insight";
 import type { LlmCostRow } from "@/types/cost";
