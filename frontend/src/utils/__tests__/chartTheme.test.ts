@@ -32,9 +32,9 @@ describe("chartColor", () => {
     expect(chartColor(0)).toBe(chartColor(CHART_COLORS.length));
   });
 
-  it("returns a string (hex color) for any index", () => {
+  it("returns a string CSS chart token for any index", () => {
     expect(typeof chartColor(0)).toBe("string");
-    expect(chartColor(0)).toMatch(/^#[0-9a-f]{6}$/);
-    expect(chartColor(99)).toMatch(/^#[0-9a-f]{6}$/);
+    expect(chartColor(0)).toMatch(/^var\(--chart-\d+\)$/);
+    expect(chartColor(99)).toMatch(/^var\(--chart-\d+\)$/);
   });
 });

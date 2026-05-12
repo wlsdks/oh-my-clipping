@@ -1,35 +1,30 @@
 import type { ReactNode } from "react";
 
-/**
- * 차트 색상 팔레트 (하드코딩 폴백).
- * 가능하면 `getChartColors()`를 사용해 CSS 변수에서 런타임 값을 읽는다.
- */
+/** 차트 색상 팔레트. globals.css의 --chart-* 토큰을 단일 소스로 사용한다. */
 export const CHART_COLORS = [
-  "#2f6fec",
-  "#34d399",
-  "#f59e0b",
-  "#ec4899",
-  "#8b5cf6",
-  "#06b6d4",
-  "#f97316",
-  "#14b8a6"
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--chart-6)",
+  "var(--chart-7)",
+  "var(--chart-8)"
 ] as const;
 
 /**
- * globals.css에 정의된 --chart-1 ~ --chart-6 CSS 변수에서 런타임 색상을 읽어 반환한다.
+ * globals.css에 정의된 --chart-1 ~ --chart-8 CSS 변수에서 런타임 색상을 읽어 반환한다.
  * 다크모드 전환 시 CSS 변수가 자동으로 바뀌므로 테마에 맞는 색상을 얻을 수 있다.
- * CSS 변수가 없으면 CHART_COLORS 하드코딩 폴백을 사용한다.
+ * CSS 변수가 없으면 var() 토큰 문자열을 반환해 브라우저 해석에 맡긴다.
  */
 export function getChartColors(): string[] {
   if (typeof document === "undefined") return [...CHART_COLORS];
   const style = getComputedStyle(document.documentElement);
   const colors: string[] = [];
-  for (let i = 1; i <= 6; i++) {
+  for (let i = 1; i <= CHART_COLORS.length; i++) {
     const val = style.getPropertyValue(`--chart-${i}`).trim();
     colors.push(val || CHART_COLORS[(i - 1) % CHART_COLORS.length]);
   }
-  // Pad to 8 with hardcoded fallbacks for indices beyond CSS variables
-  colors.push(CHART_COLORS[6], CHART_COLORS[7]);
   return colors;
 }
 
@@ -83,9 +78,9 @@ export function AreaGradientDef({ id, color }: { id: string; color: string }) {
 
 /** Sentiment-specific colors */
 export const SENTIMENT_COLORS = {
-  positive: "#10b981",
-  neutral: "#94a3b8",
-  negative: "#f43f5e",
+  positive: "var(--status-success-text)",
+  neutral: "var(--status-neutral-text)",
+  negative: "var(--status-danger-text)",
 } as const;
 
 /** Tooltip styling shared across all chart components (for recharts inline style) */
@@ -99,7 +94,7 @@ export const CHART_TOOLTIP_STYLE = {
 
 export const GRID_PROPS = {
   strokeDasharray: "3 3",
-  stroke: "var(--border, #f0f0f0)",
+  stroke: "var(--color-border)",
   vertical: false
 } as const;
 
@@ -114,5 +109,5 @@ export const AXIS_PROPS = {
   fontSize: 12,
   tickLine: false,
   axisLine: false,
-  tick: { fill: "var(--color-muted-foreground, #8b95a1)" }
+  tick: { fill: "var(--color-muted-foreground)" }
 } as const;
