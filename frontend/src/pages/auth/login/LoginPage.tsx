@@ -48,7 +48,13 @@ const BRAND_FEATURES = [
 export function LoginPage() {
   const navigate = useNavigate();
   const [showHelp, setShowHelp] = useState(false);
-  const form = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
+  const form = useForm<LoginForm>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
   const { mutate: login, isPending } = useMutation({
     mutationFn: ({ email, password }: LoginForm) => authService.login(email, password),
     onSuccess: (user) => {
