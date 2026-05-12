@@ -13,13 +13,22 @@ fun sectionSilenceCopy(
     emptyDays: Int,
     sectionLabel: String,
     actionUrl: String,
-): EscalationCopy =
-    if (emptyDays >= ESCALATION_THRESHOLD_DAYS) {
+): EscalationCopy {
+    if (emptyDays < 0) {
+        throw EngineInvalidInputException("emptyDays must be non-negative")
+    }
+    val normalizedLabel = sectionLabel.trim()
+    if (normalizedLabel.isBlank()) {
+        throw EngineInvalidInputException("sectionLabel must not be blank")
+    }
+
+    return if (emptyDays >= ESCALATION_THRESHOLD_DAYS) {
         EscalationCopy(
-            text = "$sectionLabel 뉴스가 ${emptyDays}일째 없어요.",
+            text = "$normalizedLabel 뉴스가 ${emptyDays}일째 없어요.",
             actionLabel = "주제 수정하기",
             actionUrl = actionUrl,
         )
     } else {
-        EscalationCopy(text = "오늘 $sectionLabel 관련 뉴스는 없었어요")
+        EscalationCopy(text = "오늘 $normalizedLabel 관련 뉴스는 없었어요")
     }
+}
