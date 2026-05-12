@@ -1,23 +1,8 @@
 // frontend/src/pages/source-quality/__tests__/SourceQualityPage.test.tsx
-import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-/* ── jsdom 폴리필 (Radix Dialog / Select / framer-motion) ── */
-
-beforeAll(() => {
-  Element.prototype.hasPointerCapture =
-    Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture =
-    Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture =
-    Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView =
-    Element.prototype.scrollIntoView || (() => {});
-  window.HTMLElement.prototype.scrollTo =
-    window.HTMLElement.prototype.scrollTo || (() => {});
-});
 
 /* ── Service mocks ── */
 

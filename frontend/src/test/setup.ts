@@ -1,5 +1,60 @@
 import "@testing-library/jest-dom";
 
+class TestResizeObserver implements ResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
+if (typeof globalThis.ResizeObserver === "undefined") {
+  Object.defineProperty(globalThis, "ResizeObserver", {
+    value: TestResizeObserver,
+    writable: true
+  });
+}
+
+if (typeof Element.prototype.hasPointerCapture !== "function") {
+  Object.defineProperty(Element.prototype, "hasPointerCapture", {
+    value: () => false,
+    writable: true
+  });
+}
+
+if (typeof Element.prototype.setPointerCapture !== "function") {
+  Object.defineProperty(Element.prototype, "setPointerCapture", {
+    value: () => {},
+    writable: true
+  });
+}
+
+if (typeof Element.prototype.releasePointerCapture !== "function") {
+  Object.defineProperty(Element.prototype, "releasePointerCapture", {
+    value: () => {},
+    writable: true
+  });
+}
+
+if (typeof Element.prototype.scrollIntoView !== "function") {
+  Object.defineProperty(Element.prototype, "scrollIntoView", {
+    value: () => {},
+    writable: true
+  });
+}
+
+if (typeof Element.prototype.scrollTo !== "function") {
+  Object.defineProperty(Element.prototype, "scrollTo", {
+    value: () => {},
+    writable: true
+  });
+}
+
+if (typeof HTMLElement.prototype.scrollTo !== "function") {
+  Object.defineProperty(HTMLElement.prototype, "scrollTo", {
+    value: () => {},
+    writable: true
+  });
+}
+
 /**
  * jsdom v26+ 의 localStorage 구현이 zustand persist 미들웨어가 기대하는
  * Storage 인터페이스(setItem/getItem/removeItem)를 함수로 제공하지 않는 경우가 있다.

@@ -1,21 +1,9 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // 사내 부서·팀 admin UI — master-detail 렌더링 + mutation 성공 토스트 + DnD 정렬 검증.
-
-// jsdom + Radix/dnd-kit 호환 폴리필 — pointer capture / scrollIntoView 누락 시 throw.
-beforeAll(() => {
-  Element.prototype.hasPointerCapture =
-    Element.prototype.hasPointerCapture || (() => false);
-  Element.prototype.setPointerCapture =
-    Element.prototype.setPointerCapture || (() => {});
-  Element.prototype.releasePointerCapture =
-    Element.prototype.releasePointerCapture || (() => {});
-  Element.prototype.scrollIntoView =
-    Element.prototype.scrollIntoView || (() => {});
-});
 
 vi.mock("@/services/departmentService", () => ({
   departmentService: {
