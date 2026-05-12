@@ -118,6 +118,51 @@ class AdminApprovePendingRequestToolTest {
         }
 
         @Test
+        fun `빈 requestId 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_approve_pending_request(
+                requestId = " ",
+                confirmationSummary = "AWS Tech News → AWS Blog (사용자: alice)",
+                approveNote = null,
+            )
+
+            json shouldContain "\"error\""
+            json shouldContain "requestId is required"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { userClippingRequestService.findRequestById(any()) }
+            verify(exactly = 0) { userClippingRequestService.approveRequest(any(), any(), any()) }
+        }
+
+        @Test
+        fun `빈 confirmationSummary 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_approve_pending_request(
+                requestId = "req-1",
+                confirmationSummary = " ",
+                approveNote = null,
+            )
+
+            json shouldContain "\"error\""
+            json shouldContain "confirmationSummary is required"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { userClippingRequestService.findRequestById(any()) }
+            verify(exactly = 0) { userClippingRequestService.approveRequest(any(), any(), any()) }
+        }
+
+        @Test
+        fun `approveNote 200자 초과는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_approve_pending_request(
+                requestId = "req-1",
+                confirmationSummary = "AWS Tech News → AWS Blog (사용자: alice)",
+                approveNote = "a".repeat(201),
+            )
+
+            json shouldContain "\"error\""
+            json shouldContain "approveNote must be 200 characters or less"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { userClippingRequestService.findRequestById(any()) }
+            verify(exactly = 0) { userClippingRequestService.approveRequest(any(), any(), any()) }
+        }
+
+        @Test
         fun `PENDING 이 아닌 요청은 InvalidInputException`() {
             every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
             every {
@@ -184,6 +229,34 @@ class AdminApprovePendingRequestToolTest {
             verify(exactly = 1) {
                 userClippingRequestService.approveRequest("req-1", "mcp-service", any())
             }
+        }
+
+        @Test
+        fun `requestId 와 approveNote 는 trim 해서 서비스에 전달한다`() {
+            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
+            every { userClippingRequestService.findRequestById("req-1") } returns pendingRequest
+            every { userClippingRequestService.findRequesterUsername("user-1") } returns "alice"
+            every { categoryService.findById(any()) } returns null
+            val commandSlot = slot<ApproveClippingRequestCommand>()
+            every {
+                userClippingRequestService.approveRequest(
+                    requestId = "req-1",
+                    reviewerUsername = "mcp-service",
+                    command = capture(commandSlot),
+                )
+            } returns approvedResult
+
+            val json = tool.admin_approve_pending_request(
+                requestId = " req-1 ",
+                confirmationSummary = " AWS Tech News → AWS Blog (사용자: alice) ",
+                approveNote = " reviewed ",
+            )
+
+            json shouldNotContain "\"error\""
+            verify(exactly = 1) {
+                userClippingRequestService.approveRequest("req-1", "mcp-service", any())
+            }
+            assert(commandSlot.captured.reviewNotes == "reviewed")
         }
     }
 }

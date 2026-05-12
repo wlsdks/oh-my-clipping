@@ -62,22 +62,16 @@ class AdminApprovePendingRequestTool(
         ) confirmationSummary: String,
         @ToolParam(description = "내부 검토 메모 (선택, 200자 이내)", required = false) approveNote: String?,
     ): String = mcpToolCall {
+        val normalizedRequestId = validateRequestId(requestId)
+        val normalizedConfirmationSummary = validateConfirmationSummary(confirmationSummary)
+        val normalizedApproveNote = validateApproveNote(approveNote)
+
         // 빈도 제한: 30회/시간. 승인은 외부 부작용이 크므로 스팸 호출을 차단한다.
         rateLimiter.checkOrThrow("admin_approve_pending_request", maxRequests = 30, windowSeconds = 3600)
 
-        // requestId 공백 차단.
-        if (requestId.isBlank()) {
-            throw InvalidInputException("requestId is required")
-        }
-        if (confirmationSummary.isBlank()) {
-            throw InvalidInputException(
-                "confirmationSummary is required — admin_list_pending_requests 로 대상 확인 후 echo 하세요",
-            )
-        }
-
         // 대상 요청을 조회해 echo 일치 여부를 서비스 호출 전에 먼저 검증한다.
-        val request = userClippingRequestService.findRequestById(requestId)
-            ?: throw NotFoundException("Request not found: $requestId")
+        val request = userClippingRequestService.findRequestById(normalizedRequestId)
+            ?: throw NotFoundException("Request not found: $normalizedRequestId")
         if (!request.isPendingReview()) {
             throw InvalidInputException(
                 "승인 가능한 상태가 아닙니다 (현재 status=${request.status}) — PENDING 만 승인할 수 있습니다",
@@ -88,7 +82,7 @@ class AdminApprovePendingRequestTool(
         val username = userClippingRequestService.findRequesterUsername(request.requesterUserId)
             ?: request.requesterUserId
         val expectedSummaries = buildExpectedSummaries(request, username)
-        val normalized = normalize(confirmationSummary)
+        val normalized = normalize(normalizedConfirmationSummary)
         if (expectedSummaries.none { normalize(it) == normalized }) {
             throw InvalidInputException(
                 "확인 요약 불일치 — admin_list_pending_requests 로 재확인 후 재시도 (기대: \"${expectedSummaries.first()}\")",
@@ -102,14 +96,40 @@ class AdminApprovePendingRequestTool(
             legalBasis = "QUOTATION_ONLY",
             summaryAllowed = true,
             fulltextAllowed = false,
-            reviewNotes = approveNote?.takeIf { it.isNotBlank() },
+            reviewNotes = normalizedApproveNote,
             overrideSlackChannelId = null,
         )
         userClippingRequestService.approveRequest(
-            requestId = requestId,
+            requestId = normalizedRequestId,
             reviewerUsername = reviewerUsername,
             command = command,
         )
+    }
+
+    private fun validateRequestId(requestId: String): String {
+        val normalized = requestId.trim()
+        if (normalized.isBlank()) {
+            throw InvalidInputException("requestId is required")
+        }
+        return normalized
+    }
+
+    private fun validateConfirmationSummary(confirmationSummary: String): String {
+        val normalized = confirmationSummary.trim()
+        if (normalized.isBlank()) {
+            throw InvalidInputException(
+                "confirmationSummary is required — admin_list_pending_requests 로 대상 확인 후 echo 하세요",
+            )
+        }
+        return normalized
+    }
+
+    private fun validateApproveNote(approveNote: String?): String? {
+        val normalized = approveNote?.trim()?.takeIf { it.isNotBlank() } ?: return null
+        if (normalized.length > MAX_APPROVE_NOTE_LENGTH) {
+            throw InvalidInputException("approveNote must be $MAX_APPROVE_NOTE_LENGTH characters or less")
+        }
+        return normalized
     }
 
     /**
@@ -139,4 +159,8 @@ class AdminApprovePendingRequestTool(
     /** echo 비교 시 공백/전각 공백 차이에 관대하게 만든다. */
     private fun normalize(text: String): String =
         text.trim().replace(Regex("\\s+"), " ")
+
+    companion object {
+        private const val MAX_APPROVE_NOTE_LENGTH = 200
+    }
 }

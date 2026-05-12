@@ -33,15 +33,22 @@ class AdminRetryFailedDeliveryTool(
     fun admin_retry_failed_delivery(
         @ToolParam(description = "재시도 대상 발송 로그 ID") deliveryLogId: String,
     ): String = mcpToolCall {
+        val normalizedDeliveryLogId = validateDeliveryLogId(deliveryLogId)
+
         // 빈도 제한: 30회/시간 — 사람이 수동 재시도 보내는 빈도 상한.
         rateLimiter.checkOrThrow("admin_retry_failed_delivery", maxRequests = 30, windowSeconds = 3600)
-        if (deliveryLogId.isBlank()) {
-            throw InvalidInputException("deliveryLogId is required")
-        }
-        deliveryAdminService.retryDelivery(deliveryLogId)
+        deliveryAdminService.retryDelivery(normalizedDeliveryLogId)
         mapOf(
             "success" to true,
-            "deliveryLogId" to deliveryLogId,
+            "deliveryLogId" to normalizedDeliveryLogId,
         )
+    }
+
+    private fun validateDeliveryLogId(deliveryLogId: String): String {
+        val normalized = deliveryLogId.trim()
+        if (normalized.isBlank()) {
+            throw InvalidInputException("deliveryLogId is required")
+        }
+        return normalized
     }
 }
