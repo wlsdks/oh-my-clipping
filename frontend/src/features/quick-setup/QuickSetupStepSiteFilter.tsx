@@ -53,6 +53,7 @@ export function QuickSetupStepSiteFilter({ form, onChange, disabled, isUserMode 
   const [showDropdown, setShowDropdown] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const searchRequestSeqRef = useRef(0);
 
   // 커스텀 도메인 검증 상태 (검색 결과에 없는 사이트)
   const [validating, setValidating] = useState(false);
@@ -68,6 +69,7 @@ export function QuickSetupStepSiteFilter({ form, onChange, disabled, isUserMode 
     document.addEventListener("mousedown", handleClick);
     return () => {
       document.removeEventListener("mousedown", handleClick);
+      searchRequestSeqRef.current += 1;
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
@@ -79,6 +81,8 @@ export function QuickSetupStepSiteFilter({ form, onChange, disabled, isUserMode 
     setValidationMsg(null);
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
+    const requestSeq = searchRequestSeqRef.current + 1;
+    searchRequestSeqRef.current = requestSeq;
 
     if (!value.trim()) {
       setSearchResults([]);
@@ -91,14 +95,18 @@ export function QuickSetupStepSiteFilter({ form, onChange, disabled, isUserMode 
       try {
         const region = regionToApiParam(form.newsRegion);
         const results = await userService.searchKnownSources(value.trim(), region);
+        if (searchRequestSeqRef.current !== requestSeq) return;
         // 이미 추가된 도메인은 제외
         const filtered = results.filter((r) => !form.siteFilters.includes(r.domain));
         setSearchResults(filtered);
         setShowDropdown(true);
       } catch {
+        if (searchRequestSeqRef.current !== requestSeq) return;
         setSearchResults([]);
       } finally {
-        setSearching(false);
+        if (searchRequestSeqRef.current === requestSeq) {
+          setSearching(false);
+        }
       }
     }, 300);
   }
@@ -203,6 +211,10 @@ export function QuickSetupStepSiteFilter({ form, onChange, disabled, isUserMode 
             aria-pressed={form.newsRegion === opt.value}
             onClick={() => {
               const newRegion = opt.value;
+              searchRequestSeqRef.current += 1;
+              if (debounceRef.current) {
+                clearTimeout(debounceRef.current);
+              }
               const validDomains: string[] = SITE_PRESETS
                 .filter((s) => newRegion === "both" ? true : newRegion === "international" ? s.region === "international" : s.region === "domestic")
                 .map((s) => s.domain as string);
