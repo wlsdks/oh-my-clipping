@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
  *
  * 검증 포인트:
  *  - 레이트 리밋(5회/시간, categoryId 단위)이 호출 맨 앞에서 강제된다.
+ *  - categoryId / daysBack / limit 입력 오류는 레이트 리밋과 서비스 호출 전에 거부된다.
  *  - limit 파라미터가 1..500 범위 밖이면 서비스 호출 없이 validation error 로 거부된다.
  *  - 레이트 리밋 초과 시 RateLimitExceededException 이 JSON-RPC 에러로 매핑된다.
  */
@@ -80,6 +81,26 @@ class AdminExportToolTest {
 
             json shouldContain "\"error\""
             json shouldContain "limit must be between 1 and 500"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.exportSummaries(any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `빈 categoryId 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_export(categoryId = " ", daysBack = null, includeOriginal = null, limit = null)
+
+            json shouldContain "\"error\""
+            json shouldContain "categoryId must not be blank"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.exportSummaries(any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `0 이하 daysBack 은 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_export(categoryId = "c1", daysBack = 0, includeOriginal = null, limit = null)
+
+            json shouldContain "\"error\""
+            json shouldContain "daysBack must be greater than 0"
             verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { clippingService.exportSummaries(any(), any(), any(), any()) }
         }

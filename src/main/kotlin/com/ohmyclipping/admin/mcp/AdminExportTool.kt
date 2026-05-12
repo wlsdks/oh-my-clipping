@@ -25,7 +25,7 @@ class AdminExportTool(
             카테고리의 요약 레코드를 대량으로 내보낸다 (운영자 벌크 export).
             **언제 쓰나:** 분석이나 감사 목적으로 여러 건의 원본 레코드 덤프가 필요할 때.
             **쓰지 말 것:** 일반 사용자가 최근 요약을 보려고 할 때 — user_list_recent_summaries 를 사용.
-            **파라미터:** categoryId 필수, daysBack 선택, includeOriginal 선택 (기본 false),
+            **파라미터:** categoryId 필수, daysBack 선택 (1 이상), includeOriginal 선택 (기본 false),
               limit 선택 (1~500, 기본 100).
             **Rate limit:** 카테고리 단위로 최대 5회/시간. 초과 시 Retry-After 헤더와 함께 거부된다.
             **반환:** 레코드 배열이 담긴 ExportResult.
@@ -33,7 +33,7 @@ class AdminExportTool(
     )
     fun admin_export(
         @ToolParam(description = "내보낼 대상 카테고리 ID") categoryId: String,
-        @ToolParam(description = "최근 N일 이내 레코드만 포함", required = false) daysBack: Int?,
+        @ToolParam(description = "최근 N일 이내 레코드만 포함 (1 이상)", required = false) daysBack: Int?,
         @ToolParam(
             description = "각 레코드에 원본 마크다운을 포함할지 여부 (기본 false)",
             required = false,
@@ -45,6 +45,8 @@ class AdminExportTool(
         )
         limit: Int?,
     ): String = mcpToolCall {
+        validateCategoryId(categoryId)
+        validateDaysBack(daysBack)
         val effectiveLimit = validateLimit(limit)
         // 호출 빈도 제한: 카테고리 단위로 최대 5회/시간. 벌크 덤프 남용을 막는다.
         rateLimiter.checkOrThrow(
@@ -54,6 +56,18 @@ class AdminExportTool(
             dimension = categoryId,
         )
         clippingQueryPort.exportSummaries(categoryId, daysBack, includeOriginal, effectiveLimit)
+    }
+
+    private fun validateCategoryId(categoryId: String) {
+        if (categoryId.isBlank()) {
+            throw InvalidInputException("categoryId must not be blank")
+        }
+    }
+
+    private fun validateDaysBack(daysBack: Int?) {
+        if (daysBack != null && daysBack <= 0) {
+            throw InvalidInputException("daysBack must be greater than 0")
+        }
     }
 
     private fun validateLimit(limit: Int?): Int {
