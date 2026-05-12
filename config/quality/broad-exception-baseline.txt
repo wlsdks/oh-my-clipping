@@ -5,7 +5,6 @@
 # - Rule: new files or increased counts fail the build.
 # - When a broad catch is replaced with a narrower exception, lower the matching count in this file.
 #
-src/main/kotlin/com/ohmyclipping/adapter/out/slack/SlackApiMessageSender.kt=5
 src/main/kotlin/com/ohmyclipping/admin/EditingPresenceController.kt=1
 src/main/kotlin/com/ohmyclipping/admin/SourceAdminController.kt=1
 src/main/kotlin/com/ohmyclipping/admin/mcp/AdminSendDigestIdempotencyCache.kt=2

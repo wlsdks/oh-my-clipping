@@ -1202,3 +1202,27 @@ A narrow `setKeywordsAndExcludeEventTypes` method was added to `CategoryRuleStor
 - **부수 효과 — 656건의 사전 존재 테스트 실패가 드러났다.** 빌드가 `e510f27` 이후로 깨져 있어 `./gradlew :test` 가 한 번도 실행되지 못한 사이 누적된 잠재 결함이다. 대표 증상: `@SpringBootTest` 들이 Hibernate Schema-validation 실패(`missing table [admin_users]`) 로 ApplicationContext 로딩에 실패. Flyway 가 H2 스키마를 채우기 전에 Hibernate 가 검증한다. 이 ADR 범위 밖이며 별도 후속 작업으로 추적해야 한다.
 
 **향후 대안**: 모듈명을 path 와 일치시키고 싶다면 `project(":ports:persistence").name = "store-spi"` 로 rename + 9개 build 파일 참조를 함께 업데이트하는 방안이 더 의미적이지만, 본 ADR 의 범위에서는 group 변경만으로 충분하다.
+
+## ADR-044: OSS 누락 outbound adapter 복원 (2026-05-12)
+
+**상태**: 채택
+
+**맥락**: ADR-043 의 후속 작업으로 `./gradlew :test` 를 실행할 수 있게 된 직후, 657건의 테스트가 `@SpringBootTest` ApplicationContext 로딩 단계에서 실패했다. 초기 증상은 `Schema-validation: missing table [admin_users]` 였으나 (Hibernate 가 본 메시지를 가장 먼저 던졌을 뿐), `spring.jpa.hibernate.ddl-auto: none` 으로 validation 만 비활성화하니 진짜 root cause 가 드러났다: **여러 outbound port (`SlackDeliveryPort`, `SlackMessageSender`, `OpsLogNotifier`, `CollectionUrlSafetyPort` 외 5종, `NaverNewsSearchPort`) 가 Spring 빈 구현체 없이 인터페이스만 남아 있었다.**
+
+원인 추적: OSS sanitization 커밋(`842f3e6 chore: initial open-source release`) 이 "real Slack/secret material" 을 제거하면서 `src/main/kotlin/com/ohmyclipping/adapter/out/` 디렉토리 전체를 같이 제거했다. 포트 인터페이스, 호출 서비스, 테스트는 그대로 남아 빌드는 통과했지만 Spring DI 가 끊겨 모든 통합 테스트가 동일한 오류(`No qualifying bean of type ...`)로 실패했다. `config/quality/broad-exception-baseline.txt` 의 `adapter/out/slack/SlackApiMessageSender.kt=5` 항목, `ADR-038` 의 `SlackDeliveryAdapter` 언급 등이 잔존 흔적이다.
+
+**결정**: `src/main/kotlin/com/ohmyclipping/adapter/out/` 디렉토리를 복원해 누락된 outbound 어댑터를 stub 으로 채운다. 외부 API 호출(Slack chat.postMessage, SearchCo, …) 은 본 stub 의 범위 밖이며, 운영 환경에서는 fork 가 본 stub 을 대체하는 production 빈을 등록한다.
+
+복원한 어댑터:
+- `adapter/out/slack/SlackApiMessageSender` — `SlackMessageSender` no-op stub (`ok=false` SendResult 반환).
+- `adapter/out/slack/SlackDeliveryAdapter` — `SlackDeliveryPort` 를 위 sender 로 위임.
+- `adapter/out/slack/SlackOpsLogNotifier` — `OpsLogNotifier` no-op stub (debug log 만 남김).
+- `adapter/out/AppPortAdapters` (한 파일, 6 어댑터): `CollectionRuntimeSettingsAdapter`, `CollectionArticleExtractorAdapter`, `CollectionUrlSafetyAdapter`, `SourceUrlSafetyAdapter`, `SourceSlaSettingsAdapter`, `SourceOrganizationAdapter` — root app 의 기존 `UrlSafetyValidator`/`ArticleContentExtractor`/`OrganizationService`/`SlaEscalationProperties` 에 위임.
+- `adapter/out/NaverNewsSearchAdapter` — `NaverNewsSearchPort` no-op stub (`isConfigured()=false`).
+
+**결과**:
+- `./gradlew :test` 실패 건수: 657 → 218 (67% 감소). 잔여 218건은 Spring DI 가 아니라 진짜 assertion/business logic 실패 (`SESSION cookie not found`, JPA empty result, 도메인 assertion mismatch 등) 로 별도 개별 fix 가 필요하다.
+- `config/quality/broad-exception-baseline.txt` 에서 누락 파일 항목(`adapter/out/slack/SlackApiMessageSender.kt=5`) 을 제거했다. 본 stub 은 broad catch 가 없다.
+- ADR-043 의 follow-up 인 "656 latent failure triage" 가 (대부분) 해소됐다. Spring 컨텍스트 로딩이 다시 표준 동작하므로 향후 root-app 리팩토링이 통합 테스트로 회귀 보호된다.
+
+**향후 작업**: 잔여 218건 중 assertion 실패는 진단/수정이 필요하다 (대표 사례: `SESSION cookie not found`, JPA query result mismatch). 운영 환경에서 실제 Slack/SearchCo 통합이 필요한 경우 본 stub 들을 production 어댑터(`@Primary` 빈 또는 fork 단위 대체) 로 교체한다.

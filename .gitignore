@@ -48,6 +48,7 @@ out/
 docker-compose.override.yml
 docker-compose.*.yml
 application-*.yml
+!src/test/resources/application-test.yml
 
 # local runtime artifacts
 admin-setup-tab.md
