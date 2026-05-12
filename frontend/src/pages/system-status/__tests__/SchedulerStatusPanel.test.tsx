@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 vi.mock("@/services/schedulerStatusService", () => ({
   schedulerStatusService: {
@@ -13,14 +13,7 @@ import { SchedulerStatusPanel } from "../SchedulerStatusPanel";
 import type { SchedulerStatusItem } from "@/types/schedulerStatus";
 
 function renderPanel() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-  return render(
-    <QueryClientProvider client={client}>
-      <SchedulerStatusPanel />
-    </QueryClientProvider>,
-  );
+  return render(<SchedulerStatusPanel />, { wrapper: createQueryClientWrapper() });
 }
 
 describe("SchedulerStatusPanel", () => {

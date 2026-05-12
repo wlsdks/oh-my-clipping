@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { BackfillPanel } from "../BackfillPanel";
+import { createTestQueryClient, createQueryClientWrapper } from "@/test/queryClient";
 import type { BackfillPreviewResponse, BackfillApplyResponse } from "@/services/backfillService";
 
 // 서비스 mock — 테스트별로 구현체를 갈아끼운다.
@@ -58,17 +58,14 @@ function makeApplyResponse(
 }
 
 function renderPanel() {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+  const qc = createTestQueryClient();
   return {
     qc,
     ...render(
       <MemoryRouter>
-        <QueryClientProvider client={qc}>
-          <BackfillPanel />
-        </QueryClientProvider>
+        <BackfillPanel />
       </MemoryRouter>,
+      { wrapper: createQueryClientWrapper(qc) },
     ),
   };
 }

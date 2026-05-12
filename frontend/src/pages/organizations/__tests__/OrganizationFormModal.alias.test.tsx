@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { OrganizationFormModal } from "../OrganizationFormModal";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { Organization } from "@/types/organization";
 
 // 서비스 mock — updateMock 을 통해 전달 인자를 검증한다.
@@ -40,11 +40,9 @@ function makeOrg(overrides: Partial<Organization> = {}): Organization {
 }
 
 function renderModal(organization?: Organization | null, onClose = vi.fn()) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={qc}>
-      <OrganizationFormModal open onClose={onClose} organization={organization} />
-    </QueryClientProvider>,
+    <OrganizationFormModal open onClose={onClose} organization={organization} />,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

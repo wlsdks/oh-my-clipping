@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PipelineHistory } from "../PipelineHistory";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { PipelineRunRecord } from "@/types/pipeline";
 
 vi.mock("@/services/pipelineService", () => ({
@@ -33,14 +33,9 @@ function makeRun(overrides: Partial<PipelineRunRecord> = {}): PipelineRunRecord 
 }
 
 function renderHistory(props: Partial<React.ComponentProps<typeof PipelineHistory>> = {}) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false, staleTime: 0 } },
+  return render(<PipelineHistory categories={[]} {...props} />, {
+    wrapper: createQueryClientWrapper(),
   });
-  return render(
-    <QueryClientProvider client={qc}>
-      <PipelineHistory categories={[]} {...props} />
-    </QueryClientProvider>
-  );
 }
 
 beforeEach(() => {
