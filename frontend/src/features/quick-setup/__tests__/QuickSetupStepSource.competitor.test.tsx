@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 // ── 의존 서비스 mock (hoisted) ──
@@ -40,10 +40,6 @@ import { createQuickSetupForm } from "../model/quickSetupTypes";
 import { companyService } from "@/services/companyService";
 
 const mockSearchAdmin = vi.mocked(companyService.searchAdminCompanies);
-
-beforeAll(() => {
-  Element.prototype.scrollIntoView = Element.prototype.scrollIntoView || (() => {});
-});
 
 beforeEach(() => {
   vi.clearAllMocks();

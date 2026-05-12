@@ -28,25 +28,6 @@ import { userHistoryService } from "@/services/userHistoryService";
 import { userIntelligenceService } from "@/services/userIntelligenceService";
 import { UserNewsReportPage } from "../UserNewsReportPage";
 
-// Radix Select는 jsdom에서 Element.prototype.hasPointerCapture가 없어 클릭 시 TypeError를 던진다.
-// 테스트 환경에서만 no-op 폴리필을 주입한다.
-if (!(Element.prototype as unknown as { hasPointerCapture?: unknown }).hasPointerCapture) {
-  Element.prototype.hasPointerCapture = function hasPointerCaptureNoop() {
-    return false;
-  } as Element["hasPointerCapture"];
-  Element.prototype.releasePointerCapture = function releasePointerCaptureNoop() {
-    // no-op
-  } as Element["releasePointerCapture"];
-  Element.prototype.setPointerCapture = function setPointerCaptureNoop() {
-    // no-op
-  } as Element["setPointerCapture"];
-}
-if (!(Element.prototype as unknown as { scrollIntoView?: unknown }).scrollIntoView) {
-  Element.prototype.scrollIntoView = function scrollIntoViewNoop() {
-    // no-op
-  } as Element["scrollIntoView"];
-}
-
 function renderPage() {
   const qc = new QueryClient({
     defaultOptions: {
