@@ -1,9 +1,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { StyleStatsTab } from "../StyleStatsTab";
 import { personaAnalyticsService } from "@/services/personaAnalyticsService";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 vi.mock("@/services/personaAnalyticsService");
 
@@ -28,15 +28,11 @@ const liveResponse = {
 };
 
 function renderTab() {
-  const client = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
-    <QueryClientProvider client={client}>
-      <MemoryRouter>
-        <StyleStatsTab />
-      </MemoryRouter>
-    </QueryClientProvider>
+    <MemoryRouter>
+      <StyleStatsTab />
+    </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

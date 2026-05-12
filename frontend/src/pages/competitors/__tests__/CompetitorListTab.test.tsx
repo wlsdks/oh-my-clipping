@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { MemoryRouter } from "react-router-dom";
 import { CompetitorListTab } from "../CompetitorListTab";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { Competitor } from "@/types/competitor";
 
 const listMock = vi.fn();
@@ -36,15 +36,11 @@ function makeCompetitor(overrides: Partial<Competitor> = {}): Competitor {
 }
 
 function renderTab() {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
   return render(
     <MemoryRouter>
-      <QueryClientProvider client={qc}>
-        <CompetitorListTab />
-      </QueryClientProvider>
+      <CompetitorListTab />
     </MemoryRouter>,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PresetDetailModal } from "../PresetDetailModal";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { Persona } from "@/types/persona";
 
 // mock personaService to prevent actual API calls
@@ -53,13 +53,9 @@ function makePersona(overrides: Partial<Persona> = {}): Persona {
 }
 
 function renderModal(props: Partial<React.ComponentProps<typeof PresetDetailModal>> = {}) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } }
-  });
   return render(
-    <QueryClientProvider client={qc}>
-      <PresetDetailModal persona={makePersona()} subscriptionCount={0} open={true} onOpenChange={() => {}} {...props} />
-    </QueryClientProvider>
+    <PresetDetailModal persona={makePersona()} subscriptionCount={0} open={true} onOpenChange={() => {}} {...props} />,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 

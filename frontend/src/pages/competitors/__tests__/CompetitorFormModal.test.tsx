@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CompetitorFormModal } from "../CompetitorFormModal";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { Competitor } from "@/types/competitor";
 
 // Mock competitorService
@@ -34,19 +34,14 @@ function makeCompetitor(overrides: Partial<Competitor> = {}): Competitor {
 }
 
 function renderModal(props: Partial<React.ComponentProps<typeof CompetitorFormModal>> = {}) {
-  const qc = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
-
   return render(
-    <QueryClientProvider client={qc}>
-      <CompetitorFormModal
-        open={true}
-        onClose={vi.fn()}
-        competitor={null}
-        {...props}
-      />
-    </QueryClientProvider>,
+    <CompetitorFormModal
+      open={true}
+      onClose={vi.fn()}
+      competitor={null}
+      {...props}
+    />,
+    { wrapper: createQueryClientWrapper() },
   );
 }
 
