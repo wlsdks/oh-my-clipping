@@ -41,7 +41,8 @@ class CompanySearchServiceTest {
             val result = service.search("MegaCorp")
 
             result shouldHaveSize 3
-            result.map { it.corpName } shouldBe listOf("MegaCorpSDI", "MegaCorp", "MegaCorp물산비상장")
+            // 상장사(isListed=true) 가 비상장 앞에 오고, 같은 상장 그룹 안에서는 corpName 사전순으로 정렬된다.
+            result.map { it.corpName } shouldBe listOf("MegaCorp", "MegaCorpSDI", "MegaCorp물산비상장")
         }
 
         @Test
@@ -93,17 +94,20 @@ class CompanySearchServiceTest {
             val result = service.search("MegaCorp", limit = -1)
 
             result shouldHaveSize 1
-            result[0].corpName shouldBe "MegaCorpSDI"
+            // limit 음수 → 1로 보정. 정렬 결과 (isListed desc, corpName asc) 의 첫 항목.
+            result[0].corpName shouldBe "MegaCorp"
         }
 
         @Test
         fun `대소문자 구분 없이 검색한다`() {
             val service = createServiceWithCompanies(sampleCompanies)
 
-            val result = service.search("lg")
+            // sampleCompanies 의 corpName 은 sanitized fixture("MessengerCo", "TestCorp Energy" 등) 라
+            // 검색어를 소문자로 보내 대소문자 무시 동작을 검증한다.
+            val result = service.search("messenger")
 
             result shouldHaveSize 1
-            result[0].corpName shouldBe "TestCorp Energy"
+            result[0].corpName shouldBe "MessengerCo"
         }
 
         @Test

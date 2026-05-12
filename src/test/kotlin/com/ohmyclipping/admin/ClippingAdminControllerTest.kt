@@ -80,7 +80,7 @@ class ClippingAdminControllerTest {
             BatchSummary(
                 id = "",
                 originalTitle = item.title,
-                translatedTitle = "Admin translated title",
+                translatedTitle = "AI 모델 정책 변화 발표",
                 summary = "Admin summary body",
                 keywords = listOf("admin", "digest"),
                 importanceScore = 0.9f,
@@ -96,7 +96,9 @@ class ClippingAdminControllerTest {
                 id = "",
                 title = "Admin low summary",
                 content = "Admin low content",
-                link = "https://93.184.216.34/admin-clip-low-${System.nanoTime()}",
+                // selectWithSoftPenalty 의 same-source 페널티(lambda=0.15)에 걸리지 않도록
+                // highSummary 와 다른 host(=다른 source bucket) 를 부여한다.
+                link = "https://198.51.100.42/admin-clip-low-${System.nanoTime()}",
                 categoryId = categoryId
             )
         )
@@ -104,10 +106,14 @@ class ClippingAdminControllerTest {
             BatchSummary(
                 id = "",
                 originalTitle = lowItem.title,
-                translatedTitle = "Admin low translated",
+                // dedupeCandidates 가 highSummary 와 jaccard 유사도로 합치지 않도록 토큰이 겹치지 않는 제목을 쓴다.
+                translatedTitle = "반도체 시장 점유율 전망",
                 summary = "Admin low summary body",
                 keywords = listOf("admin", "low"),
-                importanceScore = 0.2f,
+                // 0.4 는 digestMinImportanceScore (default 0.5) 보다 낮지만
+                // selectWithSoftPenalty 의 보조 임계값(clipping.digest.fair_share.min_raw_score 기본 0.3) 위.
+                // → 기본 설정에선 high 만 선정되고, digestMinImportanceScore=0.1 로 낮추면 low 도 통과한다.
+                importanceScore = 0.4f,
                 sourceLink = lowItem.link,
                 categoryId = categoryId,
                 rssItemId = lowItem.id
