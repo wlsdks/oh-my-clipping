@@ -1,7 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // Mocks must be hoisted before imports
 vi.mock("sonner", () => ({
@@ -24,11 +23,6 @@ import { useQuickSetupSubmit } from "../useQuickSetupSubmit";
 import { createQuickSetupForm } from "../model/quickSetupTypes";
 import type { QuickSetupForm } from "../model/quickSetupTypes";
 import type { SubmitWithEntriesResponse } from "@/types/adminDto";
-
-function wrapper({ children }: { children: ReactNode }) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } });
-  return <QueryClientProvider client={qc}>{children}</QueryClientProvider>;
-}
 
 const SUBMITTED_OK: SubmitWithEntriesResponse = {
   requestId: "req-1",
@@ -53,7 +47,7 @@ describe("useQuickSetupSubmit", () => {
 
   describe("요청 바디 구성", () => {
     it("entries 배열을 한 번에 POST", async () => {
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -65,7 +59,7 @@ describe("useQuickSetupSubmit", () => {
     });
 
     it("company 타입 항목에는 stockCode를 포함한다", async () => {
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -75,7 +69,7 @@ describe("useQuickSetupSubmit", () => {
     });
 
     it("keyword 타입 항목에는 stockCode를 포함하지 않는다", async () => {
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -88,7 +82,7 @@ describe("useQuickSetupSubmit", () => {
 
   describe("submitted 응답", () => {
     it("toast를 호출하지 않는다", async () => {
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -111,7 +105,7 @@ describe("useQuickSetupSubmit", () => {
         ],
       });
 
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -131,7 +125,7 @@ describe("useQuickSetupSubmit", () => {
         errors: [{ index: 0, value: "X", reason: "VALIDATION_FAILED" }],
       });
 
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -148,7 +142,7 @@ describe("useQuickSetupSubmit", () => {
         errors: [{ index: 0, value: "X", reason: "VALIDATION_FAILED" }],
       });
 
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -165,7 +159,7 @@ describe("useQuickSetupSubmit", () => {
         errors: [{ index: 0, value: "Coursera", reason: "COMPETITOR_WATCHLIST_CONFLICT" }],
       });
 
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -182,7 +176,7 @@ describe("useQuickSetupSubmit", () => {
         errors: [{ index: 0, value: "A", reason: "VALIDATION_FAILED" }],
       });
 
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });
@@ -198,7 +192,7 @@ describe("useQuickSetupSubmit", () => {
         new Error("네트워크 오류")
       );
 
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm).catch(() => {});
       });
@@ -216,12 +210,12 @@ describe("useQuickSetupSubmit", () => {
 
   describe("isPending 상태", () => {
     it("초기 상태는 isPending=false", () => {
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       expect(result.current.isPending).toBe(false);
     });
 
     it("submit 후 isPending=false (완료 기준)", async () => {
-      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper });
+      const { result } = renderHook(() => useQuickSetupSubmit(), { wrapper: createQueryClientWrapper() });
       await act(async () => {
         await result.current.submit(sampleForm);
       });

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { QuickSetupForm } from "../model/quickSetupTypes";
+import { createQueryClientWrapper } from "@/test/queryClient";
 
 // ── 서비스/의존성 mock (import 순서 중요: vi.mock hoist) ─────────────────
 vi.mock("@/services/personaService", () => ({
@@ -113,17 +113,12 @@ import { categoryService } from "@/services/categoryService";
 import { sourceService } from "@/services/sourceService";
 import { userService } from "@/services/userService";
 
-/** QueryClientProvider로 감싸 렌더 */
 async function renderWizard(props: Partial<React.ComponentProps<typeof QuickSetupWizard>> = {}) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } }
-  });
   const onClose = props.onClose ?? vi.fn();
   const onComplete = props.onComplete ?? vi.fn();
   const utils = render(
-    <QueryClientProvider client={queryClient}>
-      <QuickSetupWizard open={props.open ?? true} onClose={onClose} onComplete={onComplete} {...props} />
-    </QueryClientProvider>
+    <QuickSetupWizard open={props.open ?? true} onClose={onClose} onComplete={onComplete} {...props} />,
+    { wrapper: createQueryClientWrapper() },
   );
   await act(async () => {});
   return { ...utils, onClose, onComplete };

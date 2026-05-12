@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { ReactElement } from "react";
 import { QuickSetupStepSlack } from "../QuickSetupStepSlack";
+import { createQueryClientWrapper } from "@/test/queryClient";
 import type { QuickSetupForm } from "../model/quickSetupTypes";
 
 // runtimeService mock — 빈 채널 목록 반환
@@ -78,14 +79,8 @@ function makeForm(overrides: Partial<QuickSetupForm>): QuickSetupForm {
   };
 }
 
-/** QueryClientProvider로 감싸 렌더링하는 헬퍼 */
-function renderWithClient(ui: React.ReactElement) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } }
-  });
-  return render(
-    <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
-  );
+function renderWithClient(ui: ReactElement) {
+  return render(ui, { wrapper: createQueryClientWrapper() });
 }
 
 describe("QuickSetupStepSlack — 공개 채널 가이드 배너", () => {
