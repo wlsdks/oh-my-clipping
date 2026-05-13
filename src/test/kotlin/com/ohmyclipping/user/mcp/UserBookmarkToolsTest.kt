@@ -82,6 +82,26 @@ class UserBookmarkToolsTest {
             json shouldContain "-32022"
             verify(exactly = 0) { service.toggleBookmarkByUserId(any(), any()) }
         }
+
+        @Test
+        fun `빈 summaryId 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.user_toggle_bookmark(summaryId = " ", _onBehalfOfUserId = "u1")
+
+            json shouldContain "\"error\""
+            json shouldContain "summaryId must not be blank"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { service.toggleBookmarkByUserId(any(), any()) }
+        }
+
+        @Test
+        fun `_onBehalfOfUserId 누락 시 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.user_toggle_bookmark(summaryId = "s1", _onBehalfOfUserId = " ")
+
+            json shouldContain "\"error\""
+            json shouldContain "Caller user id is not bound"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { service.toggleBookmarkByUserId(any(), any()) }
+        }
     }
 
     @Nested
@@ -101,23 +121,32 @@ class UserBookmarkToolsTest {
 
         @Test
         fun `_onBehalfOfUserId 누락 시 InvalidInputException 으로 거부된다`() {
-            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
-
             val json = tool.user_list_bookmarks(limit = 20, offset = 0, _onBehalfOfUserId = null)
 
             json shouldContain "\"error\""
             json shouldContain "-32024"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
             verify(exactly = 0) { service.listBookmarksByUserId(any(), any(), any()) }
         }
 
         @Test
-        fun `limit 범위 밖은 validation error`() {
-            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
-
+        fun `limit 범위 밖은 rate limit 차감 없이 validation error 로 거부된다`() {
             val json = tool.user_list_bookmarks(limit = 999, offset = 0, _onBehalfOfUserId = "u1")
 
             json shouldContain "\"error\""
             json shouldContain "limit must be between"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { service.listBookmarksByUserId(any(), any(), any()) }
+        }
+
+        @Test
+        fun `offset 범위 밖은 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.user_list_bookmarks(limit = 20, offset = -1, _onBehalfOfUserId = "u1")
+
+            json shouldContain "\"error\""
+            json shouldContain "offset must be >= 0"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { service.listBookmarksByUserId(any(), any(), any()) }
         }
     }
 }
