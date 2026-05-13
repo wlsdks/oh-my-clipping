@@ -137,6 +137,38 @@ class McpToolAnnotationsTest {
         }
     }
 
+    @Nested
+    inner class `정책 불변식` {
+
+        @Test
+        fun `destructive 도구는 readOnly 또는 idempotent 로 표시하지 않는다`() {
+            val invalid = McpToolAnnotations.BY_NAME
+                .filterValues { it.destructiveHint() == true }
+                .filterValues { it.readOnlyHint() == true || it.idempotentHint() == true }
+                .keys
+
+            invalid shouldBe emptySet()
+        }
+
+        @Test
+        fun `readOnly 도구는 destructive 로 표시하지 않는다`() {
+            val invalid = McpToolAnnotations.BY_NAME
+                .filterValues { it.readOnlyHint() == true && it.destructiveHint() == true }
+                .keys
+
+            invalid shouldBe emptySet()
+        }
+
+        @Test
+        fun `non-idempotent 도구 분류는 readOnly 와 섞이지 않는다`() {
+            val invalid = McpToolAnnotations.BY_NAME
+                .filterValues { it.readOnlyHint() == true && it.idempotentHint() == false }
+                .keys
+
+            invalid shouldBe emptySet()
+        }
+    }
+
     private fun discoverMcpToolNames(): Set<String> {
         val sourceRoots = listOf(
             Path.of("src/main/kotlin/com/ohmyclipping/admin/mcp"),
