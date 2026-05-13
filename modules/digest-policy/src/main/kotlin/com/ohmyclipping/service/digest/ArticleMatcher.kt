@@ -1,5 +1,6 @@
 package com.ohmyclipping.service.digest
 
+import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -15,7 +16,7 @@ private val boundaryCachePruneLock = Any()
 private fun boundaryRegex(term: String): Regex {
     val normalized = term.trim()
     pruneBoundaryCacheIfNeeded()
-    return BOUNDARY_CACHE.computeIfAbsent(normalized.lowercase()) {
+    return BOUNDARY_CACHE.computeIfAbsent(normalized.lowercase(Locale.ROOT)) {
         Regex(
             "(?<![\\p{IsHangul}A-Za-z0-9])${Regex.escape(normalized)}(?![\\p{IsHangul}A-Za-z0-9])",
             RegexOption.IGNORE_CASE
