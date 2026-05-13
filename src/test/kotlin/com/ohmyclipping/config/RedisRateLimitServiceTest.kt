@@ -96,6 +96,60 @@ class RedisRateLimitServiceTest {
     }
 
     @Nested
+    inner class `MCP tool rate limit key 테스트` {
+
+        @Test
+        fun `tool actor dimension 세그먼트를 URL-safe base64로 인코딩한다`() {
+            every { zSetOps.zCard(any()) } returns 0L
+
+            sut.isRateLimitedForTool(
+                toolName = "admin:collect",
+                actor = "actor\none",
+                dimension = "cat:1",
+                maxRequests = 5,
+                windowSeconds = 60,
+            )
+
+            verify {
+                zSetOps.zCard("mcp:b64_YWRtaW46Y29sbGVjdA:b64_YWN0b3IKb25l:b64_Y2F0OjE")
+            }
+        }
+
+        @Test
+        fun `null dimension 과 빈 문자열 및 문자열 global dimension 은 서로 다른 키를 사용한다`() {
+            every { zSetOps.zCard(any()) } returns 0L
+
+            sut.isRateLimitedForTool(
+                toolName = "admin_collect",
+                actor = "actor",
+                dimension = null,
+                maxRequests = 5,
+                windowSeconds = 60,
+            )
+            sut.isRateLimitedForTool(
+                toolName = "admin_collect",
+                actor = "actor",
+                dimension = "",
+                maxRequests = 5,
+                windowSeconds = 60,
+            )
+            sut.isRateLimitedForTool(
+                toolName = "admin_collect",
+                actor = "actor",
+                dimension = "global",
+                maxRequests = 5,
+                windowSeconds = 60,
+            )
+
+            verify {
+                zSetOps.zCard("mcp:b64_YWRtaW5fY29sbGVjdA:b64_YWN0b3I:global")
+                zSetOps.zCard("mcp:b64_YWRtaW5fY29sbGVjdA:b64_YWN0b3I:b64_")
+                zSetOps.zCard("mcp:b64_YWRtaW5fY29sbGVjdA:b64_YWN0b3I:b64_Z2xvYmFs")
+            }
+        }
+    }
+
+    @Nested
     inner class `isDuplicate 테스트` {
 
         @Test
