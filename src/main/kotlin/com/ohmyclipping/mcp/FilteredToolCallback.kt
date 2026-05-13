@@ -46,7 +46,7 @@ class FilteredToolCallback(
         delegate.call(toolInput, toolContext)
 
     /**
-     * JSON Schema 루트의 `properties`와 `required` 목록에서
+     * JSON Schema 전체의 `properties`와 `required` 목록에서
      * [hiddenParamPrefix]로 시작하는 키를 제거한다.
      * 스키마 루트가 ObjectNode가 아니면 원본을 그대로 반환한다.
      *
@@ -59,15 +59,19 @@ class FilteredToolCallback(
         val root = objectMapper.readTree(schemaJson) as? ObjectNode ?: return schemaJson
         val toolName = delegate.toolDefinition.name()
 
-        // properties 맵에서 hidden prefix 키를 제거한다.
-        (root.get("properties") as? ObjectNode)?.let { props ->
+        filterHiddenParams(root, toolName)
+
+        return objectMapper.writeValueAsString(root)
+    }
+
+    private fun filterHiddenParams(node: ObjectNode, toolName: String) {
+        (node.get("properties") as? ObjectNode)?.let { props ->
             val toRemove = props.properties().map { it.key }
                 .filter { it.startsWith(hiddenParamPrefix) }
             toRemove.forEach { props.remove(it) }
         }
 
-        // required 배열에서도 hidden prefix 이름을 제거한다.
-        (root.get("required") as? ArrayNode)?.let { req ->
+        (node.get("required") as? ArrayNode)?.let { req ->
             val requiredHidden = req.map { it.asText() }.filter { it.startsWith(hiddenParamPrefix) }
             if (requiredHidden.isNotEmpty()) {
                 // 도구 작성자는 숨김 파라미터를 required 로 선언하면 안 된다 — 스키마에서 빠지므로
@@ -83,6 +87,13 @@ class FilteredToolCallback(
             filtered.forEach { req.add(it) }
         }
 
-        return objectMapper.writeValueAsString(root)
+        val childNodes = node.properties().flatMap { (_, child) ->
+            when (child) {
+                is ObjectNode -> listOf(child)
+                is ArrayNode -> child.filterIsInstance<ObjectNode>()
+                else -> emptyList()
+            }
+        }
+        childNodes.forEach { filterHiddenParams(it, toolName) }
     }
 }
