@@ -11,6 +11,7 @@ import com.ohmyclipping.error.ensureValid
 import com.ohmyclipping.service.dto.admin.ClippingSetting
 import com.ohmyclipping.service.pipeline.DeterministicPipelineRunner
 import com.ohmyclipping.service.pipeline.RalphPipelineOrchestrator
+import com.ohmyclipping.service.pipeline.RalphLoopOverridePolicy
 import com.ohmyclipping.service.pipeline.toDigestResult
 import com.ohmyclipping.service.port.ClippingPipelinePort
 import com.ohmyclipping.store.CategoryStore
@@ -159,6 +160,8 @@ class AdminClippingService(
         ralphLoopMaxIterationsOverride: Int? = null,
         ralphLoopStopPhraseOverride: String? = null
     ): PipelineRunResult {
+        RalphLoopOverridePolicy.validateMaxIterations(ralphLoopMaxIterationsOverride)
+
         val runtime = runtimeSettingService.current()
         if (runtime.ralphOrchestrationEnabled) {
             try {

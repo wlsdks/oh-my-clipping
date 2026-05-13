@@ -82,5 +82,25 @@ class AdminPipelineToolTest {
                 adminClippingService.runPipeline(any(), any(), any(), any(), any(), any(), any(), any(), any())
             }
         }
+
+        @Test
+        fun `Ralph loop 반복 횟수 override 가 범위 밖이면 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tool.admin_pipeline(
+                categoryId = "c1",
+                hoursBack = null,
+                maxItems = null,
+                unsentOnly = null,
+                _ralphLoopEnabled = true,
+                _ralphLoopMaxIterations = 31,
+                _ralphLoopStopPhrase = null,
+            )
+
+            json shouldContain "\"error\""
+            json shouldContain "ralphLoopMaxIterations must be between 1 and 30"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) {
+                adminClippingService.runPipeline(any(), any(), any(), any(), any(), any(), any(), any(), any())
+            }
+        }
     }
 }

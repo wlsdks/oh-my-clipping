@@ -5,6 +5,7 @@ import com.ohmyclipping.service.pipeline.RalphPipelineOrchestrator
 
 import com.ohmyclipping.config.ClippingMcpServerProperties
 import com.ohmyclipping.error.ConflictException
+import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.service.dto.clipping.CollectCategoryResult
 import com.ohmyclipping.service.dto.clipping.CollectResult
 import com.ohmyclipping.model.Category
@@ -302,6 +303,46 @@ class AdminClippingServiceTest {
                 loopStopPhraseOverride = "DONE_SIGNAL"
             )
         }
+    }
+
+    @Test
+    fun `runPipeline should reject invalid Ralph loop override before starting orchestration`() {
+        val categoryStore = mockk<CategoryStore>()
+        val retentionPolicyStore = mockk<RetentionPolicyStore>()
+        val clippingPipelinePort = mockk<ClippingPipelinePort>()
+        val runtimeSettingService = mockk<RuntimeSettingService>()
+        val ralphPipelineOrchestrator = mockk<RalphPipelineOrchestrator>()
+        val deterministicPipelineRunner = mockk<DeterministicPipelineRunner>()
+        val properties = ClippingMcpServerProperties()
+
+        val service = AdminClippingService(
+            categoryStore = categoryStore,
+            retentionPolicyStore = retentionPolicyStore,
+            clippingPipelinePort = clippingPipelinePort,
+            runtimeSettingService = runtimeSettingService,
+            ralphPipelineOrchestrator = ralphPipelineOrchestrator,
+            deterministicPipelineRunner = deterministicPipelineRunner,
+            properties = properties
+        )
+
+        val exception = shouldThrow<InvalidInputException> {
+            service.runPipeline(
+                categoryId = "cat-1",
+                hoursBack = 6,
+                maxItems = 3,
+                unsentOnly = true,
+                sendToSlack = false,
+                slackChannelId = null,
+                ralphLoopEnabledOverride = true,
+                ralphLoopMaxIterationsOverride = 31,
+                ralphLoopStopPhraseOverride = "DONE_SIGNAL"
+            )
+        }
+
+        exception.message shouldBe "ralphLoopMaxIterations must be between 1 and 30"
+        verify(exactly = 0) { runtimeSettingService.current() }
+        verify(exactly = 0) { ralphPipelineOrchestrator.runPipeline(any(), any(), any(), any(), any(), any(), any(), any(), any()) }
+        verify(exactly = 0) { deterministicPipelineRunner.run(any(), any(), any(), any(), any(), any(), any()) }
     }
 
     private fun samplePipelineResult(mode: PipelineOrchestrationMode): PipelineRunResult =

@@ -4,6 +4,7 @@ import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.mcp.McpRateLimiter
 import com.ohmyclipping.mcp.mcpToolCall
 import com.ohmyclipping.service.AdminClippingService
+import com.ohmyclipping.service.pipeline.RalphLoopOverridePolicy
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.stereotype.Component
@@ -53,6 +54,7 @@ class AdminPipelineTool(
         validateCategoryId(categoryId)
         validateHoursBack(hoursBack)
         validateMaxItems(maxItems)
+        RalphLoopOverridePolicy.validateMaxIterations(_ralphLoopMaxIterations)
 
         // 호출 빈도 제한: 최대 5회/시간. 파이프라인은 비용이 크다.
         rateLimiter.checkOrThrow("admin_pipeline", maxRequests = 5, windowSeconds = 3600)
