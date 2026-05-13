@@ -8,6 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import java.io.IOException
 import java.security.MessageDigest
+import java.util.Locale
 
 private val log = KotlinLogging.logger {}
 
@@ -91,7 +92,7 @@ class McpArgsRedactor(private val objectMapper: ObjectMapper) {
             return arr
         }
 
-        val keyLower = key.lowercase()
+        val keyLower = key.lowercase(Locale.ROOT)
         return when {
             // 비밀 필드 — 완전 마스킹
             SENSITIVE_PATTERN.containsMatchIn(keyLower) ->
