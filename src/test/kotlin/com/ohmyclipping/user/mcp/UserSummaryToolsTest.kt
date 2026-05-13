@@ -208,6 +208,59 @@ class UserSummaryToolsTest {
         }
 
         @Test
+        fun `빈 query 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tools.user_search_summaries(
+                query = "   ",
+                category = null,
+                fromDate = null,
+                toDate = null,
+                limit = 10,
+            )
+
+            json shouldContain "\"error\""
+            json shouldContain "query must not be blank"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { clippingService.searchSummaries(any(), any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `query 는 trim 후 검색 서비스로 전달된다`() {
+            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
+            every { categoryService.listCategories() } returns emptyList()
+            every {
+                clippingService.searchSummaries(
+                    categoryId = null,
+                    query = "AI",
+                    fromDate = null,
+                    toDate = null,
+                    limit = 10,
+                )
+            } returns SummaryListResult(
+                summaries = listOf(summaryInfo("trimmed-query", Instant.now().toString())),
+                totalCount = 1,
+            )
+
+            val json = tools.user_search_summaries(
+                query = "  AI  ",
+                category = null,
+                fromDate = null,
+                toDate = null,
+                limit = 10,
+            )
+
+            json shouldContain "\"id\":\"trimmed-query\""
+            verify(exactly = 1) {
+                clippingService.searchSummaries(
+                    categoryId = null,
+                    query = "AI",
+                    fromDate = null,
+                    toDate = null,
+                    limit = 10,
+                )
+            }
+        }
+
+        @Test
         fun `rate limit 초과 시 검색 서비스 미호출`() {
             every {
                 rateLimiter.checkOrThrow(
@@ -264,6 +317,17 @@ class UserSummaryToolsTest {
             val json = tools.user_list_top_summaries("AI News", days = 7, minScore = 1.5, limit = 5)
             json shouldContain "-32024"
             verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+        }
+
+        @Test
+        fun `빈 category 는 rate limit 차감 없이 validation error 로 거부된다`() {
+            val json = tools.user_list_top_summaries(" ", days = 7, minScore = 0.7, limit = 5)
+
+            json shouldContain "\"error\""
+            json shouldContain "category must not be blank"
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
+            verify(exactly = 0) { categoryService.resolveCategory(any()) }
+            verify(exactly = 0) { clippingService.listTopSummaries(any(), any(), any(), any()) }
         }
     }
 }

@@ -128,6 +128,7 @@ class UserSummaryTools(
         @ToolParam(description = "종료일 yyyy-MM-dd (선택)", required = false) toDate: String? = null,
         @ToolParam(description = "최대 결과 수 (1~30, 기본 10)", required = false) limit: Int = 10,
     ): String = mcpToolCall {
+        val normalizedQuery = validateRequiredText(query, "query")
         validateLimit(limit)
         val from = parseLocalDate(fromDate)
         val to = parseLocalDate(toDate)
@@ -138,7 +139,7 @@ class UserSummaryTools(
             ?.let { categoryService.resolveCategory(it).id }
         val result = clippingQueryPort.searchSummaries(
             categoryId = resolvedCategoryId,
-            query = query,
+            query = normalizedQuery,
             fromDate = from,
             toDate = to,
             limit = limit,
@@ -182,11 +183,12 @@ class UserSummaryTools(
         @ToolParam(description = "최소 중요도 점수 (0.0~1.0, 기본 0.7)", required = false) minScore: Double = 0.7,
         @ToolParam(description = "최대 결과 수 (1~30, 기본 10)", required = false) limit: Int = 10,
     ): String = mcpToolCall {
+        val normalizedCategory = validateRequiredText(category, "category")
         validateLimit(limit)
         validateSinceDays(days)
         validateScore(minScore)
         rateLimiter.checkOrThrow("user_list_top_summaries", maxRequests = 60, windowSeconds = 3600)
-        val cat = categoryService.resolveCategory(category)
+        val cat = categoryService.resolveCategory(normalizedCategory)
         val result = clippingQueryPort.listTopSummaries(
             categoryId = cat.id,
             days = days,
@@ -197,6 +199,14 @@ class UserSummaryTools(
     }
 
     // -- private helpers --
+
+    private fun validateRequiredText(value: String, fieldName: String): String {
+        val normalized = value.trim()
+        if (normalized.isBlank()) {
+            throw InvalidInputException("$fieldName must not be blank")
+        }
+        return normalized
+    }
 
     private fun toSanitizedView(info: SummaryInfo, categoryName: String): SummaryView {
         val base = SummaryView.from(
