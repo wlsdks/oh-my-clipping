@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.ohmyclipping.service.digest.EngineInvalidInputException
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -120,6 +121,20 @@ class McpToolResponseTest {
             error["type"] shouldBe "VALIDATION_ERROR"
             error["retryable"] shouldBe false
             error["message"] shouldBe "maxItems must be greater than 0"
+        }
+
+        @Test
+        fun `사용자에게 노출되는 에러 메시지 안의 secret 은 마스킹한다`() {
+            val result = mcpToolCall {
+                throw IllegalArgumentException("invalid callback token=sk-live-secret")
+            }
+
+            val parsed: Map<String, Any> = mapper.readValue(result)
+            val error = parsed["error"] as Map<*, *>
+            error["type"] shouldBe "INVALID_PARAMS"
+            val message = error["message"] as String
+            message shouldContain "token=***REDACTED***"
+            message shouldNotContain "sk-live-secret"
         }
     }
 }
