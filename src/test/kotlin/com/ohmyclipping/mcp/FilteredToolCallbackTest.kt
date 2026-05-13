@@ -107,6 +107,47 @@ class FilteredToolCallbackTest {
     }
 
     @Test
+    fun `nested object schema also removes hidden properties and required entries`() {
+        val originalSchema = """
+            {
+              "type": "object",
+              "properties": {
+                "payload": {
+                  "type": "object",
+                  "properties": {
+                    "summaryId": {"type": "string"},
+                    "_onBehalfOfUserId": {"type": "string"}
+                  },
+                  "required": ["summaryId", "_onBehalfOfUserId"]
+                }
+              },
+              "required": ["payload"]
+            }
+        """.trimIndent()
+
+        val delegate = mockk<ToolCallback>()
+        every { delegate.toolDefinition } returns DefaultToolDefinition.builder()
+            .name("nested_user_tool")
+            .description("demo")
+            .inputSchema(originalSchema)
+            .build()
+
+        val wrapper = FilteredToolCallback(delegate, objectMapper)
+        val filteredSchema = wrapper.toolDefinition.inputSchema()
+        val root = objectMapper.readTree(filteredSchema)
+        val payload = root.get("properties").get("payload")
+
+        filteredSchema shouldContain "summaryId"
+        filteredSchema shouldNotContain "_onBehalfOfUserId"
+        payload.get("required").map { it.asText() }.toSet() shouldBe setOf("summaryId")
+
+        val warnEvent = appender.list.firstOrNull { it.level == Level.WARN }
+        warnEvent shouldNotBe null
+        warnEvent!!.formattedMessage shouldContain "nested_user_tool"
+        warnEvent.formattedMessage shouldContain "_onBehalfOfUserId"
+    }
+
+    @Test
     fun `숨김 파라미터가 required 에 없으면 WARN 로그가 남지 않는다`() {
         val originalSchema = """
             {
