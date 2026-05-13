@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.util.Base64
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 
@@ -65,7 +66,12 @@ class RedisRateLimitService(
         maxRequests: Int,
         windowSeconds: Long
     ): Boolean {
-        val key = listOf("mcp", toolName, actor, dimension ?: "all").joinToString(":")
+        val key = listOf(
+            MCP_KEY_PREFIX,
+            encodeMcpRateLimitSegment(toolName),
+            encodeMcpRateLimitSegment(actor),
+            dimension?.let(::encodeMcpRateLimitSegment) ?: MCP_GLOBAL_DIMENSION,
+        ).joinToString(":")
         return isRateLimited(key, maxRequests, windowSeconds)
     }
 
@@ -84,5 +90,13 @@ class RedisRateLimitService(
         } catch (e: DataAccessException) {
             log.warn(e) { "Redis dedup mark failed: $key" }
         }
+    }
+
+    private fun encodeMcpRateLimitSegment(value: String): String =
+        "b64_" + Base64.getUrlEncoder().withoutPadding().encodeToString(value.toByteArray(Charsets.UTF_8))
+
+    companion object {
+        private const val MCP_KEY_PREFIX = "mcp"
+        private const val MCP_GLOBAL_DIMENSION = "global"
     }
 }
