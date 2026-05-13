@@ -52,17 +52,8 @@ inline fun <T : Any> mcpToolCall(block: () -> T): String = try {
 internal fun safeMcpErrorMessage(code: McpErrorCode, e: Exception): String =
     when (code) {
         McpErrorCode.INTERNAL_ERROR -> "Internal error"
-        else -> e.message?.let(::redactMcpErrorMessage) ?: "Internal error"
+        else -> e.message?.let(McpSecretRedactor::scrubEmbeddedSecrets) ?: "Internal error"
     }
-
-@PublishedApi
-internal fun redactMcpErrorMessage(message: String): String {
-    if (!MCP_ERROR_SECRET_PATTERN.containsMatchIn(message)) return message
-    return MCP_ERROR_SECRET_PATTERN.replace(message) { match ->
-        val keyName = match.groupValues[1]
-        "$keyName=***REDACTED***"
-    }
-}
 
 @PublishedApi
 internal fun isRetryableMcpError(code: McpErrorCode): Boolean =
@@ -71,12 +62,3 @@ internal fun isRetryableMcpError(code: McpErrorCode): Boolean =
         McpErrorCode.DEPENDENCY_FAILURE -> true
         else -> false
     }
-
-@PublishedApi
-internal val MCP_ERROR_SECRET_PATTERN: Regex = Regex(
-    "(password|passwd|secret|token|apikey|api_key|authorization|bearer|credential|credentials|privatekey|private_key)" +
-        "([\"':= ]+)" +
-        "(?:bearer\\s+)?" +
-        "[^\"',\\s]+",
-    RegexOption.IGNORE_CASE,
-)
