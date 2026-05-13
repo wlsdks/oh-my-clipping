@@ -1,6 +1,7 @@
 package com.ohmyclipping.service.digest
 
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.ints.shouldBeLessThanOrEqual
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -40,6 +41,16 @@ class ArticleMatcherTest {
         }
         @Test fun `키워드 앞뒤 공백은 제거하고 매칭한다`() {
             matchesKeyword("AI 교육 확대", " AI ") shouldBe true
+        }
+
+        @Test fun `boundary regex cache 는 고유 키워드가 많아져도 제한 크기 이하로 유지된다`() {
+            clearArticleMatcherBoundaryCacheForTest()
+
+            repeat(600) { index ->
+                matchesKeyword("keyword-$index 업데이트", "keyword-$index") shouldBe true
+            }
+
+            articleMatcherBoundaryCacheSizeForTest() shouldBeLessThanOrEqual 512
         }
     }
 
