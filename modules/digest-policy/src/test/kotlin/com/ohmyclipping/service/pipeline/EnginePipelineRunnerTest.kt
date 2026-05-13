@@ -3,6 +3,8 @@ package com.ohmyclipping.service.pipeline
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.string.shouldNotContain
 import org.junit.jupiter.api.Test
 import java.time.Clock
 import java.time.Instant
@@ -123,6 +125,27 @@ class EnginePipelineRunnerTest {
         )
 
         result.traces.first().detail?.length shouldBe 240
+    }
+
+    @Test
+    fun `run should redact secrets from success detail`() {
+        val runner = EnginePipelineRunner(fixedClock())
+
+        val result = runner.run(
+            EnginePipelineActions(
+                collect = { Collect(newItems = 2, duplicateSkipped = 1) },
+                summarize = { Summarize(totalSummarized = 2) },
+                digest = { Digest(selectedCount = 1, postedToSlack = false) },
+                collectDetail = { "newItems=${it.newItems}, token=sk-live-secret" },
+                summarizeDetail = { "authorization bearer api-secret-token" },
+                digestDetail = { "ok" }
+            )
+        )
+
+        result.traces[0].detail shouldContain "token=***REDACTED***"
+        result.traces[0].detail shouldNotContain "sk-live-secret"
+        result.traces[1].detail shouldContain "authorization=***REDACTED***"
+        result.traces[1].detail shouldNotContain "api-secret-token"
     }
 
     private fun fixedClock(): Clock =

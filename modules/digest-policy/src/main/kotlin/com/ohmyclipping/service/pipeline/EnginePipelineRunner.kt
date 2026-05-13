@@ -59,7 +59,7 @@ class EnginePipelineRunner(
                 status = EnginePipelineStepStatus.FAILED,
                 startedAt = startedAt,
                 endedAt = Instant.now(clock),
-                detail = e.message?.take(MAX_STEP_DETAIL_LENGTH)
+                detail = e.message?.let(::sanitizeDetail)
             )
             throw e
         }
@@ -67,13 +67,33 @@ class EnginePipelineRunner(
 
     private fun <T> safeDetail(result: T, detailBuilder: (T) -> String?): String? =
         try {
-            detailBuilder(result)?.take(MAX_STEP_DETAIL_LENGTH)
+            detailBuilder(result)?.let(::sanitizeDetail)
         } catch (e: RuntimeException) {
             "detail unavailable: ${e::class.simpleName ?: "RuntimeException"}"
         }
 
+    private fun sanitizeDetail(detail: String): String {
+        val redacted = if (VALUE_SECRET_PATTERN.containsMatchIn(detail)) {
+            VALUE_SECRET_PATTERN.replace(detail) { match ->
+                val keyName = match.groupValues[1]
+                "$keyName=***REDACTED***"
+            }
+        } else {
+            detail
+        }
+        return redacted.take(MAX_STEP_DETAIL_LENGTH)
+    }
+
     private companion object {
         const val MAX_STEP_DETAIL_LENGTH = 240
+
+        val VALUE_SECRET_PATTERN: Regex = Regex(
+            "(password|passwd|secret|token|apikey|api_key|authorization|bearer|credential|credentials|privatekey|private_key)" +
+                "([\"':= ]+)" +
+                "(?:bearer\\s+)?" +
+                "[^\"',\\s]+",
+            RegexOption.IGNORE_CASE,
+        )
     }
 }
 
