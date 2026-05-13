@@ -50,10 +50,11 @@ class UserBookmarkTools(
             required = false,
         ) _onBehalfOfUserId: String?,
     ): String = mcpToolCall {
+        validateRequiredId(summaryId, "summaryId")
+        val userId = requireBoundUserId(_onBehalfOfUserId)
+
         // 호출 빈도 제한: 120회/시간 — 개인 클릭성 행동.
         rateLimiter.checkOrThrow("user_toggle_bookmark", maxRequests = 120, windowSeconds = 3600)
-        val userId = _onBehalfOfUserId?.takeIf { it.isNotBlank() }
-            ?: throw InvalidInputException("Caller user id is not bound; orchestrator must inject _onBehalfOfUserId")
         val bookmarked = userArticleHistoryService.toggleBookmarkByUserId(userId, summaryId)
         mapOf(
             "summaryId" to summaryId,
@@ -92,15 +93,25 @@ class UserBookmarkTools(
             required = false,
         ) _onBehalfOfUserId: String?,
     ): String = mcpToolCall {
-        // 읽기 전용이라 rate limit 은 여유있게 60/시간.
-        rateLimiter.checkOrThrow("user_list_bookmarks", maxRequests = 60, windowSeconds = 3600)
         validateLimit(limit)
         validateOffset(offset)
-        val userId = _onBehalfOfUserId?.takeIf { it.isNotBlank() }
-            ?: throw InvalidInputException("Caller user id is not bound; orchestrator must inject _onBehalfOfUserId")
+        val userId = requireBoundUserId(_onBehalfOfUserId)
+
+        // 읽기 전용이라 rate limit 은 여유있게 60/시간.
+        rateLimiter.checkOrThrow("user_list_bookmarks", maxRequests = 60, windowSeconds = 3600)
         userArticleHistoryService.listBookmarksByUserId(userId, offset, limit)
             .map { BookmarkView.from(it) }
     }
+
+    private fun validateRequiredId(value: String, fieldName: String) {
+        if (value.isBlank()) {
+            throw InvalidInputException("$fieldName must not be blank")
+        }
+    }
+
+    private fun requireBoundUserId(userId: String?): String =
+        userId?.takeIf { it.isNotBlank() }
+            ?: throw InvalidInputException("Caller user id is not bound; orchestrator must inject _onBehalfOfUserId")
 
     private fun validateLimit(limit: Int) {
         if (limit < 1 || limit > MAX_LIMIT) {
