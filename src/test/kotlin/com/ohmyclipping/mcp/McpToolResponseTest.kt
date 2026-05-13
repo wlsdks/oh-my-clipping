@@ -1,5 +1,6 @@
 package com.ohmyclipping.mcp
 
+import com.ohmyclipping.error.DependencyFailureException
 import com.ohmyclipping.error.RateLimitExceededException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -69,6 +70,42 @@ class McpToolResponseTest {
 
             val parsed: Map<String, Any> = mapper.readValue(result)
             val error = parsed["error"] as Map<*, *>
+            (error.containsKey("retryAfterSeconds")) shouldBe false
+            (error.containsKey("retryAt")) shouldBe false
+        }
+    }
+
+    @Nested
+    inner class `DependencyFailureException 직렬화` {
+
+        @Test
+        fun `retryAfterSeconds 힌트가 있으면 MCP error payload 에 포함한다`() {
+            val result = mcpToolCall {
+                throw DependencyFailureException(
+                    message = "upstream temporarily unavailable",
+                    retryAfterSeconds = 120,
+                )
+            }
+
+            val parsed: Map<String, Any> = mapper.readValue(result)
+            val error = parsed["error"] as Map<*, *>
+            error["code"] shouldBe McpErrorCode.DEPENDENCY_FAILURE.code
+            error["type"] shouldBe "DEPENDENCY_FAILURE"
+            error["retryable"] shouldBe true
+            error["retryAfterSeconds"] shouldBe 120
+            (error.containsKey("retryAt")) shouldBe false
+        }
+
+        @Test
+        fun `retryAfterSeconds 힌트가 없으면 dependency error 에 재시도 시간을 붙이지 않는다`() {
+            val result = mcpToolCall {
+                throw DependencyFailureException("upstream failed")
+            }
+
+            val parsed: Map<String, Any> = mapper.readValue(result)
+            val error = parsed["error"] as Map<*, *>
+            error["type"] shouldBe "DEPENDENCY_FAILURE"
+            error["retryable"] shouldBe true
             (error.containsKey("retryAfterSeconds")) shouldBe false
             (error.containsKey("retryAt")) shouldBe false
         }
