@@ -18,6 +18,7 @@ object DigestSummaryFormattingPolicy {
     private val inlineWhitespace = Regex("[ \\t]+")
     private val paragraphBreak = Regex("\\n\\s*\\n+")
     private val sentenceBreak = Regex("(?<=[.!?])\\s+|(?<=다\\.)\\s+")
+    private val leadingDecoration = Regex("^[^\\p{L}\\p{N}\\(\\[\\\"'＂＇]+")
     private val sectionLabelPattern = Regex(
         "(?im)^\\s*($sectionEmoji\\s*)?(?:\\*+\\s*)?" +
             "(?:요약\\s*\\d*|핵심\\s*내용|맥락|실무\\s*시사점|" +
@@ -47,7 +48,7 @@ object DigestSummaryFormattingPolicy {
     }
 
     fun stripLeadingDecoration(text: String): String =
-        text.replace(Regex("^[^\\p{L}\\p{N}\\(\\[\\\"'＂＇]+"), "").trim()
+        text.replace(leadingDecoration, "").trim()
 
     fun buildSummaryParts(summary: String, maxChars: Int): List<DigestSummaryPart> {
         val paragraphs = buildDigestParagraphs(summary, maxChars)
