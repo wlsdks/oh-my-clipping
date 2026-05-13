@@ -50,6 +50,7 @@ object McpToolAnnotations {
         // PR-05 신규 read-only 사용자 도구
         putAll(readOnly("user_list_bookmarks"))
         putAll(readOnly("user_list_my_subscriptions"))
+        putAll(readOnly("user_get_my_briefing"))
         // PR-05 신규 read-only admin 도구 (Phase 3 데이터)
         putAll(readOnly("admin_content_levers_summary"))
         putAll(readOnly("admin_list_organizations"))

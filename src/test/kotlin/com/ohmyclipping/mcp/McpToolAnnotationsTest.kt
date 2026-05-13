@@ -40,6 +40,15 @@ class McpToolAnnotationsTest {
             ann shouldNotBe null
             ann!!.readOnlyHint() shouldBe true
         }
+
+        @Test
+        fun `user_get_my_briefing 은 readOnly 이고 idempotent 이다`() {
+            val ann = McpToolAnnotations.BY_NAME["user_get_my_briefing"]
+            ann shouldNotBe null
+            ann!!.readOnlyHint() shouldBe true
+            ann.destructiveHint() shouldBe false
+            ann.idempotentHint() shouldBe true
+        }
     }
 
     @Nested
@@ -108,6 +117,7 @@ class McpToolAnnotationsTest {
                 "user_get_original_preview",
                 "user_get_trending_keywords",
                 "user_get_category_overview",
+                "user_get_my_briefing",
             )
             val missing = expected - McpToolAnnotations.BY_NAME.keys
             missing shouldBe emptySet()
