@@ -54,6 +54,25 @@ class AdminCollectToolTest {
         }
 
         @Test
+        fun `categoryId 는 trim 해서 rate limit dimension 과 collect 포트에 전달한다`() {
+            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
+            every { clippingService.collect("c1", 3) } returns result.toPipelineCollectResult()
+
+            val json = tool.admin_collect(categoryId = " c1 ", hoursBack = 3)
+
+            json shouldNotContain "\"error\""
+            verify(exactly = 1) {
+                rateLimiter.checkOrThrow(
+                    toolName = "admin_collect",
+                    maxRequests = 20,
+                    windowSeconds = 3600,
+                    dimension = "c1",
+                )
+            }
+            verify(exactly = 1) { clippingService.collect("c1", 3) }
+        }
+
+        @Test
         fun `categoryId 가 없으면 InvalidInputException 으로 차단된다`() {
             val json = tool.admin_collect(categoryId = null, hoursBack = 1)
 

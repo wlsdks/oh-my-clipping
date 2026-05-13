@@ -47,8 +47,9 @@ class AdminCollectTool(
             required = false,
         ) hoursBack: Int?,
     ): String = mcpToolCall {
+        val normalizedCategoryId = categoryId?.trim()
         // 강제 가드레일: 장기/전체 수집은 async 로 위임해 request timeout 을 피한다.
-        if (categoryId.isNullOrBlank()) {
+        if (normalizedCategoryId.isNullOrBlank()) {
             throw InvalidInputException(
                 "동기 수집은 categoryId 가 필수다. 전체 카테고리 수집은 admin_collect_async 를 사용하라."
             )
@@ -67,8 +68,8 @@ class AdminCollectTool(
             toolName = "admin_collect",
             maxRequests = 20,
             windowSeconds = 3600,
-            dimension = categoryId
+            dimension = normalizedCategoryId
         )
-        clippingPipelinePort.collect(categoryId, hoursBack).toCollectResult()
+        clippingPipelinePort.collect(normalizedCategoryId, hoursBack).toCollectResult()
     }
 }
