@@ -7,6 +7,7 @@ import com.ohmyclipping.error.InvalidInputException
 import com.ohmyclipping.error.InvalidStateException
 import com.ohmyclipping.error.NotFoundException
 import com.ohmyclipping.error.RateLimitExceededException
+import com.ohmyclipping.service.digest.EngineInvalidInputException
 
 /**
  * MCP JSON-RPC 에러 코드 매핑.
@@ -48,6 +49,7 @@ enum class McpErrorCode(val code: Int) {
             is NotFoundException -> RESOURCE_NOT_FOUND
             is AccessForbiddenException -> FORBIDDEN
             is InvalidInputException -> VALIDATION_ERROR
+            is EngineInvalidInputException -> VALIDATION_ERROR
             is InvalidStateException -> VALIDATION_ERROR
             is ConflictException -> CONFLICT
             is RateLimitExceededException -> RATE_LIMITED
