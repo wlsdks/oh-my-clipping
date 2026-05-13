@@ -49,6 +49,17 @@ class AdminSummarizeToolTest {
         }
 
         @Test
+        fun `categoryId 는 trim 해서 summarize 포트에 전달한다`() {
+            every { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) } just Runs
+            every { clippingService.summarize("c1") } returns result.toPipelineSummarizeResult()
+
+            val json = tool.admin_summarize(categoryId = " c1 ")
+
+            json shouldNotContain "\"error\""
+            verify(exactly = 1) { clippingService.summarize("c1") }
+        }
+
+        @Test
         fun `categoryId 가 없으면 InvalidInputException 으로 차단된다`() {
             val json = tool.admin_summarize(categoryId = null)
 
@@ -65,6 +76,7 @@ class AdminSummarizeToolTest {
             json shouldContain "\"error\""
             json shouldContain "admin_summarize_async"
             verify(exactly = 0) { clippingService.summarize(any()) }
+            verify(exactly = 0) { rateLimiter.checkOrThrow(any(), any(), any(), any(), any()) }
         }
     }
 }

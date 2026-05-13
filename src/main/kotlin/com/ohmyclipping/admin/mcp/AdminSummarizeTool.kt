@@ -32,14 +32,15 @@ class AdminSummarizeTool(
     fun admin_summarize(
         @ToolParam(description = "요약 대상 카테고리 ID (필수)", required = false) categoryId: String?,
     ): String = mcpToolCall {
+        val normalizedCategoryId = categoryId?.trim()
         // 강제 가드레일: 전체 카테고리 요약은 시간이 오래 걸려 request timeout 을 유발한다 → async 강제.
-        if (categoryId.isNullOrBlank()) {
+        if (normalizedCategoryId.isNullOrBlank()) {
             throw InvalidInputException(
                 "동기 요약은 categoryId 가 필수다. 전체 카테고리 요약은 admin_summarize_async 를 사용하라."
             )
         }
         // 호출 빈도 제한: 최대 10회/시간 (전역).
         rateLimiter.checkOrThrow("admin_summarize", maxRequests = 10, windowSeconds = 3600)
-        clippingPipelinePort.summarize(categoryId).toSummarizeResult()
+        clippingPipelinePort.summarize(normalizedCategoryId).toSummarizeResult()
     }
 }
