@@ -1,5 +1,6 @@
 package com.ohmyclipping.mcp
 
+import com.ohmyclipping.error.DependencyFailureException
 import com.ohmyclipping.error.RateLimitExceededException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 
@@ -44,6 +45,9 @@ inline fun <T : Any> mcpToolCall(block: () -> T): String = try {
     if (e is RateLimitExceededException) {
         errorMap["retryAfterSeconds"] = e.retryAfterSeconds
         e.retryAt?.let { errorMap["retryAt"] = it.toString() }
+    }
+    if (e is DependencyFailureException) {
+        e.retryAfterSeconds?.let { errorMap["retryAfterSeconds"] = it }
     }
     mapper.writeValueAsString(mapOf("error" to errorMap))
 }
