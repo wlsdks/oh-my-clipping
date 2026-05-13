@@ -4,6 +4,11 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import java.nio.file.Files
+import java.nio.file.Path
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.name
+import kotlin.io.path.readText
 
 /**
  * 도구 이름 → `ToolAnnotations` 매핑이 의도한 분류를 만족하는지 검증한다.
@@ -122,5 +127,35 @@ class McpToolAnnotationsTest {
             val missing = expected - McpToolAnnotations.BY_NAME.keys
             missing shouldBe emptySet()
         }
+
+        @Test
+        fun `모든 MCP 도구는 정확히 하나의 annotation 매핑을 가진다`() {
+            val toolNames = discoverMcpToolNames()
+
+            (toolNames - McpToolAnnotations.BY_NAME.keys) shouldBe emptySet()
+            (McpToolAnnotations.BY_NAME.keys - toolNames) shouldBe emptySet()
+        }
+    }
+
+    private fun discoverMcpToolNames(): Set<String> {
+        val sourceRoots = listOf(
+            Path.of("src/main/kotlin/com/ohmyclipping/admin/mcp"),
+            Path.of("src/main/kotlin/com/ohmyclipping/user/mcp"),
+        )
+        val toolNamePattern = Regex("""@Tool\s*\([\s\S]*?\)\s*fun\s+([A-Za-z0-9_]+)\s*\(""")
+
+        return sourceRoots
+            .flatMap { root ->
+                Files.walk(root).use { paths ->
+                    paths
+                        .filter { it.isRegularFile() && it.name.endsWith(".kt") }
+                        .map { it.readText() }
+                        .toList()
+                }
+            }
+            .flatMap { source ->
+                toolNamePattern.findAll(source).map { it.groupValues[1] }
+            }
+            .toSet()
     }
 }
