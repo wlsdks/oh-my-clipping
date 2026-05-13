@@ -3,6 +3,7 @@ package com.ohmyclipping.mcp
 import com.ohmyclipping.error.RateLimitExceededException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.ohmyclipping.service.digest.EngineInvalidInputException
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.Nested
@@ -105,6 +106,20 @@ class McpToolResponseTest {
             error["type"] shouldBe "INVALID_PARAMS"
             error["retryable"] shouldBe false
             error["message"] shouldBe "limit must be positive"
+        }
+
+        @Test
+        fun `엔진 입력 오류는 validation error 로 노출한다`() {
+            val result = mcpToolCall {
+                throw EngineInvalidInputException("maxItems must be greater than 0")
+            }
+
+            val parsed: Map<String, Any> = mapper.readValue(result)
+            val error = parsed["error"] as Map<*, *>
+            error["code"] shouldBe McpErrorCode.VALIDATION_ERROR.code
+            error["type"] shouldBe "VALIDATION_ERROR"
+            error["retryable"] shouldBe false
+            error["message"] shouldBe "maxItems must be greater than 0"
         }
     }
 }
