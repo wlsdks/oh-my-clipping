@@ -134,10 +134,7 @@ data class DigestCandidateSelectionPolicy(
         val tokensB = b.semanticTokens
         if (tokensA.isEmpty() || tokensB.isEmpty()) return 0.0
 
-        val intersection = tokensA.intersect(tokensB).size.toDouble()
-        val union = tokensA.union(tokensB).size.toDouble()
-        if (union <= 0.0) return 0.0
-        return intersection / union
+        return jaccardSimilarity(tokensA, tokensB)
     }
 
     private fun DigestCandidate.toFingerprint(): DigestCandidateFingerprint =
@@ -174,8 +171,10 @@ data class DigestCandidateSelectionPolicy(
         if (words1.isEmpty() && words2.isEmpty()) return 1.0
         if (words1.isEmpty() || words2.isEmpty()) return 0.0
 
-        val intersection = words1.intersect(words2).size
-        val union = words1.union(words2).size
+        val smaller = if (words1.size <= words2.size) words1 else words2
+        val larger = if (words1.size <= words2.size) words2 else words1
+        val intersection = smaller.count { it in larger }
+        val union = words1.size + words2.size - intersection
         return intersection.toDouble() / union.toDouble()
     }
 

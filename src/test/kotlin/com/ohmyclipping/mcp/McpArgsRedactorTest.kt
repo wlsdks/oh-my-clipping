@@ -135,6 +135,21 @@ class McpArgsRedactorTest {
         }
 
         @Test
+        fun `authorization bearer 형태의 임베디드 토큰은 실제 토큰까지 마스킹된다`() {
+            val bodyBytes = jsonRpcBody(
+                mapOf("note" to "curl -H 'authorization bearer sk-live-secret-token' https://example.com")
+            )
+
+            val result = sut.redact("test_tool", bodyBytes)
+            val resultNode = objectMapper.readTree(result)
+
+            val masked = resultNode.get("note").asText()
+            masked shouldContain "authorization=***REDACTED***"
+            masked shouldNotContain "bearer sk-live-secret-token"
+            masked shouldNotContain "sk-live-secret-token"
+        }
+
+        @Test
         fun `slackChannelId는 원본을 유지한다`() {
             val bodyBytes = jsonRpcBody(mapOf("slackChannelId" to "C0123456789"))
 
