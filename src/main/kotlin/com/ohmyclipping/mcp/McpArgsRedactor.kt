@@ -95,7 +95,7 @@ class McpArgsRedactor(private val objectMapper: ObjectMapper) {
         val keyLower = key.lowercase(Locale.ROOT)
         return when {
             // 비밀 필드 — 완전 마스킹
-            SENSITIVE_PATTERN.containsMatchIn(keyLower) ->
+            McpSecretRedactor.isSensitiveKey(keyLower) ->
                 TextNode("[REDACTED]")
 
             // Slack 사용자 ID — SHA-256 해시 접두어로 치환
@@ -107,7 +107,7 @@ class McpArgsRedactor(private val objectMapper: ObjectMapper) {
 
             // 긴 쿼리 — 값 내부의 키-밸류 형태 유출을 마스킹한 뒤 길이 제한을 적용한다.
             key == "query" && value.isTextual -> {
-                val masked = scrubEmbeddedSecrets(value.asText())
+                val masked = McpSecretRedactor.scrubEmbeddedSecrets(value.asText())
                 TextNode(
                     if (masked.length > QUERY_MAX_LENGTH) {
                         masked.take(QUERY_MAX_LENGTH) + "...(truncated)"
@@ -120,7 +120,7 @@ class McpArgsRedactor(private val objectMapper: ObjectMapper) {
             // 그 외 텍스트 값에서도 임베디드 secret 패턴을 마스킹한다.
             value.isTextual -> {
                 val raw = value.asText()
-                val masked = scrubEmbeddedSecrets(raw)
+                val masked = McpSecretRedactor.scrubEmbeddedSecrets(raw)
                 if (masked === raw) value else TextNode(masked)
             }
 
@@ -128,65 +128,7 @@ class McpArgsRedactor(private val objectMapper: ObjectMapper) {
         }
     }
 
-    /**
-     * 문자열 값 내부에 포함된 `password=xxx`, `token: yyy` 같은 키-밸류 형태의
-     * secret 유출 패턴을 `key=***REDACTED***` 로 치환한다.
-     *
-     * 매칭이 없으면 **원본 문자열 인스턴스를 그대로 반환**한다 (불필요한 TextNode
-     * 생성 회피).
-     */
-    internal fun scrubEmbeddedSecrets(input: String): String {
-        if (!VALUE_SECRET_PATTERN.containsMatchIn(input)) return input
-        return VALUE_SECRET_PATTERN.replace(input) { match ->
-            val keyName = match.groupValues[1]
-            "$keyName=***REDACTED***"
-        }
-    }
-
     private companion object {
-        /**
-         * 민감 키 감지 패턴 — 광범위하게 매칭되는 하위 문자열 기준.
-         *
-         * 키 이름에 포함될 수 있는 모든 표기(camelCase, snake_case, 공백 없음)를
-         * 하위 문자열 매칭으로 한 번에 커버한다. 예: `apiKey`, `API_KEY`,
-         * `userPrivateKey`, `slack_webhook_url` 등 모두 매칭.
-         */
-        val SENSITIVE_PATTERN: Regex = Regex(
-            listOf(
-                "password",
-                "passwd",
-                "secret",
-                "token",
-                "apikey",
-                "api_key",
-                "authorization",
-                "credential",
-                "credentials",
-                "webhook",
-                "bearer",
-                "privatekey",
-                "private_key",
-            ).joinToString("|"),
-            RegexOption.IGNORE_CASE,
-        )
-
-        /**
-         * 문자열 값 안의 key-value 형태 secret 유출 패턴.
-         * 예: `password=abc`, `api_key: xyz`, `token="bar"`, `authorization bearer xxx`,
-         * `Authorization: Bearer xxx`.
-         *
-         * 캡처 그룹 1 = 키 이름 (마스킹 시 `$1=***REDACTED***` 로 교체).
-         * 캡처 그룹 2 = 구분자. authorization 값 앞의 Bearer scheme 은 값 일부로 함께 소비한다.
-         * 값 부분은 공백/따옴표/쉼표/개행 직전까지 greedy 매칭.
-         */
-        val VALUE_SECRET_PATTERN: Regex = Regex(
-            "(password|passwd|secret|token|apikey|api_key|authorization|bearer|credential|credentials|privatekey|private_key)" +
-                "([\"':= ]+)" +
-                "(?:bearer\\s+)?" +
-                "[^\"',\\s]+",
-            RegexOption.IGNORE_CASE,
-        )
-
         /** SHA-256 해시의 hex 인코딩 앞 12자를 반환한다. */
         fun sha256Prefix(input: String): String {
             val digest = MessageDigest.getInstance("SHA-256")
